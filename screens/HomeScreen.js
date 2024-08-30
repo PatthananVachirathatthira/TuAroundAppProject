@@ -1,6 +1,6 @@
 import React from 'react';
 import { View, TextInput, TouchableOpacity, StyleSheet } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
+import { AntDesign } from '@expo/vector-icons';
 
 const HomeScreen = ({ navigation }) => {
   return (
@@ -16,8 +16,8 @@ const HomeScreen = ({ navigation }) => {
           placeholderTextColor="#888"
           editable={false} // ป้องกันการแก้ไขข้อความใน TextInput
         />
-        <Ionicons
-          name="md-search"
+        <AntDesign
+          name="search1"
           size={24}
           color="#888"
           style={styles.searchIcon}
