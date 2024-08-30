@@ -12,7 +12,7 @@ const HomeScreen = ({ navigation }) => {
       >
         <TextInput
           style={styles.searchBar}
-          placeholder="คุณจะไปไหนดี"
+          placeholder="คุณจะไปที่ไหน"
           placeholderTextColor="#888"
           editable={false} // ป้องกันการแก้ไขข้อความใน TextInput
         />
