@@ -47,6 +47,7 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.10,
     shadowRadius: 1,
     elevation: 1.5,
+    margin: 10,
   },
   searchBar: {
     flex: 1,
