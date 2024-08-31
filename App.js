@@ -2,7 +2,7 @@ import React from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
 import { StyleSheet } from 'react-native';
-import Ionicons from 'react-native-vector-icons/Ionicons';
+import { AntDesign } from '@expo/vector-icons';
 import HomeScreen from './screens/HomeScreen';
 import RouteSearchScreen from './screens/RouteSearchScreen';
 
@@ -27,13 +27,13 @@ const App = () => {
             headerTitleAlign: 'center',
             headerTitleStyle: styles.headerTitle,
             headerLeft: () => (
-              <Ionicons 
-                name="arrow-back-outline" 
-                size={25} 
-                color="black" 
+              <AntDesign
+                name="left"
+                size={25}
+                color="black"
                 style={styles.iconStyle}
-                onPress={() => navigation.goBack()} 
-              />
+                onPress={() => navigation.goBack()}
+        />
             ),
           })}
         />
