@@ -77,6 +77,10 @@ const RouteSearchScreen = () => {
         renderItem={renderPlace}
         keyExtractor={(item) => item.id}
       />
+      {/* Button to Show Route Information */}
+      <TouchableOpacity style={styles.button}>
+        <Text style={styles.buttonText}>ดูข้อมูลเส้นทาง</Text>
+      </TouchableOpacity>
     </View>
   );
 };
@@ -137,6 +141,19 @@ const styles = StyleSheet.create({
     marginLeft: 8,
     fontSize: 16,
     color: '#555',
+  },
+  button: {
+    backgroundColor: '#d87c38',
+    borderRadius: 8,
+    paddingVertical: 12,
+    paddingHorizontal: 16,
+    alignItems: 'center',
+    marginTop: 16,
+  },
+  buttonText: {
+    color: '#000',
+    fontSize: 16,
+    fontWeight: 'bold',
   },
 });
 
