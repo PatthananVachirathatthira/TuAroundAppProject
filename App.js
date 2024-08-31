@@ -13,7 +13,7 @@ const App = () => {
     <NavigationContainer>
       <Stack.Navigator initialRouteName="Home">
         <Stack.Screen
-          name="TU Around"
+          name="TU AROUND"
           component={HomeScreen}
           options={{
             headerTitleAlign: 'center',
@@ -30,7 +30,7 @@ const App = () => {
               <AntDesign
                 name="left"
                 size={25}
-                color="#f23a04"
+                color="#2a2a2a"
                 style={styles.iconStyle}
                 onPress={() => navigation.goBack()}
         />

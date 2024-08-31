@@ -1,8 +1,35 @@
-import React from 'react';
-import { View, TextInput, StyleSheet, Text } from 'react-native';
+import React, { useState } from 'react';
+import { View, TextInput, FlatList, StyleSheet, Text, TouchableOpacity } from 'react-native';
 import Icon from 'react-native-vector-icons/FontAwesome';
+import { FontAwesome } from '@expo/vector-icons';
 
 const RouteSearchScreen = () => {
+  const places = [
+    { id: '1', name: 'หอสมุดป๋วย' },
+    { id: '2', name: 'อาคารเรียนรวม 1' },
+    { id: '3', name: 'กรีนแคนทีน' },
+  ];
+
+  const [startLocation, setStartLocation] = useState('');
+  const [endLocation, setEndLocation] = useState('');
+  const [inputField, setInputField] = useState(null); // To determine which input field to update
+
+  const renderPlace = ({ item }) => (
+    <TouchableOpacity
+      style={styles.placeContainer}
+      onPress={() => {
+        if (inputField === 'start') {
+          setStartLocation(item.name);
+        } else if (inputField === 'end') {
+          setEndLocation(item.name);
+        }
+      }}
+    >
+      <FontAwesome name="star" size={24} color="#d87c38" />
+      <Text style={styles.placeText}>{item.name}</Text>
+    </TouchableOpacity>
+  );
+
   return (
     <View style={styles.container}>
       <View style={styles.row}>
@@ -12,11 +39,14 @@ const RouteSearchScreen = () => {
           <Icon name="circle" size={7} color="#D3D3D3" style={styles.icon} />
         </View>
         <View style={styles.inputContainer}>
-        <Text style={styles.label}>จุดเริ่มต้น</Text>
+          <Text style={styles.label}>จาก</Text>
           <TextInput 
             style={styles.input} 
             placeholder="ตำแหน่งปัจจุบัน"
             placeholderTextColor="#D3D3D3"
+            value={startLocation}
+            onChangeText={text => setStartLocation(text)}
+            onFocus={() => setInputField('start')}
           />
         </View>
       </View>
@@ -27,14 +57,26 @@ const RouteSearchScreen = () => {
           <Icon name="circle" size={10} color="#FFA500" style={styles.icon} />
         </View>
         <View style={styles.inputContainer}>
-          <Text style={styles.label}>จุดหมาย</Text>
+          <Text style={styles.label}>ถึง</Text>
           <TextInput 
             style={styles.input}
             placeholder=""
             placeholderTextColor="#FFA500"
+            value={endLocation}
+            onChangeText={text => setEndLocation(text)}
+            onFocus={() => setInputField('end')}
           />
         </View>
       </View>
+
+      {/* Recommended Places List */}
+      <Text style={styles.title}>สถานที่แนะนำ</Text>
+      <View style={styles.separator} />
+      <FlatList
+        data={places}
+        renderItem={renderPlace}
+        keyExtractor={(item) => item.id}
+      />
     </View>
   );
 };
@@ -63,7 +105,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     borderWidth: 1,
     borderColor: '#D3D3D3',
-    borderRadius: 8, // มุมโค้งมน
+    borderRadius: 8,
     paddingHorizontal: 8,
     paddingVertical: 4,
   },
@@ -75,6 +117,26 @@ const styles = StyleSheet.create({
   label: {
     fontSize: 14,
     color: '#FFA500',
+  },
+  title: {
+    fontSize: 16,
+    color: '#d87c38',
+    fontWeight: 'bold',
+  },
+  separator: {
+    height: 1,
+    backgroundColor: '#e0e0e0',
+    marginVertical: 8,
+  },
+  placeContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginVertical: 4,
+  },
+  placeText: {
+    marginLeft: 8,
+    fontSize: 16,
+    color: '#555',
   },
 });
 
