@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
 import { View, TextInput, FlatList, StyleSheet, Text, TouchableOpacity } from 'react-native';
 import Icon from 'react-native-vector-icons/FontAwesome';
-import { FontAwesome } from '@expo/vector-icons';
+// import { FontAwesome } from '@expo/vector-icons';
+import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 
 const RouteSearchScreen = () => {
   const places = [
@@ -25,7 +26,7 @@ const RouteSearchScreen = () => {
         }
       }}
     >
-      <FontAwesome name="star" size={24} color="#d87c38" />
+      <MaterialIcons name="stars" size={24} color="#FFA500" />
       <Text style={styles.placeText}>{item.name}</Text>
     </TouchableOpacity>
   );
@@ -143,7 +144,7 @@ const styles = StyleSheet.create({
     color: '#555',
   },
   button: {
-    backgroundColor: '#d87c38',
+    backgroundColor: '#FFA500',
     borderRadius: 8,
     paddingVertical: 12,
     paddingHorizontal: 16,
