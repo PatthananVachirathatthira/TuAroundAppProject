@@ -30,7 +30,7 @@ const App = () => {
               <AntDesign
                 name="left"
                 size={25}
-                color="black"
+                color="#f23a04"
                 style={styles.iconStyle}
                 onPress={() => navigation.goBack()}
         />
@@ -45,7 +45,7 @@ const App = () => {
 const styles = StyleSheet.create({
   headerTitle: {
     fontWeight: 'bold',
-    color: 'black',
+    color: '#f23a04',
   },
   iconStyle: {
     marginLeft: 10,
