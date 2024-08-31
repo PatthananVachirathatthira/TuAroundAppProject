@@ -55,7 +55,6 @@ const styles = StyleSheet.create({
     borderRadius: 30,
     paddingLeft: 10,
     fontSize: 16,
-    fontFamily: 'Prompt Regular',
   },
   searchIcon: {
     marginRight: 10,
