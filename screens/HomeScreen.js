@@ -56,7 +56,7 @@ const styles = StyleSheet.create({
     paddingLeft: 10,
   },
   searchIcon: {
-    marginLeft: 10,
+    marginRight: 10,
   },
 });
 
