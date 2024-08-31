@@ -14,7 +14,7 @@ const Drawer = createDrawerNavigator();
 const HomeStackNavigator = () => (
   <Stack.Navigator>
     <Stack.Screen
-      name="Home"
+      name="HomeScreeen"
       component={HomeScreen}
       options={({ navigation }) => ({
         headerTitle: 'TU AROUND',
@@ -68,7 +68,7 @@ const App = () => {
         <Drawer.Screen
           name="Transport"
           component={TransportScreen}
-          options={{ drawerLabel: 'Transport' }}
+          options={{ drawerLabel: 'Other Transportation' }}
         />
       </Drawer.Navigator>
     </NavigationContainer>
