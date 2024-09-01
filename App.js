@@ -1,24 +1,25 @@
-import React from 'react';
-import { NavigationContainer } from '@react-navigation/native';
-import { createStackNavigator } from '@react-navigation/stack';
-import { createDrawerNavigator } from '@react-navigation/drawer';
-import { StyleSheet } from 'react-native';
-import { AntDesign, Ionicons } from '@expo/vector-icons';
-import HomeScreen from './screens/HomeScreen';
-import RouteSearchScreen from './screens/RouteSearchScreen';
-import TransportScreen from './screens/TransportScreen';
+import React from "react";
+import { StyleSheet } from "react-native";
+import { NavigationContainer } from "@react-navigation/native";
+import { createStackNavigator } from "@react-navigation/stack";
+import { createDrawerNavigator, DrawerContentScrollView, DrawerItem } from "@react-navigation/drawer";
+import { AntDesign, Ionicons } from "@expo/vector-icons";
+import HomeScreen from "./screens/HomeScreen";
+import RouteSearchScreen from "./screens/RouteSearchScreen";
+import TransportScreen from "./screens/TransportScreen";
 
 const Stack = createStackNavigator();
 const Drawer = createDrawerNavigator();
 
+// Stack Navigator สำหรับ Home
 const HomeStackNavigator = () => (
   <Stack.Navigator>
     <Stack.Screen
-      name="HomeScreeen"
+      name="HomeScreen"
       component={HomeScreen}
       options={({ navigation }) => ({
-        headerTitle: 'TU AROUND',
-        headerTitleAlign: 'center',
+        headerTitle: "TU AROUND",
+        headerTitleAlign: "center",
         headerTitleStyle: styles.headerTitle,
         headerLeft: () => (
           <Ionicons
@@ -35,8 +36,8 @@ const HomeStackNavigator = () => (
       name="RouteSearchScreen"
       component={RouteSearchScreen}
       options={({ navigation }) => ({
-        headerTitle: 'คุณจะไปที่ไหน',
-        headerTitleAlign: 'center',
+        headerTitle: "คุณจะไปที่ไหน",
+        headerTitleAlign: "center",
         headerTitleStyle: styles.headerTitle,
         headerLeft: () => (
           <AntDesign
@@ -52,36 +53,87 @@ const HomeStackNavigator = () => (
   </Stack.Navigator>
 );
 
+// Stack Navigator สำหรับ Transport
+const TransportStackNavigator = () => (
+  <Stack.Navigator>
+    <Stack.Screen
+      name="TransportScreen"
+      component={TransportScreen}
+      options={({ navigation }) => ({
+        headerTitle: "Transport",
+        headerTitleAlign: "center",
+        headerTitleStyle: styles.headerTitle,
+        headerLeft: () => (
+          <Ionicons
+            name="arrow-back"
+            size={25}
+            color="#2a2a2a"
+            style={styles.iconStyle}
+            onPress={() => navigation.goBack()} // ย้อนกลับไปที่หน้าจอก่อนหน้า
+          />
+        ),
+      })}
+    />
+  </Stack.Navigator>
+);
+
+// Custom Drawer Content
+const CustomDrawerContent = (props) => {
+  return (
+    <DrawerContentScrollView {...props}>
+      <DrawerItem
+        label="Home"
+        onPress={() => props.navigation.navigate("HomeScreen")}
+        icon={({ color, size }) => (
+          <AntDesign name="home" size={size} color={color} />
+        )}
+        labelStyle={styles.drawerLabel}
+        style={styles.drawerItem}
+      />
+      <DrawerItem
+        label="Other Transportation"
+        onPress={() => props.navigation.navigate("TransportScreen")}
+        icon={({ color, size }) => (
+          <Ionicons name="car-sport-sharp" size={size} color={color} />
+        )}
+        labelStyle={styles.drawerLabel}
+        style={styles.drawerItem}
+      />
+    </DrawerContentScrollView>
+  );
+};
+
+// Main App Component
 const App = () => {
   return (
     <NavigationContainer>
       <Drawer.Navigator
+        drawerContent={(props) => <CustomDrawerContent {...props} />}
         screenOptions={{
-          headerShown: false,  // ซ่อน header ของ Drawer
+          headerShown: false, // ซ่อน header ของ Drawer
         }}
       >
-        <Drawer.Screen
-          name="Home"
-          component={HomeStackNavigator}
-          options={{ drawerLabel: 'Home' }}
-        />
-        <Drawer.Screen
-          name="Transport"
-          component={TransportScreen}
-          options={{ drawerLabel: 'Other Transportation' }}
-        />
+        <Drawer.Screen name="HomeScreen" component={HomeStackNavigator} />
+        <Drawer.Screen name="TransportScreen" component={TransportStackNavigator} />
       </Drawer.Navigator>
     </NavigationContainer>
   );
 };
 
+// Styles
 const styles = StyleSheet.create({
   headerTitle: {
-    fontWeight: 'bold',
-    color: '#f23a04',
+    fontWeight: "bold",
+    color: "#f23a04",
   },
   iconStyle: {
     marginLeft: 10,
+  },
+  drawerItem: {
+    marginVertical: 0, // ปรับให้ไอคอนชิดกับชื่อ
+  },
+  drawerLabel: {
+    marginLeft: -15, // ปรับให้ชื่อชิดกับไอคอนมากขึ้น
   },
 });
 

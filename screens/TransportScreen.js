@@ -4,7 +4,7 @@ import React from 'react'
 const TransportScreen = () => {
   return (
     <View>
-      <Text>TransportScreen</Text>
+      {/* <Text>TransportScreen</Text> */}
     </View>
   )
 }
