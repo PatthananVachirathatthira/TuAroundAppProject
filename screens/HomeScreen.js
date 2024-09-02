@@ -79,6 +79,7 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     padding: 6,
     width: '75%',
+    height: 52,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.10,
@@ -87,7 +88,7 @@ const styles = StyleSheet.create({
   },
   searchBar: {
     flex: 1,
-    height: 40,
+    height: '100%',
     borderRadius: 30,
     paddingLeft: 10,
     fontSize: 16,
@@ -100,6 +101,11 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     padding: 6,
     marginLeft: 10,
+    height: 52,
+    width: 52,
+    justifyContent: 'center',
+    alignItems: 'center',
+    justifyContent: 'center',
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.10,
@@ -109,7 +115,9 @@ const styles = StyleSheet.create({
   dropdown: {
     position: 'absolute',
     top: 80,
-    right: '10%',
+    right: '4.5%',
+    width: 'auto',
+    minWidth: '100',
     backgroundColor: '#fff',
     borderRadius: 8,
     shadowColor: '#000',
@@ -118,6 +126,8 @@ const styles = StyleSheet.create({
     shadowRadius: 1,
     elevation: 1.5,
     zIndex: 1,
+    width: 52,  // Set width to be the same as height
+    height: 52, // Set height to match search container
   },
   dropdownItem: {
     padding: 10,
