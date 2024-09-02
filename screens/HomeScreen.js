@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
-import { View, TextInput, TouchableOpacity, StyleSheet, Text } from 'react-native';
-import { AntDesign } from '@expo/vector-icons';
+import { View, TextInput, TouchableOpacity, StyleSheet } from 'react-native';
+import { AntDesign, Ionicons, MaterialIcons, FontAwesome5 } from '@expo/vector-icons';
 
 const HomeScreen = ({ navigation }) => {
   const [dropdownVisible, setDropdownVisible] = useState(false);
@@ -38,20 +38,20 @@ const HomeScreen = ({ navigation }) => {
         </TouchableOpacity>
 
         <TouchableOpacity style={styles.dropdownButton} onPress={toggleDropdown}>
-          <AntDesign name={dropdownVisible ? 'up' : 'down'} size={24} color="#888" />
+          <AntDesign name={dropdownVisible ? 'up' : 'down'} size={24} color="black" />
         </TouchableOpacity>
       </View>
 
       {dropdownVisible && (
         <View style={styles.dropdown}>
           <TouchableOpacity style={styles.dropdownItem} onPress={() => selectOption('Option 1')}>
-            <Text style={styles.dropdownText}>Option 1</Text>
+            <Ionicons name="bus-outline" size={24} color="black" />
           </TouchableOpacity>
           <TouchableOpacity style={styles.dropdownItem} onPress={() => selectOption('Option 2')}>
-            <Text style={styles.dropdownText}>Option 2</Text>
+           <MaterialIcons name="gps-fixed" size={24} color="black" />
           </TouchableOpacity>
           <TouchableOpacity style={styles.dropdownItem} onPress={() => selectOption('Option 3')}>
-            <Text style={styles.dropdownText}>Option 3</Text>
+            <FontAwesome5 name="traffic-light" size={24} color="black" />
           </TouchableOpacity>
         </View>
       )}
@@ -105,7 +105,6 @@ const styles = StyleSheet.create({
     width: 52,
     justifyContent: 'center',
     alignItems: 'center',
-    justifyContent: 'center',
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.10,
@@ -116,8 +115,7 @@ const styles = StyleSheet.create({
     position: 'absolute',
     top: 80,
     right: '4.5%',
-    width: 'auto',
-    minWidth: '100',
+    width: 52,  // Set width to match dropdownButton
     backgroundColor: '#fff',
     borderRadius: 8,
     shadowColor: '#000',
@@ -126,17 +124,12 @@ const styles = StyleSheet.create({
     shadowRadius: 1,
     elevation: 1.5,
     zIndex: 1,
-    width: 52,  // Set width to be the same as height
-    height: 52, // Set height to match search container
   },
   dropdownItem: {
-    padding: 10,
-    borderBottomWidth: 1,
-    borderBottomColor: '#ddd',
-  },
-  dropdownText: {
-    fontSize: 16,
-    color: '#333',
+    width: 52,  // Match width of dropdownButton
+    height: 52, // Match height of dropdownButton
+    justifyContent: 'center',
+    alignItems: 'center',
   },
 });
 

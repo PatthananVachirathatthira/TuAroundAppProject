@@ -60,7 +60,7 @@ const TransportStackNavigator = () => (
       name="TransportScreen"
       component={TransportScreen}
       options={({ navigation }) => ({
-        headerTitle: "Transport",
+        headerTitle: "TRANSPORT",
         headerTitleAlign: "center",
         headerTitleStyle: styles.headerTitle,
         headerLeft: () => (
