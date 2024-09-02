@@ -10,7 +10,7 @@ import {
 import Icon from "react-native-vector-icons/FontAwesome";
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 
-const RouteSearchScreen = () => {
+const RouteSearchScreen = ({ navigation }) => {
   const places = [
     { id: "1", name: "หอสมุดป๋วย" },
     { id: "2", name: "อาคารเรียนรวม 1" },
@@ -85,7 +85,9 @@ const RouteSearchScreen = () => {
         keyExtractor={(item) => item.id}
       />
       {/* Button to Show Route Information */}
-      <TouchableOpacity style={styles.button}>
+      <TouchableOpacity
+        style={styles.button}
+        onPress={() => navigation.navigate("RouteScreen")}>
         <Text style={styles.buttonText}>ค้นหาเส้นทาง</Text>
       </TouchableOpacity>
     </View>

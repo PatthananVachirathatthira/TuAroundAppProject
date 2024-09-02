@@ -7,6 +7,7 @@ import { AntDesign, Ionicons } from "@expo/vector-icons";
 import HomeScreen from "./screens/HomeScreen";
 import RouteSearchScreen from "./screens/RouteSearchScreen";
 import TransportScreen from "./screens/TransportScreen";
+import RouteScreen from "./screens/RouteScreen";
 
 const Stack = createStackNavigator();
 const Drawer = createDrawerNavigator();
@@ -37,6 +38,24 @@ const HomeStackNavigator = () => (
       component={RouteSearchScreen}
       options={({ navigation }) => ({
         headerTitle: "คุณจะไปที่ไหน",
+        headerTitleAlign: "center",
+        headerTitleStyle: styles.headerTitle,
+        headerLeft: () => (
+          <AntDesign
+            name="left"
+            size={25}
+            color="#2a2a2a"
+            style={styles.iconStyle}
+            onPress={() => navigation.goBack()}
+          />
+        ),
+      })}
+    />
+    <Stack.Screen
+      name="RouteScreen"
+      component={RouteScreen}
+      options={({ navigation }) => ({
+        headerTitle: "ROUTE",
         headerTitleAlign: "center",
         headerTitleStyle: styles.headerTitle,
         headerLeft: () => (
