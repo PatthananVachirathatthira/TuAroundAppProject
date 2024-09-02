@@ -64,12 +64,12 @@ const TransportStackNavigator = () => (
         headerTitleAlign: "center",
         headerTitleStyle: styles.headerTitle,
         headerLeft: () => (
-          <Ionicons
-            name="arrow-back"
+          <AntDesign
+            name="left"
             size={25}
             color="#2a2a2a"
             style={styles.iconStyle}
-            onPress={() => navigation.goBack()} // ย้อนกลับไปที่หน้าจอก่อนหน้า
+            onPress={() => navigation.goBack()}
           />
         ),
       })}
