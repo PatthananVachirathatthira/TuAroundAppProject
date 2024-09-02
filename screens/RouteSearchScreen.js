@@ -86,7 +86,7 @@ const RouteSearchScreen = () => {
       />
       {/* Button to Show Route Information */}
       <TouchableOpacity style={styles.button}>
-        <Text style={styles.buttonText}>ดูข้อมูลเส้นทาง</Text>
+        <Text style={styles.buttonText}>ค้นหาเส้นทาง</Text>
       </TouchableOpacity>
     </View>
   );
