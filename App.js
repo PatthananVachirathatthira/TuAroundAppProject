@@ -100,7 +100,7 @@ const TransportStackNavigator = () => (
 const CustomDrawerContent = (props) => {
   return (
     <DrawerContentScrollView {...props}>
-      <DrawerItem
+      {/* <DrawerItem
         label="Home"
         onPress={() => props.navigation.navigate("HomeScreen")}
         icon={({ color, size }) => (
@@ -108,7 +108,7 @@ const CustomDrawerContent = (props) => {
         )}
         labelStyle={styles.drawerLabel}
         style={styles.drawerItem}
-      />
+      /> */}
       <DrawerItem
         label="Other Transportation"
         onPress={() => props.navigation.navigate("TransportScreen")}
@@ -132,8 +132,8 @@ const App = () => {
           headerShown: false, // ซ่อน header ของ Drawer
         }}
       >
-        <Drawer.Screen name="HomeScreen" component={HomeStackNavigator} />
-        <Drawer.Screen name="TransportScreen" component={TransportStackNavigator} />
+        <Drawer.Screen name="Home" component={HomeStackNavigator} />
+        <Drawer.Screen name="Transport" component={TransportStackNavigator} />
       </Drawer.Navigator>
     </NavigationContainer>
   );
