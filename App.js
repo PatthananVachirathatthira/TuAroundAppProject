@@ -8,6 +8,8 @@ import HomeScreen from "./screens/HomeScreen";
 import RouteSearchScreen from "./screens/RouteSearchScreen";
 import TransportScreen from "./screens/TransportScreen";
 import RouteScreen from "./screens/RouteScreen";
+import HowToUseScreen from "./screens/HowToUseScreen";
+import DashboardScreen from "./screens/DashboardScreen";
 
 const Stack = createStackNavigator();
 const Drawer = createDrawerNavigator();
@@ -22,6 +24,7 @@ const HomeStackNavigator = () => (
         headerTitle: "TU AROUND",
         headerTitleAlign: "center",
         headerTitleStyle: styles.headerTitle,
+        headerTransparent: true,
         headerLeft: () => (
           <Ionicons
             name="menu"
@@ -58,6 +61,45 @@ const HomeStackNavigator = () => (
         headerTitle: "ROUTE",
         headerTitleAlign: "center",
         headerTitleStyle: styles.headerTitle,
+        headerTransparent: true,
+        headerLeft: () => (
+          <AntDesign
+            name="left"
+            size={25}
+            color="#2a2a2a"
+            style={styles.iconStyle}
+            onPress={() => navigation.goBack()}
+          />
+        ),
+      })}
+    />
+    <Stack.Screen
+      name="HowToUseScreen"
+      component={HowToUseScreen}
+      options={({ navigation }) => ({
+        headerTitle: "How to use",
+        headerTitleAlign: "center",
+        headerTitleStyle: styles.headerTitle,
+        headerTransparent: true,
+        headerLeft: () => (
+          <AntDesign
+            name="close"
+            size={25}
+            color="#2a2a2a"
+            style={styles.iconStyle}
+            onPress={() => navigation.goBack()}
+          />
+        ),
+      })}
+    />
+    <Stack.Screen
+      name="DashboardScreen"
+      component={DashboardScreen}
+      options={({ navigation }) => ({
+        headerTitle: "Dashboard",
+        headerTitleAlign: "center",
+        headerTitleStyle: styles.headerTitle,
+        headerTransparent: true,
         headerLeft: () => (
           <AntDesign
             name="left"
@@ -82,6 +124,7 @@ const TransportStackNavigator = () => (
         headerTitle: "TRANSPORT",
         headerTitleAlign: "center",
         headerTitleStyle: styles.headerTitle,
+        headerTransparent: true,
         headerLeft: () => (
           <AntDesign
             name="left"
@@ -101,19 +144,28 @@ const CustomDrawerContent = (props) => {
   return (
     <DrawerContentScrollView {...props}>
       <DrawerItem
-        label="Home"
-        onPress={() => props.navigation.navigate("HomeScreen")}
+        label="Other Transportation"
+        onPress={() => props.navigation.navigate("TransportScreen")}
         icon={({ color, size }) => (
-          <AntDesign name="home" size={size} color={color} />
+          <Ionicons name="car-sport-sharp" size={size} color={color} />
         )}
         labelStyle={styles.drawerLabel}
         style={styles.drawerItem}
       />
       <DrawerItem
-        label="Other Transportation"
-        onPress={() => props.navigation.navigate("TransportScreen")}
+        label="How to use"
+        onPress={() => props.navigation.navigate("HowToUseScreen")}
         icon={({ color, size }) => (
-          <Ionicons name="car-sport-sharp" size={size} color={color} />
+          <Ionicons name="help-circle-outline" size={size} color={color} />
+        )}
+        labelStyle={styles.drawerLabel}
+        style={styles.drawerItem}
+      />
+      <DrawerItem
+        label="Dashboard"
+        onPress={() => props.navigation.navigate("DashboardScreen")}
+        icon={({ color, size }) => (
+          <Ionicons name="grid-outline" size={size} color={color} />
         )}
         labelStyle={styles.drawerLabel}
         style={styles.drawerItem}
@@ -146,7 +198,8 @@ const styles = StyleSheet.create({
     color: "#f23a04",
   },
   iconStyle: {
-    marginLeft: 10,
+    marginLeft: 20,
+    marginTop: 5,
   },
   drawerItem: {
     marginVertical: 0, // ปรับให้ไอคอนชิดกับชื่อ

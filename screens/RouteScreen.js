@@ -14,6 +14,7 @@ const styles = StyleSheet.create({
     flex: 1,
     padding: 16,
     backgroundColor: "#FFFFFF",
+    paddingTop: 70,
   },
   backButton: {
     position: "absolute",
