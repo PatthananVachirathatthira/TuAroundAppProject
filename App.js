@@ -4,7 +4,7 @@ import { StyleSheet } from "react-native";
 import { NavigationContainer } from "@react-navigation/native";
 import { createStackNavigator } from "@react-navigation/stack";
 import { createDrawerNavigator, DrawerContentScrollView, DrawerItem } from "@react-navigation/drawer";
-import { AntDesign, Ionicons, MaterialIcons } from "@expo/vector-icons";
+import { AntDesign, Ionicons, MaterialIcons, Octicons } from "@expo/vector-icons";
 import HomeScreen from "./screens/HomeScreen";
 import RouteSearchScreen from "./screens/RouteSearchScreen";
 import TransportScreen from "./screens/TransportScreen";
@@ -154,20 +154,20 @@ const CustomDrawerContent = (props) => {
         labelStyle={styles.drawerLabel}
         style={styles.drawerItem}
       />
+        <DrawerItem
+          label="Dashboard"
+          onPress={() => props.navigation.navigate("DashboardScreen")}
+          icon={({ color, size }) => (
+            <MaterialIcons name="space-dashboard" size={size} color="#000000" />
+          )}
+          labelStyle={styles.drawerLabel}
+          style={styles.drawerItem}
+        />
       <DrawerItem
         label="How to use"
         onPress={() => props.navigation.navigate("HowToUseScreen")}
         icon={({ color, size }) => (
-          <Ionicons name="help-circle-outline" size={size} color="#000000" />
-        )}
-        labelStyle={styles.drawerLabel}
-        style={styles.drawerItem}
-      />
-      <DrawerItem
-        label="Dashboard"
-        onPress={() => props.navigation.navigate("DashboardScreen")}
-        icon={({ color, size }) => (
-          <MaterialIcons name="dashboard" size={size} color="#000000" />
+          <Octicons name="question" size={size} color="#000000" />
         )}
         labelStyle={styles.drawerLabel}
         style={styles.drawerItem}
