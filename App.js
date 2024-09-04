@@ -1,3 +1,4 @@
+// HowToUseScreen.js
 import React from "react";
 import { StyleSheet } from "react-native";
 import { NavigationContainer } from "@react-navigation/native";
@@ -77,26 +78,27 @@ const HomeStackNavigator = () => (
       name="HowToUseScreen"
       component={HowToUseScreen}
       options={({ navigation }) => ({
-        headerTitle: "How to use",
+        headerTitle: "",
         headerTitleAlign: "center",
         headerTitleStyle: styles.headerTitle,
         headerTransparent: true,
-        headerLeft: () => (
+        headerRight: () => (
           <AntDesign
             name="close"
             size={25}
             color="#2a2a2a"
-            style={styles.iconStyle}
+            style={styles.iconCloseStyle}
             onPress={() => navigation.goBack()}
           />
         ),
+        headerLeft: () => null, // เอาไอคอนย้อนกลับออก
       })}
     />
     <Stack.Screen
       name="DashboardScreen"
       component={DashboardScreen}
       options={({ navigation }) => ({
-        headerTitle: "Dashboard",
+        headerTitle: "DASHBOARD",
         headerTitleAlign: "center",
         headerTitleStyle: styles.headerTitle,
         headerTransparent: true,
@@ -198,8 +200,12 @@ const styles = StyleSheet.create({
     color: "#f23a04",
   },
   iconStyle: {
-    marginLeft: 20,
+    marginLeft: 17,
     marginTop: 5,
+  },
+  iconCloseStyle: {
+    marginRight: 30, // ระยะห่างจากขอบขวา
+    marginTop: 15, // ระยะห่างจากด้านบน
   },
   drawerItem: {
     marginVertical: 0, // ปรับให้ไอคอนชิดกับชื่อ
