@@ -1,45 +1,77 @@
-// HowToUseScreen.js
-import React from "react";
-import { View, Text, StyleSheet, Image, TouchableOpacity } from "react-native";
+import React, { useState, useRef } from "react";
+import { View, StyleSheet, Image, TouchableOpacity, Text } from "react-native";
 import Swiper from 'react-native-swiper';
 import { AntDesign } from "@expo/vector-icons";
 
 const HowToUseScreen = ({ navigation }) => {
+  const swiperRef = useRef(null);
+  const [currentIndex, setCurrentIndex] = useState(0);
+
+  const texts = [
+    "นี่คือรูปหมา",
+    "นี่คือรูปแมว",
+  ];
+
+  const handleNext = () => {
+    if (swiperRef.current) {
+      swiperRef.current.scrollBy(1); // เลื่อนไปยังภาพถัดไป
+    }
+  };
+
+  const handlePrevious = () => {
+    if (swiperRef.current) {
+      swiperRef.current.scrollBy(-1); // เลื่อนไปยังภาพก่อนหน้า
+    }
+  };
+
+  const handleIndexChanged = (index) => {
+    setCurrentIndex(index);
+  };
+
   return (
     <View style={styles.container}>
       <Swiper
+        ref={swiperRef}
         style={styles.wrapper}
-        showsPagination={false} // ซ่อนจุดแสดงสถานะ
-        loop={false} // ไม่ทำการวนลูป
+        showsPagination={false}
+        loop={false}
+        onIndexChanged={handleIndexChanged}
       >
         <View style={styles.slide}>
           <Image
-            source={{ uri: 'https://www.freepik.com/free-photo/close-up-portrait-beautiful-cat_21194112.htm#fromView=search&page=1&position=12&uuid=932eea98-4240-4863-bfde-0879b55136e9' }} // เปลี่ยน URL เป็น URL ของรูปภาพของคุณ
+            source={require('../assets/icon.png')} // รูปหมา
             style={styles.image}
           />
         </View>
         <View style={styles.slide}>
           <Image
-            source={{ uri: 'https://example.com/image2.png' }} // เปลี่ยน URL เป็น URL ของรูปภาพของคุณ
+            source={require('../assets/images/close-up-portrait-beautiful-cat.jpg')} // รูปแมว
             style={styles.image}
           />
         </View>
-        {/* เพิ่ม View และ Image สำหรับแต่ละภาพที่ต้องการ */}
       </Swiper>
 
-      <TouchableOpacity
-        style={[styles.button, styles.leftButton]}
-        onPress={() => { /* ใช้ swiper API เพื่อเลื่อนไปยังภาพก่อนหน้า */ }}
-      >
-        <AntDesign name="leftcircle" size={30} color="#2a2a2a" />
-      </TouchableOpacity>
+      <View style={styles.textContainer}>
+        <Text style={styles.text}>{texts[currentIndex]}</Text>
+      </View>
 
-      <TouchableOpacity
-        style={[styles.button, styles.rightButton]}
-        onPress={() => { /* ใช้ swiper API เพื่อเลื่อนไปยังภาพถัดไป */ }}
-      >
-        <AntDesign name="rightcircle" size={30} color="#2a2a2a" />
-      </TouchableOpacity>
+      {currentIndex > 0 && (
+        <TouchableOpacity
+          style={[styles.button, styles.leftButton]}
+          onPress={handlePrevious}
+        >
+          <AntDesign name="leftcircle" size={30} color="#2a2a2a" />
+        </TouchableOpacity>
+      )}
+
+      {currentIndex < texts.length - 1 && (
+        <TouchableOpacity
+          style={[styles.button, styles.rightButton]}
+          onPress={handleNext}
+        >
+          <AntDesign name="rightcircle" size={30} color="#2a2a2a" />
+        </TouchableOpacity>
+      )}
     </View>
   );
 };
@@ -63,6 +95,15 @@ const styles = StyleSheet.create({
   image: {
     width: 300, // ขนาดของรูปภาพ
     height: 300, // ขนาดของรูปภาพ
+  },
+  textContainer: {
+    marginVertical: 1, // ระยะห่างระหว่างรูปภาพและข้อความ
+    alignItems: 'center',
+    bottom: 200,
+  },
+  text: {
+    fontSize: 16,
+    color: '#333',
   },
   button: {
     position: 'absolute',
