@@ -32,7 +32,7 @@ const RouteSearchScreen = ({ navigation }) => {
         }
       }}
     >
-      <MaterialIcons name="stars" size={24} color="#FFA500" />
+      <MaterialIcons name="stars" size={22} color="#FFA500" />
       <Text style={styles.placeText}>{item.name}</Text>
     </TouchableOpacity>
   );

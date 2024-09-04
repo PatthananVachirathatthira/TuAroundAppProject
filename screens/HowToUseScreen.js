@@ -8,8 +8,8 @@ const HowToUseScreen = ({ navigation }) => {
   const [currentIndex, setCurrentIndex] = useState(0);
 
   const texts = [
-    "นี่คือรูปหมา",
-    "นี่คือรูปแมว",
+    "Check Bus Routes",
+    "Get Directions, Find Stops",
   ];
 
   const handleNext = () => {
