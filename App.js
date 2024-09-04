@@ -4,7 +4,7 @@ import { StyleSheet } from "react-native";
 import { NavigationContainer } from "@react-navigation/native";
 import { createStackNavigator } from "@react-navigation/stack";
 import { createDrawerNavigator, DrawerContentScrollView, DrawerItem } from "@react-navigation/drawer";
-import { AntDesign, Ionicons } from "@expo/vector-icons";
+import { AntDesign, Ionicons, MaterialIcons } from "@expo/vector-icons";
 import HomeScreen from "./screens/HomeScreen";
 import RouteSearchScreen from "./screens/RouteSearchScreen";
 import TransportScreen from "./screens/TransportScreen";
@@ -149,7 +149,7 @@ const CustomDrawerContent = (props) => {
         label="Other Transportation"
         onPress={() => props.navigation.navigate("TransportScreen")}
         icon={({ color, size }) => (
-          <Ionicons name="car-sport-sharp" size={size} color={color} />
+          <Ionicons name="car-sport-sharp" size={size} color="#000000" />
         )}
         labelStyle={styles.drawerLabel}
         style={styles.drawerItem}
@@ -158,7 +158,7 @@ const CustomDrawerContent = (props) => {
         label="How to use"
         onPress={() => props.navigation.navigate("HowToUseScreen")}
         icon={({ color, size }) => (
-          <Ionicons name="help-circle-outline" size={size} color={color} />
+          <Ionicons name="help-circle-outline" size={size} color="#000000" />
         )}
         labelStyle={styles.drawerLabel}
         style={styles.drawerItem}
@@ -167,7 +167,7 @@ const CustomDrawerContent = (props) => {
         label="Dashboard"
         onPress={() => props.navigation.navigate("DashboardScreen")}
         icon={({ color, size }) => (
-          <Ionicons name="grid-outline" size={size} color={color} />
+          <MaterialIcons name="dashboard" size={size} color="#000000" />
         )}
         labelStyle={styles.drawerLabel}
         style={styles.drawerItem}
@@ -208,10 +208,12 @@ const styles = StyleSheet.create({
     marginTop: 15, // ระยะห่างจากด้านบน
   },
   drawerItem: {
-    marginVertical: 0, // ปรับให้ไอคอนชิดกับชื่อ
+    marginVertical: 3, // ปรับให้ไอคอนชิดกับชื่อ
   },
   drawerLabel: {
     marginLeft: -15, // ปรับให้ชื่อชิดกับไอคอนมากขึ้น
+    color: "#000000", // สีของชื่อใน Drawer
+    fontSize: 15,
   },
 });
 
