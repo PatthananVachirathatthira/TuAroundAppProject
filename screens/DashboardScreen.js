@@ -15,7 +15,7 @@ const DashboardScreen = () => {
       flex: 1,
       justifyContent: 'flex-start', // จัดตำแหน่งในแนวตั้งให้เป็นกลาง
       alignItems: 'center',
-      backgroundColor: 'pink',
+      backgroundColor: 'white',
       paddingTop: 70, // ระยะห่างจากขอบบน (header)
     },
     text: {
