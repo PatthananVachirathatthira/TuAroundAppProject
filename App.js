@@ -1,6 +1,6 @@
 // HowToUseScreen.js
-import React from "react";
-import { StyleSheet } from "react-native";
+import React, { useState, useEffect } from "react";
+import { StyleSheet, ActivityIndicator } from "react-native";
 import { NavigationContainer } from "@react-navigation/native";
 import { createStackNavigator } from "@react-navigation/stack";
 import { createDrawerNavigator, DrawerContentScrollView, DrawerItem } from "@react-navigation/drawer";
@@ -11,11 +11,18 @@ import TransportScreen from "./screens/TransportScreen";
 import RouteScreen from "./screens/RouteScreen";
 import HowToUseScreen from "./screens/HowToUseScreen";
 import DashboardScreen from "./screens/DashboardScreen";
+import * as Font from 'expo-font'; // นำเข้า expo-font
 
 const Stack = createStackNavigator();
 const Drawer = createDrawerNavigator();
 
-// Stack Navigator สำหรับ Home
+// โหลดฟอนต์
+const fetchFonts = () => {
+  return Font.loadAsync({
+    'Prompt-Regular': require('./assets/fonts/Prompt-Regular.ttf'), // ปรับเส้นทางฟอนต์ตามตำแหน่งที่เก็บ
+  });
+};
+
 const HomeStackNavigator = () => (
   <Stack.Navigator>
     <Stack.Screen
@@ -116,7 +123,6 @@ const HomeStackNavigator = () => (
   </Stack.Navigator>
 );
 
-// Stack Navigator สำหรับ Transport
 const TransportStackNavigator = () => (
   <Stack.Navigator>
     <Stack.Screen
@@ -141,7 +147,6 @@ const TransportStackNavigator = () => (
   </Stack.Navigator>
 );
 
-// Custom Drawer Content
 const CustomDrawerContent = (props) => {
   return (
     <DrawerContentScrollView {...props}>
@@ -154,15 +159,15 @@ const CustomDrawerContent = (props) => {
         labelStyle={styles.drawerLabel}
         style={styles.drawerItem}
       />
-        <DrawerItem
-          label="Dashboard"
-          onPress={() => props.navigation.navigate("DashboardScreen")}
-          icon={({ color, size }) => (
-            <MaterialIcons name="space-dashboard" size={size} color="#000000" />
-          )}
-          labelStyle={styles.drawerLabel}
-          style={styles.drawerItem}
-        />
+      <DrawerItem
+        label="Dashboard"
+        onPress={() => props.navigation.navigate("DashboardScreen")}
+        icon={({ color, size }) => (
+          <MaterialIcons name="space-dashboard" size={size} color="#000000" />
+        )}
+        labelStyle={styles.drawerLabel}
+        style={styles.drawerItem}
+      />
       <DrawerItem
         label="How to use"
         onPress={() => props.navigation.navigate("HowToUseScreen")}
@@ -176,8 +181,17 @@ const CustomDrawerContent = (props) => {
   );
 };
 
-// Main App Component
 const App = () => {
+  const [fontLoaded, setFontLoaded] = useState(false);
+
+  useEffect(() => {
+    fetchFonts().then(() => setFontLoaded(true));
+  }, []);
+
+  if (!fontLoaded) {
+    return <ActivityIndicator size="large" color="#0000ff" />;
+  }
+
   return (
     <NavigationContainer>
       <Drawer.Navigator
@@ -196,7 +210,7 @@ const App = () => {
 // Styles
 const styles = StyleSheet.create({
   headerTitle: {
-    fontWeight: "bold",
+    fontFamily: 'Prompt-Medium', // ใช้ฟอนต์ที่โหลด
     color: "#f23a04",
   },
   iconStyle: {
@@ -211,6 +225,7 @@ const styles = StyleSheet.create({
     marginVertical: 3, // ปรับให้ไอคอนชิดกับชื่อ
   },
   drawerLabel: {
+    fontFamily: 'Prompt-Regular', // ใช้ฟอนต์ที่โหลด
     marginLeft: -15, // ปรับให้ชื่อชิดกับไอคอนมากขึ้น
     color: "#000000", // สีของชื่อใน Drawer
     fontSize: 15,

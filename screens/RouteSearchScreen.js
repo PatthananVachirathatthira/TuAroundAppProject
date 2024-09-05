@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   View,
   TextInput,
@@ -6,9 +6,17 @@ import {
   StyleSheet,
   Text,
   TouchableOpacity,
+  ActivityIndicator,
 } from "react-native";
 import Icon from "react-native-vector-icons/FontAwesome";
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
+import * as Font from 'expo-font'; // นำเข้า expo-font
+
+const fetchFonts = () => {
+  return Font.loadAsync({
+    'Prompt-Regular': require('../assets/fonts/Prompt-Regular.ttf'), // ปรับเส้นทางฟอนต์ตามตำแหน่งที่เก็บ
+  });
+};
 
 const RouteSearchScreen = ({ navigation }) => {
   const places = [
@@ -20,6 +28,11 @@ const RouteSearchScreen = ({ navigation }) => {
   const [startLocation, setStartLocation] = useState("");
   const [endLocation, setEndLocation] = useState("");
   const [inputField, setInputField] = useState(null); // To determine which input field to update
+  const [fontLoaded, setFontLoaded] = useState(false);
+
+  useEffect(() => {
+    fetchFonts().then(() => setFontLoaded(true));
+  }, []);
 
   const renderPlace = ({ item }) => (
     <TouchableOpacity
@@ -36,6 +49,10 @@ const RouteSearchScreen = ({ navigation }) => {
       <Text style={styles.placeText}>{item.name}</Text>
     </TouchableOpacity>
   );
+
+  if (!fontLoaded) {
+    return <ActivityIndicator size="large" color="#0000ff" />;
+  }
 
   return (
     <View style={styles.container}>
@@ -87,7 +104,8 @@ const RouteSearchScreen = ({ navigation }) => {
       {/* Button to Show Route Information */}
       <TouchableOpacity
         style={styles.button}
-        onPress={() => navigation.navigate("RouteScreen")}>
+        onPress={() => navigation.navigate("RouteScreen")}
+      >
         <Text style={styles.buttonText}>ค้นหาเส้นทาง</Text>
       </TouchableOpacity>
     </View>
@@ -126,15 +144,17 @@ const styles = StyleSheet.create({
     height: 40,
     fontSize: 14,
     color: "#FFA500",
+    fontFamily: 'Prompt-Regular', // ใช้ฟอนต์ที่โหลด
   },
   label: {
     fontSize: 14,
     color: "#FFA500",
+    fontFamily: 'Prompt-Regular', // ใช้ฟอนต์ที่โหลด
   },
   title: {
     fontSize: 16,
     color: "#d87c38",
-    fontWeight: "bold",
+    fontFamily: 'Prompt-Medium', // ใช้ฟอนต์ที่โหลด
   },
   separator: {
     height: 1,
@@ -150,6 +170,7 @@ const styles = StyleSheet.create({
     marginLeft: 10,
     fontSize: 16,
     color: "#555",
+    fontFamily: 'Prompt-Regular', // ใช้ฟอนต์ที่โหลด
   },
   button: {
     backgroundColor: "#FFA500",
@@ -162,7 +183,7 @@ const styles = StyleSheet.create({
   buttonText: {
     color: "#000",
     fontSize: 16,
-    fontWeight: "bold",
+    fontFamily: 'Prompt-Medium', // ใช้ฟอนต์ที่โหลด
   },
 });
 

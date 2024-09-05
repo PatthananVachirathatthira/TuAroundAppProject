@@ -1,9 +1,21 @@
-import React, { useState } from 'react';
-import { View, TextInput, TouchableOpacity, StyleSheet } from 'react-native';
+import React, { useState, useEffect } from 'react';
+import { View, TextInput, TouchableOpacity, StyleSheet, ActivityIndicator } from 'react-native';
 import { AntDesign, Ionicons, MaterialIcons, FontAwesome5 } from '@expo/vector-icons';
+import * as Font from 'expo-font'; // นำเข้า expo-font
+
+const fetchFonts = () => {
+  return Font.loadAsync({
+    'Prompt-Regular': require('../assets/fonts/Prompt-Regular.ttf'), // ปรับเส้นทางฟอนต์ตามตำแหน่งที่เก็บ
+  });
+};
 
 const HomeScreen = ({ navigation }) => {
   const [dropdownVisible, setDropdownVisible] = useState(false);
+  const [fontLoaded, setFontLoaded] = useState(false);
+
+  useEffect(() => {
+    fetchFonts().then(() => setFontLoaded(true));
+  }, []);
 
   const toggleDropdown = () => {
     setDropdownVisible(!dropdownVisible);
@@ -13,6 +25,10 @@ const HomeScreen = ({ navigation }) => {
     setDropdownVisible(false);
     console.log('Selected:', option);
   };
+
+  if (!fontLoaded) {
+    return <ActivityIndicator size="large" color="#0000ff" />;
+  }
 
   return (
     <View style={styles.container}>
@@ -93,6 +109,7 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     paddingLeft: 10,
     fontSize: 16,
+    fontFamily: 'Prompt-Regular', // ใช้ฟอนต์ที่โหลด
   },
   searchIcon: {
     marginRight: 10,

@@ -1,7 +1,24 @@
-import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
-import React from 'react';
+import React, { useState, useEffect } from 'react';
+import { View, Text, TouchableOpacity, StyleSheet, ActivityIndicator } from 'react-native';
+import * as Font from 'expo-font'; // นำเข้า expo-font
+
+const fetchFonts = () => {
+  return Font.loadAsync({
+    'Prompt-Regular': require('../assets/fonts/Prompt-Regular.ttf'), // ตำแหน่งของฟอนต์
+  });
+};
 
 const TransportScreen = () => {
+  const [fontLoaded, setFontLoaded] = useState(false);
+
+  useEffect(() => {
+    fetchFonts().then(() => setFontLoaded(true));
+  }, []);
+
+  if (!fontLoaded) {
+    return <ActivityIndicator size="large" color="#0000ff" />;
+  }
+
   return (
     <View style={styles.container}>
       <TouchableOpacity style={styles.button}>
@@ -39,10 +56,10 @@ const styles = StyleSheet.create({
     alignItems: 'flex-start', // จัดตำแหน่งข้อความไปที่ด้านซ้ายของกล่อง
   },
   buttonText: {
-    color: '1e1e1e', // สีข้อความ
+    color: '#1e1e1e', // สีข้อความ
     fontSize: 18,
     marginLeft: 10, // เพิ่มระยะห่างจากขอบด้านซ้ายของกล่อง
-    fontWeight: 'bold',
+    fontFamily: 'Prompt-Medium', // ใช้ฟอนต์ที่โหลด
   },
 });
 
