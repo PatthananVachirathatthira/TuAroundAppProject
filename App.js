@@ -19,7 +19,9 @@ const Drawer = createDrawerNavigator();
 // โหลดฟอนต์
 const fetchFonts = () => {
   return Font.loadAsync({
-    'Prompt-Regular': require('./assets/fonts/Prompt-Regular.ttf'), // ปรับเส้นทางฟอนต์ตามตำแหน่งที่เก็บ
+    'Prompt-Regular': require('./assets/fonts/Prompt-Regular.ttf'),
+    'Prompt-Bold': require('./assets/fonts/Prompt-Bold.ttf'),
+    'Prompt-Medium': require('./assets/fonts/Prompt-Medium.ttf'), // ปรับเส้นทางฟอนต์ตามตำแหน่งที่เก็บ
   });
 };
 
@@ -129,7 +131,7 @@ const TransportStackNavigator = () => (
       name="Transport"
       component={TransportScreen}
       options={({ navigation }) => ({
-        headerTitle: "TRANSPORT",
+        headerTitle: "",
         headerTitleAlign: "center",
         headerTitleStyle: styles.headerTitle,
         headerTransparent: true,
@@ -169,7 +171,7 @@ const CustomDrawerContent = (props) => {
         style={styles.drawerItem}
       />
       <DrawerItem
-        label="How to use"
+        label="How To Use"
         onPress={() => props.navigation.navigate("HowToUseScreen")}
         icon={({ color, size }) => (
           <Octicons name="question" size={size} color="#000000" />

@@ -5,7 +5,9 @@ import * as Font from 'expo-font'; // นำเข้า expo-font
 
 const fetchFonts = () => {
   return Font.loadAsync({
-    'Prompt-Regular': require('../assets/fonts/Prompt-Regular.ttf'), // ปรับเส้นทางฟอนต์ตามตำแหน่งที่เก็บ
+    'Prompt-Regular': require('../assets/fonts/Prompt-Regular.ttf'),
+    'Prompt-Bold': require('../assets/fonts/Prompt-Bold.ttf'),
+    'Prompt-Medium': require('../assets/fonts/Prompt-Medium.ttf'), // ปรับเส้นทางฟอนต์ตามตำแหน่งที่เก็บ
   });
 };
 
