@@ -68,13 +68,13 @@ const HowToUseScreen = () => {
       <View style={styles.buttonContainer}>
         {currentIndex > 0 && (
           <TouchableOpacity onPress={handlePrevious} style={[styles.button, styles.leftbutton]}>
-            <AntDesign name={leftIcon} size={40} color="black" />
+            <AntDesign name={leftIcon} size={40} color="#1e1e1e" />
           </TouchableOpacity>
         )}
 
         {currentIndex < images.length - 1 && (
           <TouchableOpacity onPress={handleNext} style={[styles.button, styles.rightbutton]}>
-            <AntDesign name={rightIcon} size={40} color="black" />
+            <AntDesign name={rightIcon} size={40} color="#1e1e1e" />
           </TouchableOpacity>
         )}
       </View>
@@ -107,10 +107,11 @@ const styles = StyleSheet.create({
     fontSize: 20,
     fontWeight: 'bold',
     textAlign: 'center',
+    color: '#1e1e1e',
   },
   normalText: {
     fontSize: 16,
-    color: 'gray',
+    color: '#6d6d6d',
     marginTop: 15,
     textAlign: 'center',
     lineHeight: 24,

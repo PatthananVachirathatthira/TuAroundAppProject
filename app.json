@@ -1,5 +1,8 @@
 {
   "expo": {
+    "assetBundlePatterns": [
+      "assets/fonts/*"
+    ],
     "name": "TuAroundApp",
     "slug": "TuAroundApp",
     "version": "1.0.0",

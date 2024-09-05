@@ -24,7 +24,7 @@ const styles = StyleSheet.create({
   },
   button: {
     backgroundColor: 'white', // สีพื้นหลังของปุ่ม
-    borderRadius: 15, // ทำให้มุมปุ่มมน
+    borderRadius: 20, // ทำให้มุมปุ่มมน
     paddingVertical: 15,
     paddingHorizontal: 20,
     marginVertical: 10,
@@ -39,9 +39,10 @@ const styles = StyleSheet.create({
     alignItems: 'flex-start', // จัดตำแหน่งข้อความไปที่ด้านซ้ายของกล่อง
   },
   buttonText: {
-    color: 'black', // สีข้อความ
+    color: '1e1e1e', // สีข้อความ
     fontSize: 18,
     marginLeft: 10, // เพิ่มระยะห่างจากขอบด้านซ้ายของกล่อง
+    fontWeight: 'bold',
   },
 });
 

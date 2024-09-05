@@ -38,20 +38,20 @@ const HomeScreen = ({ navigation }) => {
         </TouchableOpacity>
 
         <TouchableOpacity style={styles.dropdownButton} onPress={toggleDropdown}>
-          <AntDesign name={dropdownVisible ? 'up' : 'down'} size={24} color="black" />
+          <AntDesign name={dropdownVisible ? 'up' : 'down'} size={24} color="#1e1e1e" />
         </TouchableOpacity>
       </View>
 
       {dropdownVisible && (
         <View style={styles.dropdown}>
           <TouchableOpacity style={styles.dropdownItem} onPress={() => selectOption('Option 1')}>
-            <Ionicons name="bus-outline" size={24} color="black" />
+            <Ionicons name="bus-outline" size={24} color="#1e1e1e" />
           </TouchableOpacity>
           <TouchableOpacity style={styles.dropdownItem} onPress={() => selectOption('Option 2')}>
-           <MaterialIcons name="gps-fixed" size={24} color="black" />
+           <MaterialIcons name="gps-fixed" size={24} color="#1e1e1e" />
           </TouchableOpacity>
           <TouchableOpacity style={styles.dropdownItem} onPress={() => selectOption('Option 3')}>
-            <FontAwesome5 name="traffic-light" size={24} color="black" />
+            <FontAwesome5 name="traffic-light" size={24} color="#1e1e1e" />
           </TouchableOpacity>
         </View>
       )}
@@ -77,7 +77,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     backgroundColor: '#fff',
-    borderRadius: 10,
+    borderRadius: 12,
     padding: 6,
     width: '75%',
     height: 52,
@@ -90,7 +90,7 @@ const styles = StyleSheet.create({
   searchBar: {
     flex: 1,
     height: '100%',
-    borderRadius: 30,
+    borderRadius: 12,
     paddingLeft: 10,
     fontSize: 16,
   },
@@ -99,7 +99,7 @@ const styles = StyleSheet.create({
   },
   dropdownButton: {
     backgroundColor: '#fff',
-    borderRadius: 8,
+    borderRadius: 12,
     padding: 6,
     marginLeft: 10,
     height: 52,
@@ -118,7 +118,7 @@ const styles = StyleSheet.create({
     right: '4.5%',
     width: 52,  // Set width to match dropdownButton
     backgroundColor: '#fff',
-    borderRadius: 8,
+    borderRadius: 12,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.10,
