@@ -118,20 +118,20 @@ const styles = StyleSheet.create({
   },
   textContainer: {
     position: 'absolute',
-    top: 500,
+    top: 485,
     alignItems: 'center',
     paddingHorizontal: 40,
   },
   boldText: {
-    fontSize: 20,
+    fontSize: 24,
     textAlign: 'center',
-    color: '#1e1e1e',
+    color: '#ff6e33',
     fontFamily: 'Prompt-Medium', // ใช้ฟอนต์ที่โหลด
   },
   normalText: {
     fontSize: 16,
-    color: '#6d6d6d',
-    marginTop: 15,
+    color: '#1e1e1e',
+    marginTop: 10,
     textAlign: 'center',
     lineHeight: 24,
     fontFamily: 'Prompt-Regular', // ใช้ฟอนต์ที่โหลด
