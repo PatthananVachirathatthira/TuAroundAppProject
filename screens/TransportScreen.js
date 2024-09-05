@@ -24,12 +24,12 @@ const styles = StyleSheet.create({
   },
   button: {
     backgroundColor: 'white', // สีพื้นหลังของปุ่ม
-    borderRadius: 10, // ทำให้มุมปุ่มมน
+    borderRadius: 15, // ทำให้มุมปุ่มมน
     paddingVertical: 15,
     paddingHorizontal: 20,
     marginVertical: 10,
     width: '85%', // ขนาดของปุ่ม
-    height: 65,
+    height: 90,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.10,
