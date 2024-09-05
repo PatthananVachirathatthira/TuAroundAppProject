@@ -1,5 +1,6 @@
-import React, { useState } from 'react';
-import { View, Text, TouchableOpacity, StyleSheet, Image } from 'react-native';
+import React, { useState, useEffect } from 'react';
+import { View, Text, TouchableOpacity, StyleSheet, Image, ActivityIndicator } from 'react-native';
+import * as Font from 'expo-font'; // นำเข้า expo-font
 import { AntDesign } from '@expo/vector-icons'; // นำเข้าไอคอนจาก AntDesign
 
 const images = [
@@ -33,8 +34,26 @@ const images = [
   },
 ];
 
+const fetchFonts = () => {
+  return Font.loadAsync({
+    'Prompt-Regular': require('../assets/fonts/Prompt-Regular.ttf'),
+    'Prompt-Bold': require('../assets/fonts/Prompt-Bold.ttf'),
+    'Prompt-Medium': require('../assets/fonts/Prompt-Medium.ttf'),
+
+  });
+};
+
 const HowToUseScreen = () => {
   const [currentIndex, setCurrentIndex] = useState(0);
+  const [fontLoaded, setFontLoaded] = useState(false);
+
+  useEffect(() => {
+    fetchFonts().then(() => setFontLoaded(true));
+  }, []);
+
+  if (!fontLoaded) {
+    return <ActivityIndicator size="large" color="#0000ff" />;
+  }
 
   // ฟังก์ชันเลื่อนไปทางขวา
   const handleNext = () => {
@@ -105,9 +124,9 @@ const styles = StyleSheet.create({
   },
   boldText: {
     fontSize: 20,
-    fontWeight: 'bold',
     textAlign: 'center',
     color: '#1e1e1e',
+    fontFamily: 'Prompt-Medium', // ใช้ฟอนต์ที่โหลด
   },
   normalText: {
     fontSize: 16,
@@ -115,6 +134,7 @@ const styles = StyleSheet.create({
     marginTop: 15,
     textAlign: 'center',
     lineHeight: 24,
+    fontFamily: 'Prompt-Regular', // ใช้ฟอนต์ที่โหลด
   },
   buttonContainer: {
     flexDirection: 'row',
