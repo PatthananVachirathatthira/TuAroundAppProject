@@ -85,7 +85,7 @@ const HomeStackNavigator = () => (
         headerRight: () => (
           <AntDesign
             name="close"
-            size={25}
+            size={27}
             color="#2a2a2a"
             style={styles.iconCloseStyle}
             onPress={() => navigation.goBack()}
