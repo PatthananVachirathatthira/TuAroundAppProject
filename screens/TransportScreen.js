@@ -37,7 +37,7 @@ const TransportScreen = () => {
       </View>
       <TouchableOpacity style={styles.button}>
         <LinearGradient
-          colors={["#ff6e33", "#ff6e33"]} // สีส้มและแดง
+          colors={["#f65d3c", "#f65d3c"]} // สีส้มและแดง
           start={[0, 0]} // จุดเริ่มต้นของ gradient
           end={[1, 1]} // จุดสิ้นสุดของ gradient
           style={styles.gradient}
@@ -54,7 +54,7 @@ const TransportScreen = () => {
 
       <TouchableOpacity style={styles.button}>
         <LinearGradient
-          colors={["#ff6e33", "#ff6e33"]} // สีส้มและแดง
+          colors={["#f65d3c", "#f65d3c"]} // สีส้มและแดง
           start={[0, 0]} // จุดเริ่มต้นของ gradient
           end={[1, 1]} // จุดสิ้นสุดของ gradient
           style={styles.gradient}
@@ -89,7 +89,7 @@ const styles = StyleSheet.create({
   header1: {
     fontSize: 25,
     fontFamily: 'Prompt-Bold',
-    color: '#ff6e33',
+    color: '#f65d3c',
     marginBottom: 0, // ระยะห่างระหว่างข้อความและปุ่ม
   },
   header2: {

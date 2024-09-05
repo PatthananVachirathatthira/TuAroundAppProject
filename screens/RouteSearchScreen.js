@@ -47,7 +47,7 @@ const RouteSearchScreen = ({ navigation }) => {
         }
       }}
     >
-      <MaterialIcons name="stars" size={22} color="#FFA500" />
+      <MaterialIcons name="stars" size={22} color="#f65d3c" />
       <Text style={styles.placeText}>{item.name}</Text>
     </TouchableOpacity>
   );
@@ -60,7 +60,7 @@ const RouteSearchScreen = ({ navigation }) => {
     <View style={styles.container}>
       <View style={styles.row}>
         <View style={styles.dotColumn}>
-          <Icon name="circle" size={10} color="#FFA500" style={styles.icon} />
+          <Icon name="circle" size={10} color="#f65d3c" style={styles.icon} />
           <Icon name="circle" size={7} color="#D3D3D3" style={styles.icon} />
           <Icon name="circle" size={7} color="#D3D3D3" style={styles.icon} />
         </View>
@@ -80,14 +80,14 @@ const RouteSearchScreen = ({ navigation }) => {
         <View style={styles.dotColumn}>
           <Icon name="circle" size={7} color="#D3D3D3" style={styles.icon} />
           <Icon name="circle" size={7} color="#D3D3D3" style={styles.icon} />
-          <Icon name="circle" size={10} color="#FFA500" style={styles.icon} />
+          <Icon name="circle" size={10} color="#f65d3c" style={styles.icon} />
         </View>
         <View style={styles.inputContainer}>
           <Text style={styles.label}>ถึง</Text>
           <TextInput
             style={styles.input}
             placeholder=""
-            placeholderTextColor="#FFA500"
+            placeholderTextColor="#f65d3c"
             value={endLocation}
             onChangeText={(text) => setEndLocation(text)}
             onFocus={() => setInputField("end")}
@@ -138,24 +138,24 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     borderWidth: 1,
     borderColor: "#D3D3D3",
-    borderRadius: 20,
+    borderRadius: 15,
     paddingHorizontal: 8,
     paddingVertical: 4,
   },
   input: {
     height: 40,
     fontSize: 14,
-    color: "#FFA500",
+    color: "#f65d3c",
     fontFamily: 'Prompt-Regular', // ใช้ฟอนต์ที่โหลด
   },
   label: {
     fontSize: 14,
-    color: "#FFA500",
+    color: "#f65d3c",
     fontFamily: 'Prompt-Regular', // ใช้ฟอนต์ที่โหลด
   },
   title: {
     fontSize: 16,
-    color: "#d87c38",
+    color: "#f65d3c",
     fontFamily: 'Prompt-Medium', // ใช้ฟอนต์ที่โหลด
   },
   separator: {
@@ -171,12 +171,12 @@ const styles = StyleSheet.create({
   placeText: {
     marginLeft: 10,
     fontSize: 16,
-    color: "#555",
+    color: "#f65d3cf",
     fontFamily: 'Prompt-Regular', // ใช้ฟอนต์ที่โหลด
   },
   button: {
-    backgroundColor: "#FFA500",
-    borderRadius: 20,
+    backgroundColor: "#f65d3c",
+    borderRadius: 15,
     paddingVertical: 15,
     paddingHorizontal: 16,
     alignItems: "center",
@@ -184,8 +184,8 @@ const styles = StyleSheet.create({
   },
   buttonText: {
     color: "#000",
-    fontSize: 16,
-    fontFamily: 'Prompt-Medium', // ใช้ฟอนต์ที่โหลด
+    fontSize: 18,
+    fontFamily: 'Prompt-Regular', // ใช้ฟอนต์ที่โหลด
   },
 });
 

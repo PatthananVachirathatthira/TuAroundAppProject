@@ -213,7 +213,7 @@ const App = () => {
 const styles = StyleSheet.create({
   headerTitle: {
     fontFamily: 'Prompt-Medium', // ใช้ฟอนต์ที่โหลด
-    color: "#f23a04",
+    color: "#f65d3c",
   },
   iconStyle: {
     marginLeft: 17,

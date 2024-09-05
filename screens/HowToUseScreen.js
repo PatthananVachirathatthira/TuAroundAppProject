@@ -125,7 +125,7 @@ const styles = StyleSheet.create({
   boldText: {
     fontSize: 24,
     textAlign: 'center',
-    color: '#ff6e33',
+    color: '#f65d3c',
     fontFamily: 'Prompt-Medium', // ใช้ฟอนต์ที่โหลด
   },
   normalText: {
