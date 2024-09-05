@@ -7,28 +7,28 @@ const images = [
     src: require('../assets/images/gradient-grainy-gradient-background_23-2149922200.jpg'), 
     description: { 
       bold: 'คำอธิบายตัวหนา 1', 
-      normal: 'คำอธิบายตัวบาง 1' 
+      normal: 'Proident aliqua culpa aliqua cupidatat tempor excepteur nulla in.' 
     } 
   },
   { 
     src: require('../assets/images/gradient-grainy-gradient-background_23-2149922209.jpg'), 
     description: { 
       bold: 'คำอธิบายตัวหนา 2', 
-      normal: 'คำอธิบายตัวบาง 2' 
+      normal: 'Proident proident cupidatat eiusmod exercitation voluptate exercitation enim ullamco adipisicing et.' 
     } 
   },
   {
     src: require('../assets/images/gradient-grainy-gradient-background_23-2149922231.jpg'),
     description: {
       bold: 'คำอธิบายตัวหนา 3',
-      normal: 'คำอธิบายตัวบาง 3'
+      normal: 'Laborum laborum officia eiusmod non consequat deserunt nisi.'
     }
   },
   { 
     src: require('../assets/images/gradient-grainy-gradient-background_23-2149922238.jpg'), 
     description: { 
       bold: 'คำอธิบายตัวหนา 4', 
-      normal: 'คำอธิบายตัวบาง 4' 
+      normal: 'Aliqua id nostrud est labore sit velit tempor elit commodo officia tempor exercitation.' 
     } 
   },
 ];
@@ -85,24 +85,29 @@ const styles = StyleSheet.create({
   },
   image: {
     position: 'absolute', // ใช้ตำแหน่ง absolute
-    top: 180, // ปรับตำแหน่งรูปภาพให้เลื่อนไปด้านบน
+    top: 160, // ปรับตำแหน่งรูปภาพให้เลื่อนไปด้านบน
     width: 300,
     height: 300,
     resizeMode: 'cover',
     borderRadius: 50,
   },
   textContainer: {
-    marginTop: 290,
+    position: 'absolute',
+    top: 500,
     alignItems: 'center',
+    paddingHorizontal: 40,
   },
   boldText: {
     fontSize: 20,
     fontWeight: 'bold',
+    textAlign: 'center',
   },
   normalText: {
     fontSize: 16,
     color: 'gray',
-    marginTop: 7,
+    marginTop: 15,
+    textAlign: 'center',
+    lineHeight: 24,
   },
   buttonContainer: {
     flexDirection: 'row',
