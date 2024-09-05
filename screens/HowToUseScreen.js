@@ -84,12 +84,15 @@ const styles = StyleSheet.create({
     backgroundColor: 'white',
   },
   image: {
+    position: 'absolute', // ใช้ตำแหน่ง absolute
+    top: 180, // ปรับตำแหน่งรูปภาพให้เลื่อนไปด้านบน
     width: 300,
     height: 300,
-    resizeMode: 'contain',
+    resizeMode: 'cover',
+    borderRadius: 50,
   },
   textContainer: {
-    marginTop: 20,
+    marginTop: 290,
     alignItems: 'center',
   },
   boldText: {
@@ -99,6 +102,7 @@ const styles = StyleSheet.create({
   normalText: {
     fontSize: 16,
     color: 'gray',
+    marginTop: 7,
   },
   buttonContainer: {
     flexDirection: 'row',
