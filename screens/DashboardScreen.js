@@ -46,7 +46,7 @@ const DashboardScreen = () => {
           <AntDesign
             name="right"
             size={24}
-            color="#1e1e1e"
+            color="#f65d3c"
             style={styles.icon}
           />
         </TouchableOpacity>
@@ -61,7 +61,7 @@ const DashboardScreen = () => {
           <AntDesign
             name="right"
             size={24}
-            color="#1e1e1e"
+            color="#f65d3c"
             style={styles.icon}
           />
         </TouchableOpacity>
@@ -76,7 +76,7 @@ const DashboardScreen = () => {
           <AntDesign
             name="right"
             size={24}
-            color="#1e1e1e"
+            color="#f65d3c"
             style={styles.icon}
           />
         </TouchableOpacity>
