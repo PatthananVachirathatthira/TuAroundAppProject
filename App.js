@@ -220,10 +220,11 @@ const styles = StyleSheet.create({
     fontFamily: 'Prompt-Bold', // ใช้ฟอนต์ที่โหล
     fontSize: 22,
     color: "#f65d3c",
+    marginTop: 25,
   },
   iconStyle: {
-    marginLeft: 17,
-    marginTop: 5,
+    marginLeft: 20,
+    marginTop: 30,
   },
   iconCloseStyle: {
     marginRight: 30, // ระยะห่างจากขอบขวา

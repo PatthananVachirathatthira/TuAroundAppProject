@@ -82,8 +82,8 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'flex-start',
     alignItems: 'center',
-    backgroundColor: 'pink',
-    paddingTop: 70,
+    backgroundColor: 'white',
+    paddingTop: 85,
   },
   searchSection: {
     flexDirection: 'row',
@@ -133,7 +133,7 @@ const styles = StyleSheet.create({
   },
   dropdown: {
     position: 'absolute',
-    top: 80,
+    top: 95,
     right: '4.5%',
     width: 52,  // Set width to match dropdownButton
     backgroundColor: '#fff',

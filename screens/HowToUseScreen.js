@@ -91,6 +91,19 @@ const HowToUseScreen = () => {
           </TouchableOpacity>
         )}
 
+        {/* เพิ่มไอคอนวงกลมตรงกลาง */}
+        <View style={styles.circleContainer}>
+          {images.map((_, index) => (
+            <View
+              key={index}
+              style={[
+                styles.circle,
+                { backgroundColor: currentIndex === index ? '#000000' : '#cccccc' },
+              ]}
+            />
+          ))}
+        </View>
+
         {currentIndex < images.length - 1 && (
           <TouchableOpacity onPress={handleNext} style={[styles.button, styles.rightbutton]}>
             <AntDesign name={rightIcon} size={40} color="#1e1e1e" />
@@ -133,7 +146,7 @@ const styles = StyleSheet.create({
     color: '#1e1e1e',
     marginTop: 10,
     textAlign: 'center',
-    lineHeight: 24,
+    lineHeight: 20,
     fontFamily: 'Prompt-Regular', // ใช้ฟอนต์ที่โหลด
   },
   buttonContainer: {
@@ -148,6 +161,7 @@ const styles = StyleSheet.create({
   button: {
     alignItems: 'center',
     justifyContent: 'center',
+    bottom: -27,
   },
   leftbutton: {
     position: 'absolute',
@@ -156,6 +170,21 @@ const styles = StyleSheet.create({
   rightbutton: {
     position: 'absolute',
     right: 35,
+  },
+  circleContainer: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center',
+    position: 'absolute',
+    bottom: -15,  // ปรับตำแหน่งให้เลื่อนลงจากปุ่มและไม่รบกวนองค์ประกอบอื่นๆ
+    left: 0,
+    right: 0,
+  },
+  circle: {
+    width: 9,
+    height: 9,
+    borderRadius: 5,
+    marginHorizontal: 5,
   },
 });
 
