@@ -152,7 +152,7 @@ const styles = StyleSheet.create({
   label: {
     fontSize: 14,
     color: "#f65d3c",
-    fontFamily: 'Prompt-Regular', // ใช้ฟอนต์ที่โหลด
+    fontFamily: 'Prompt-Medium', // ใช้ฟอนต์ที่โหลด
   },
   title: {
     fontSize: 16,

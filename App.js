@@ -1,6 +1,6 @@
 // HowToUseScreen.js
 import React, { useState, useEffect } from "react";
-import { StyleSheet, ActivityIndicator } from "react-native";
+import { StyleSheet, ActivityIndicator, View, Text } from "react-native";
 import { NavigationContainer } from "@react-navigation/native";
 import { createStackNavigator } from "@react-navigation/stack";
 import { createDrawerNavigator, DrawerContentScrollView, DrawerItem } from "@react-navigation/drawer";
@@ -107,7 +107,7 @@ const HomeStackNavigator = () => (
       name="DashboardScreen"
       component={DashboardScreen}
       options={({ navigation }) => ({
-        headerTitle: "DASHBOARD",
+        headerTitle: "",
         headerTitleAlign: "center",
         headerTitleStyle: styles.headerTitle,
         headerTransparent: true,
@@ -155,7 +155,6 @@ const CustomDrawerContent = (props) => {
       <DrawerItem
         label="TU AROUND"
         labelStyle={styles.drawerHeadLabel}
-        style={styles.drawerHeadItem}
       />
       <DrawerItem
         label="รถสาธารณะอื่นๆ"
@@ -167,7 +166,7 @@ const CustomDrawerContent = (props) => {
         style={styles.drawerItem}
       />
       <DrawerItem
-        label="แจ้งปัญหา"
+        label="ประกาศ"
         onPress={() => props.navigation.navigate("DashboardScreen")}
         // icon={({ color, size }) => (
         //   <MaterialIcons name="space-dashboard" size={size} color="#000000" />
@@ -234,7 +233,7 @@ const styles = StyleSheet.create({
     fontFamily: 'Prompt-Bold', // ใช้ฟอนต์ที่โหลด
     color: 'pink',
     textAlign: 'center',
-    marginLeft: 20,
+    marginLeft: 25,
     marginTop: 5,
     color: "#f65d3c", // สีของชื่อใน Drawer
     fontSize: 25,

@@ -42,7 +42,7 @@ const TransportScreen = () => {
           end={[1, 1]} // จุดสิ้นสุดของ gradient
           style={styles.gradient}
         >
-          <Text style={styles.buttonText}>รถมอเตอร์ไซ</Text>
+          <Text style={styles.buttonText}>รถมอเตอร์ไซค์</Text>
           <Feather
             name="arrow-up-right"
             size={27}
@@ -51,7 +51,6 @@ const TransportScreen = () => {
           />
         </LinearGradient>
       </TouchableOpacity>
-
       <TouchableOpacity style={styles.button}>
         <LinearGradient
           colors={["#f65d3c", "#f65d3c"]} // สีส้มและแดง
@@ -60,6 +59,22 @@ const TransportScreen = () => {
           style={styles.gradient}
         >
           <Text style={styles.buttonText}>รถเมล์</Text>
+          <Feather
+            name="arrow-up-right"
+            size={27}
+            color="#fffbf7"
+            style={styles.icon}
+          />
+        </LinearGradient>
+      </TouchableOpacity>
+      <TouchableOpacity style={styles.button}>
+        <LinearGradient
+          colors={["#f65d3c", "#f65d3c"]} // สีส้มและแดง
+          start={[0, 0]} // จุดเริ่มต้นของ gradient
+          end={[1, 1]} // จุดสิ้นสุดของ gradient
+          style={styles.gradient}
+        >
+          <Text style={styles.buttonText}>รถตู้</Text>
           <Feather
             name="arrow-up-right"
             size={27}
@@ -93,7 +108,7 @@ const styles = StyleSheet.create({
     marginBottom: 0, // ระยะห่างระหว่างข้อความและปุ่ม
   },
   header2: {
-    fontSize: 20,
+    fontSize: 23,
     fontFamily: 'Prompt-Medium',
     color: '#1e1e1e',
     marginBottom: 5, // ระยะห่างระหว่างข้อความและปุ่ม
@@ -101,7 +116,7 @@ const styles = StyleSheet.create({
   button: {
     marginVertical: 11,
     width: "88%",
-    height: 95,
+    height: 90,
     borderRadius: 25,
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
