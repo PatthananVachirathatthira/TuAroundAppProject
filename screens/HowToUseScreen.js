@@ -98,7 +98,7 @@ const HowToUseScreen = () => {
               key={index}
               style={[
                 styles.circle,
-                { backgroundColor: currentIndex === index ? '#000000' : '#cccccc' },
+                { backgroundColor: currentIndex === index ? '#1e1e1e' : '#cccccc' },
               ]}
             />
           ))}
