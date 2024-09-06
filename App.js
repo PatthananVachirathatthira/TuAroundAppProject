@@ -153,29 +153,34 @@ const CustomDrawerContent = (props) => {
   return (
     <DrawerContentScrollView {...props}>
       <DrawerItem
-        label="Other Transportation"
+        label="TU AROUND"
+        labelStyle={styles.drawerHeadLabel}
+        style={styles.drawerHeadItem}
+      />
+      <DrawerItem
+        label="รถสาธารณะอื่นๆ"
         onPress={() => props.navigation.navigate("TransportScreen")}
-        icon={({ color, size }) => (
-          <Ionicons name="car-sport-sharp" size={size} color="#000000" />
-        )}
+        // icon={({ color, size }) => (
+        //   <Ionicons name="car-sport-sharp" size={size} color="#000000" />
+        // )}
         labelStyle={styles.drawerLabel}
         style={styles.drawerItem}
       />
       <DrawerItem
-        label="Dashboard"
+        label="แจ้งปัญหา"
         onPress={() => props.navigation.navigate("DashboardScreen")}
-        icon={({ color, size }) => (
-          <MaterialIcons name="space-dashboard" size={size} color="#000000" />
-        )}
+        // icon={({ color, size }) => (
+        //   <MaterialIcons name="space-dashboard" size={size} color="#000000" />
+        // )}
         labelStyle={styles.drawerLabel}
         style={styles.drawerItem}
       />
       <DrawerItem
-        label="How To Use"
+        label="วิธีใช้งาน"
         onPress={() => props.navigation.navigate("HowToUseScreen")}
-        icon={({ color, size }) => (
-          <Octicons name="question" size={size} color="#000000" />
-        )}
+        // icon={({ color, size }) => (
+        //   <Octicons name="question" size={size} color="#000000" />
+        // )}
         labelStyle={styles.drawerLabel}
         style={styles.drawerItem}
       />
@@ -212,7 +217,8 @@ const App = () => {
 // Styles
 const styles = StyleSheet.create({
   headerTitle: {
-    fontFamily: 'Prompt-Medium', // ใช้ฟอนต์ที่โหลด
+    fontFamily: 'Prompt-Bold', // ใช้ฟอนต์ที่โหล
+    fontSize: 22,
     color: "#f65d3c",
   },
   iconStyle: {
@@ -223,14 +229,24 @@ const styles = StyleSheet.create({
     marginRight: 30, // ระยะห่างจากขอบขวา
     marginTop: 15, // ระยะห่างจากด้านบน
   },
+  drawerHeadLabel: {
+    fontFamily: 'Prompt-Bold', // ใช้ฟอนต์ที่โหลด
+    color: 'pink',
+    textAlign: 'center',
+    marginLeft: 20,
+    marginTop: 5,
+    color: "#f65d3c", // สีของชื่อใน Drawer
+    fontSize: 25,
+  },
   drawerItem: {
     marginVertical: 3, // ปรับให้ไอคอนชิดกับชื่อ
   },
   drawerLabel: {
-    fontFamily: 'Prompt-Regular', // ใช้ฟอนต์ที่โหลด
-    marginLeft: -15, // ปรับให้ชื่อชิดกับไอคอนมากขึ้น
+    fontFamily: 'Prompt-Medium', // ใช้ฟอนต์ที่โหลด
+    marginLeft: 10, // ปรับให้ชื่อชิดกับไอคอนมากขึ้น
+    marginTop: 2,
     color: "#000000", // สีของชื่อใน Drawer
-    fontSize: 15,
+    fontSize: 16,
   },
 });
 

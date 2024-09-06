@@ -46,7 +46,7 @@ const TransportScreen = () => {
           <Feather
             name="arrow-up-right"
             size={27}
-            color="#1e1e1e"
+            color="#fffbf7"
             style={styles.icon}
           />
         </LinearGradient>
@@ -63,7 +63,7 @@ const TransportScreen = () => {
           <Feather
             name="arrow-up-right"
             size={27}
-            color="#1e1e1e"
+            color="#fffbf7"
             style={styles.icon}
           />
         </LinearGradient>
@@ -100,8 +100,8 @@ const styles = StyleSheet.create({
   },
   button: {
     marginVertical: 11,
-    width: "85%",
-    height: 100,
+    width: "88%",
+    height: 95,
     borderRadius: 25,
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
@@ -115,17 +115,18 @@ const styles = StyleSheet.create({
     alignItems: "flex-start",
     borderRadius: 25, // มุมมนเหมือนปุ่ม
     paddingVertical: 15,
-    paddingHorizontal: 30,
+    paddingHorizontal: 35,
   },
   buttonText: {
-    color: "#1e1e1e",
+    color: "#fffbf7",
     fontSize: 25,
     fontFamily: "Prompt-Regular",
+    marginBottom: 5,
   },
   icon: {
     position: "absolute",
-    top: 20,
-    right: 20,
+    top: 15,
+    right: 15,
   },
 });
 

@@ -10,7 +10,7 @@ const DashboardScreen = () => {
     );
   };
   
-  const styles = StyleSheet.create({
+const styles = StyleSheet.create({
     container: {
       flex: 1,
       justifyContent: 'flex-start', // จัดตำแหน่งในแนวตั้งให้เป็นกลาง
