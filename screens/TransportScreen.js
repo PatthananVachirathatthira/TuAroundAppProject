@@ -97,7 +97,7 @@ const styles = StyleSheet.create({
   },
   textContainer: {
     alignItems: 'flex-start', // ชิดซ้ายทั้งหมด
-    marginLeft: 27,
+    marginLeft: 20,
     width: '85%', // ทำให้ข้อความใช้พื้นที่ตามความกว้างที่ต้องการ
     marginBottom: 15, // เพิ่มระยะห่างระหว่างข้อความกับปุ่ม
   },
