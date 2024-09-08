@@ -7,8 +7,8 @@ import {
   ActivityIndicator,
   Dimensions,
 } from "react-native";
-import * as Font from 'expo-font';
 import { AntDesign } from '@expo/vector-icons';
+import * as Font from 'expo-font';
 
 const fetchFonts = () => {
   return Font.loadAsync({
@@ -20,7 +20,7 @@ const fetchFonts = () => {
 
 const { width } = Dimensions.get('window'); // ใช้ขนาดของหน้าจอ
 
-const DashboardScreen = () => {
+const DashboardScreen = ({ navigation }) => {
   const [fontLoaded, setFontLoaded] = useState(false);
 
   useEffect(() => {
@@ -38,7 +38,10 @@ const DashboardScreen = () => {
         <Text style={styles.header2}>จากขนส่งภายในมหาวิทยาลัย</Text>
       </View>
       <View style={styles.buttonContainer}>
-        <TouchableOpacity style={styles.button}>
+        <TouchableOpacity
+          style={styles.button}
+          onPress={() => navigation.navigate('AnnounceScreen', { type: 'A' })}
+        >
           <View style={styles.buttonContent}>
             <Text style={styles.buttonTitleText}>การปรัปปรุง EV สาย A</Text>
             <Text style={styles.buttonText}>32 สิงหา 2024-5.00</Text>
@@ -53,9 +56,12 @@ const DashboardScreen = () => {
         <View style={styles.separator} />
       </View>
       <View style={styles.buttonContainer}>
-        <TouchableOpacity style={styles.button}>
+        <TouchableOpacity
+          style={styles.button}
+          onPress={() => navigation.navigate('AnnounceScreen', { type: 'B' })}
+        >
           <View style={styles.buttonContent}>
-            <Text style={styles.buttonTitleText}>การปรัปปรุง EV สาย A</Text>
+            <Text style={styles.buttonTitleText}>การปรัปปรุง EV สาย B</Text>
             <Text style={styles.buttonText}>32 สิงหา 2024-5.00</Text>
           </View>
           <AntDesign
@@ -68,9 +74,12 @@ const DashboardScreen = () => {
         <View style={styles.separator} />
       </View>
       <View style={styles.buttonContainer}>
-        <TouchableOpacity style={styles.button}>
+        <TouchableOpacity
+          style={styles.button}
+          onPress={() => navigation.navigate('AnnounceScreen', { type: 'C' })}
+        >
           <View style={styles.buttonContent}>
-            <Text style={styles.buttonTitleText}>การปรัปปรุง EV สาย A</Text>
+            <Text style={styles.buttonTitleText}>การปรัปปรุง EV สาย C</Text>
             <Text style={styles.buttonText}>32 สิงหา 2024-5.00</Text>
           </View>
           <AntDesign

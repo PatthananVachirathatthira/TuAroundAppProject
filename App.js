@@ -15,6 +15,7 @@ import DashboardScreen from "./screens/DashboardScreen";
 import ReportScreen from "./screens/ReportScreen";
 import MotorcycleScreen from "./screens/MotorcycleScreen";
 import VanScreen from "./screens/VanScreen";
+import AnnounceScreen from "./screens/AnnouceScreen"; 
 
 const Stack = createStackNavigator();
 const Drawer = createDrawerNavigator();
@@ -70,7 +71,7 @@ const HomeStackNavigator = () => (
       name="RouteScreen"
       component={RouteScreen}
       options={({ navigation }) => ({
-        headerTitle: "ROUTE",
+        headerTitle: "ค้นหาเส้นทาง",
         headerTitleAlign: "center",
         headerTitleStyle: styles.headerTitle,
         headerTransparent: true,
@@ -110,6 +111,25 @@ const HomeStackNavigator = () => (
       component={DashboardScreen}
       options={({ navigation }) => ({
         headerTitle: "",
+        headerTitleAlign: "center",
+        headerTitleStyle: styles.headerTitle,
+        headerTransparent: true,
+        headerLeft: () => (
+          <AntDesign
+            name="left"
+            size={25}
+            color="#2a2a2a"
+            style={styles.iconStyle}
+            onPress={() => navigation.goBack()}
+          />
+        ),
+      })}
+    />
+    <Stack.Screen
+      name="AnnounceScreen"
+      component={AnnounceScreen} // เพิ่ม AnnounceScreen
+      options={({ navigation }) => ({
+        headerTitle: "ประกาศ",
         headerTitleAlign: "center",
         headerTitleStyle: styles.headerTitle,
         headerTransparent: true,
