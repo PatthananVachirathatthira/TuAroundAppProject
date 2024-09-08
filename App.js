@@ -153,10 +153,7 @@ const TransportStackNavigator = () => (
 const CustomDrawerContent = (props) => {
   return (
     <DrawerContentScrollView {...props}>
-      <DrawerItem
-        label="TU AROUND"
-        labelStyle={styles.drawerHeadLabel}
-      />
+      <Text style={styles.drawerHeadLabel}>TU AROUND</Text>
       <DrawerItem
         label="รถสาธารณะอื่นๆ"
         onPress={() => props.navigation.navigate("TransportScreen")}
@@ -244,8 +241,8 @@ const styles = StyleSheet.create({
     fontFamily: 'Prompt-Bold', // ใช้ฟอนต์ที่โหลด
     color: 'pink',
     textAlign: 'center',
-    marginLeft: 25,
-    marginTop: 5,
+    marginTop: 15,
+    marginBottom: 10,
     color: "#f65d3c", // สีของชื่อใน Drawer
     fontSize: 25,
   },
