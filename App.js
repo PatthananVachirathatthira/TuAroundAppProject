@@ -12,6 +12,7 @@ import RouteScreen from "./screens/RouteScreen";
 import HowToUseScreen from "./screens/HowToUseScreen";
 import DashboardScreen from "./screens/DashboardScreen";
 import * as Font from 'expo-font'; // นำเข้า expo-font
+import ReportScreen from "./screens/ReportScreen";
 
 const Stack = createStackNavigator();
 const Drawer = createDrawerNavigator();
@@ -183,6 +184,15 @@ const CustomDrawerContent = (props) => {
         labelStyle={styles.drawerLabel}
         style={styles.drawerItem}
       />
+      <DrawerItem
+        label="รายงานปัญหา"
+        onPress={() => props.navigation.navigate("ReportScreen")}
+        // icon={({ color, size }) => (
+        //   <Octicons name="question" size={size} color="#000000" />
+        // )}
+        labelStyle={styles.drawerLabel}
+        style={styles.drawerItem}
+      />
     </DrawerContentScrollView>
   );
 };
@@ -208,6 +218,7 @@ const App = () => {
       >
         <Drawer.Screen name="HomeScreen" component={HomeStackNavigator} />
         <Drawer.Screen name="TransportScreen" component={TransportStackNavigator} />
+        <Drawer.Screen name="ReportScreen" component={ReportScreen} />
       </Drawer.Navigator>
     </NavigationContainer>
   );
