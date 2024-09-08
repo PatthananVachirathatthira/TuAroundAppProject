@@ -5,19 +5,20 @@ import { NavigationContainer } from "@react-navigation/native";
 import { createStackNavigator } from "@react-navigation/stack";
 import { createDrawerNavigator, DrawerContentScrollView, DrawerItem } from "@react-navigation/drawer";
 import { AntDesign, Ionicons, MaterialIcons, Octicons } from "@expo/vector-icons";
+import * as Font from 'expo-font'; // นำเข้า expo-font
 import HomeScreen from "./screens/HomeScreen";
 import RouteSearchScreen from "./screens/RouteSearchScreen";
 import TransportScreen from "./screens/TransportScreen";
 import RouteScreen from "./screens/RouteScreen";
 import HowToUseScreen from "./screens/HowToUseScreen";
 import DashboardScreen from "./screens/DashboardScreen";
-import * as Font from 'expo-font'; // นำเข้า expo-font
 import ReportScreen from "./screens/ReportScreen";
+import MotorcycleScreen from "./screens/MotorcycleScreen";
+import VanScreen from "./screens/VanScreen";
 
 const Stack = createStackNavigator();
 const Drawer = createDrawerNavigator();
 
-// โหลดฟอนต์
 const fetchFonts = () => {
   return Font.loadAsync({
     'Prompt-Regular': require('./assets/fonts/Prompt-Regular.ttf'),
@@ -133,6 +134,44 @@ const TransportStackNavigator = () => (
       component={TransportScreen}
       options={({ navigation }) => ({
         headerTitle: "",
+        headerTitleAlign: "center",
+        headerTitleStyle: styles.headerTitle,
+        headerTransparent: true,
+        headerLeft: () => (
+          <AntDesign
+            name="left"
+            size={25}
+            color="#2a2a2a"
+            style={styles.iconStyle}
+            onPress={() => navigation.goBack()}
+          />
+        ),
+      })}
+    />
+    <Stack.Screen
+      name="MotorcycleScreen"
+      component={MotorcycleScreen}
+      options={({ navigation }) => ({
+        headerTitle: "รถมอเตอร์ไซค์",
+        headerTitleAlign: "center",
+        headerTitleStyle: styles.headerTitle,
+        headerTransparent: true,
+        headerLeft: () => (
+          <AntDesign
+            name="left"
+            size={25}
+            color="#2a2a2a"
+            style={styles.iconStyle}
+            onPress={() => navigation.goBack()}
+          />
+        ),
+      })}
+    />
+    <Stack.Screen
+      name="VanScreen"
+      component={VanScreen}
+      options={({ navigation }) => ({
+        headerTitle: "รถตู้",
         headerTitleAlign: "center",
         headerTitleStyle: styles.headerTitle,
         headerTransparent: true,

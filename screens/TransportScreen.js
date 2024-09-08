@@ -8,7 +8,8 @@ import {
 } from "react-native";
 import * as Font from "expo-font";
 import { Feather } from "@expo/vector-icons";
-import { LinearGradient } from "expo-linear-gradient"; // นำเข้า LinearGradient
+import { LinearGradient } from "expo-linear-gradient";
+import { useNavigation } from '@react-navigation/native'; // นำเข้า useNavigation
 
 const fetchFonts = () => {
   return Font.loadAsync({
@@ -20,6 +21,7 @@ const fetchFonts = () => {
 
 const TransportScreen = () => {
   const [fontLoaded, setFontLoaded] = useState(false);
+  const navigation = useNavigation(); // สร้างตัวแปรเพื่อใช้ในการนำทาง
 
   useEffect(() => {
     fetchFonts().then(() => setFontLoaded(true));
@@ -35,11 +37,14 @@ const TransportScreen = () => {
         <Text style={styles.header1}>รถสาธารณะ</Text>
         <Text style={styles.header2}>ภายในมหาวิทยาลัย</Text>
       </View>
-      <TouchableOpacity style={styles.button}>
+      <TouchableOpacity
+        style={styles.button}
+        onPress={() => navigation.navigate("MotorcycleScreen")} // นำทางไปยัง MotorcycleScreen
+      >
         <LinearGradient
-          colors={["#f65d3c", "#f65d3c"]} // สีส้มและแดง
-          start={[0, 0]} // จุดเริ่มต้นของ gradient
-          end={[1, 1]} // จุดสิ้นสุดของ gradient
+          colors={["#f65d3c", "#f65d3c"]}
+          start={[0, 0]}
+          end={[1, 1]}
           style={styles.gradient}
         >
           <Text style={styles.buttonText}>รถมอเตอร์ไซค์</Text>
@@ -51,27 +56,14 @@ const TransportScreen = () => {
           />
         </LinearGradient>
       </TouchableOpacity>
-      <TouchableOpacity style={styles.button}>
+      <TouchableOpacity
+        style={styles.button}
+        onPress={() => navigation.navigate("VanScreen")} // นำทางไปยัง VanScreen
+      >
         <LinearGradient
-          colors={["#f65d3c", "#f65d3c"]} // สีส้มและแดง
-          start={[0, 0]} // จุดเริ่มต้นของ gradient
-          end={[1, 1]} // จุดสิ้นสุดของ gradient
-          style={styles.gradient}
-        >
-          <Text style={styles.buttonText}>รถเมล์</Text>
-          <Feather
-            name="arrow-up-right"
-            size={27}
-            color="#fffbf7"
-            style={styles.icon}
-          />
-        </LinearGradient>
-      </TouchableOpacity>
-      <TouchableOpacity style={styles.button}>
-        <LinearGradient
-          colors={["#f65d3c", "#f65d3c"]} // สีส้มและแดง
-          start={[0, 0]} // จุดเริ่มต้นของ gradient
-          end={[1, 1]} // จุดสิ้นสุดของ gradient
+          colors={["#f65d3c", "#f65d3c"]}
+          start={[0, 0]}
+          end={[1, 1]}
           style={styles.gradient}
         >
           <Text style={styles.buttonText}>รถตู้</Text>
@@ -96,22 +88,22 @@ const styles = StyleSheet.create({
     paddingTop: 90,
   },
   textContainer: {
-    alignItems: 'flex-start', // ชิดซ้ายทั้งหมด
+    alignItems: 'flex-start',
     marginLeft: 20,
-    width: '85%', // ทำให้ข้อความใช้พื้นที่ตามความกว้างที่ต้องการ
-    marginBottom: 15, // เพิ่มระยะห่างระหว่างข้อความกับปุ่ม
+    width: '85%',
+    marginBottom: 15,
   },
   header1: {
     fontSize: 25,
     fontFamily: 'Prompt-Bold',
     color: '#f65d3c',
-    marginBottom: 0, // ระยะห่างระหว่างข้อความและปุ่ม
+    marginBottom: 0,
   },
   header2: {
     fontSize: 23,
     fontFamily: 'Prompt-Medium',
     color: '#1e1e1e',
-    marginBottom: 5, // ระยะห่างระหว่างข้อความและปุ่ม
+    marginBottom: 5,
   },
   button: {
     marginVertical: 11,
@@ -128,7 +120,7 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: "center",
     alignItems: "flex-start",
-    borderRadius: 25, // มุมมนเหมือนปุ่ม
+    borderRadius: 25,
     paddingVertical: 15,
     paddingHorizontal: 35,
   },
