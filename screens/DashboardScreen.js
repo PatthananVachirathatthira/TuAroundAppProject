@@ -45,7 +45,7 @@ const DashboardScreen = () => {
           </View>
           <AntDesign
             name="right"
-            size={24}
+            size={22}
             color="#f65d3c"
             style={styles.icon}
           />
@@ -60,7 +60,7 @@ const DashboardScreen = () => {
           </View>
           <AntDesign
             name="right"
-            size={24}
+            size={22}
             color="#f65d3c"
             style={styles.icon}
           />
@@ -75,7 +75,7 @@ const DashboardScreen = () => {
           </View>
           <AntDesign
             name="right"
-            size={24}
+            size={22}
             color="#f65d3c"
             style={styles.icon}
           />
@@ -114,7 +114,7 @@ const styles = StyleSheet.create({
   },
   buttonContainer: {
     width: width * 0.9, // ใช้ขนาดหน้าจอเพื่อให้ปุ่มไม่เต็มขนาด
-    height: 90,
+    height: 75,
     marginVertical: 5,
     position: 'relative',
   },
@@ -138,26 +138,28 @@ const styles = StyleSheet.create({
   },
   buttonTitleText: {
     color: "#f65d3c",
-    fontSize: 20,
+    fontSize: 18,
     fontFamily: "Prompt-Medium",
     marginTop: -10,
     marginBottom: -2,
+    paddingLeft: 12,
   },
   buttonText: {
     color: "#d6b493",
-    fontSize: 17,
+    fontSize: 15,
     fontFamily: "Prompt-Regular",
+    paddingLeft: 12,
   },
   icon: {
     marginHorizontal: 10,
   },
   separator: {
-    height: 1,
-    backgroundColor: '#fca044',
-    width: '100%',
+    height: 1.5,
+    backgroundColor: '#ecc69f',
+    width: '95%',
     position: 'absolute',
     bottom: 0,
-    left: 0,
+    left: 10,
     zIndex: 1, // ทำให้แน่ใจว่าเส้นแบ่งจะอยู่เหนือปุ่ม
   },
 });
