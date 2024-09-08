@@ -10,13 +10,13 @@ import {
 } from "react-native";
 import Icon from "react-native-vector-icons/FontAwesome";
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
-import * as Font from 'expo-font'; // นำเข้า expo-font
+import * as Font from 'expo-font';
 
 const fetchFonts = () => {
   return Font.loadAsync({
     'Prompt-Regular': require('../assets/fonts/Prompt-Regular.ttf'),
     'Prompt-Bold': require('../assets/fonts/Prompt-Bold.ttf'),
-    'Prompt-Medium': require('../assets/fonts/Prompt-Medium.ttf'), // ปรับเส้นทางฟอนต์ตามตำแหน่งที่เก็บ
+    'Prompt-Medium': require('../assets/fonts/Prompt-Medium.ttf'),
   });
 };
 
@@ -29,8 +29,9 @@ const RouteSearchScreen = ({ navigation }) => {
 
   const [startLocation, setStartLocation] = useState("");
   const [endLocation, setEndLocation] = useState("");
-  const [inputField, setInputField] = useState(null); // To determine which input field to update
+  const [inputField, setInputField] = useState(null);
   const [fontLoaded, setFontLoaded] = useState(false);
+  const [errorMessage, setErrorMessage] = useState(""); // เพิ่ม state สำหรับแสดงข้อความผิดพลาด
 
   useEffect(() => {
     fetchFonts().then(() => setFontLoaded(true));
@@ -52,6 +53,19 @@ const RouteSearchScreen = ({ navigation }) => {
     </TouchableOpacity>
   );
 
+  const handleSearchRoute = () => {
+    if (!startLocation) {
+      setStartLocation("ตำแหน่งปัจจุบัน"); // ตั้งค่าเริ่มต้นถ้าผู้ใช้ไม่กรอกค่า
+    }
+    
+    if (!endLocation) {
+      setErrorMessage("กรุณาเลือกสถานีปลายทาง"); // แสดงข้อความผิดพลาดถ้าไม่กรอกปลายทาง
+    } else {
+      setErrorMessage(""); // ล้างข้อความผิดพลาด
+      navigation.navigate("RouteScreen");
+    }
+  };
+
   if (!fontLoaded) {
     return <ActivityIndicator size="large" color="#0000ff" />;
   }
@@ -70,7 +84,7 @@ const RouteSearchScreen = ({ navigation }) => {
             style={styles.input}
             placeholder="ตำแหน่งปัจจุบัน"
             placeholderTextColor="#D3D3D3"
-            value={startLocation}
+            value={startLocation} // ถ้าไม่ได้กรอกให้ใช้ค่าเริ่มต้น
             onChangeText={(text) => setStartLocation(text)}
             onFocus={() => setInputField("start")}
           />
@@ -95,6 +109,13 @@ const RouteSearchScreen = ({ navigation }) => {
         </View>
       </View>
 
+      {/* แสดงข้อความผิดพลาด */}
+      {errorMessage ? (
+        <View style={styles.errorContainer}>
+          <Text style={styles.errorText}>{errorMessage}</Text>
+        </View>
+      ) : null}
+
       {/* Recommended Places List */}
       <Text style={styles.title}>สถานที่แนะนำ</Text>
       <View style={styles.separator} />
@@ -103,10 +124,11 @@ const RouteSearchScreen = ({ navigation }) => {
         renderItem={renderPlace}
         keyExtractor={(item) => item.id}
       />
+      
       {/* Button to Show Route Information */}
       <TouchableOpacity
         style={styles.button}
-        onPress={() => navigation.navigate("RouteScreen")}
+        onPress={handleSearchRoute}
       >
         <Text style={styles.buttonText}>ค้นหาเส้นทาง</Text>
       </TouchableOpacity>
@@ -147,17 +169,17 @@ const styles = StyleSheet.create({
     height: 40,
     fontSize: 14,
     color: "#f65d3c",
-    fontFamily: 'Prompt-Regular', // ใช้ฟอนต์ที่โหลด
+    fontFamily: 'Prompt-Regular',
   },
   label: {
     fontSize: 14,
     color: "#f65d3c",
-    fontFamily: 'Prompt-Medium', // ใช้ฟอนต์ที่โหลด
+    fontFamily: 'Prompt-Medium',
   },
   title: {
     fontSize: 16,
     color: "#f65d3c",
-    fontFamily: 'Prompt-Medium', // ใช้ฟอนต์ที่โหลด
+    fontFamily: 'Prompt-Medium',
   },
   separator: {
     height: 1,
@@ -173,7 +195,7 @@ const styles = StyleSheet.create({
     marginLeft: 10,
     fontSize: 16,
     color: "#f65d3cf",
-    fontFamily: 'Prompt-Regular', // ใช้ฟอนต์ที่โหลด
+    fontFamily: 'Prompt-Regular',
   },
   button: {
     backgroundColor: "#f65d3c",
@@ -186,7 +208,18 @@ const styles = StyleSheet.create({
   buttonText: {
     color: "#000",
     fontSize: 18,
-    fontFamily: 'Prompt-Regular', // ใช้ฟอนต์ที่โหลด
+    fontFamily: 'Prompt-Regular',
+  },
+  errorContainer: {
+    backgroundColor: "#ffcccb", // สีพื้นหลังกล่องข้อความผิดพลาด
+    borderRadius: 10, // ทำให้เป็นสี่เหลี่ยมมน
+    padding: 10,
+    marginVertical: 10,
+  },
+  errorText: {
+    color: "#b22222", // สีข้อความ
+    fontFamily: 'Prompt-Bold', // เปลี่ยนเป็นฟอนต์หนา
+    textDecorationLine: 'underline', // เพิ่มการขีดเส้นใต้
   },
 });
 
