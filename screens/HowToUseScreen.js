@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, TouchableOpacity, StyleSheet, Image, ActivityIndicator } from 'react-native';
-import * as Font from 'expo-font'; // นำเข้า expo-font
-import { AntDesign } from '@expo/vector-icons'; // นำเข้าไอคอนจาก AntDesign
+import { View, Text, TouchableOpacity, StyleSheet, Image, ActivityIndicator} from 'react-native';
+import * as Font from 'expo-font';
+import { AntDesign } from '@expo/vector-icons';
+import { useNavigation } from '@react-navigation/native'; // สำหรับการนำทาง
 
 const images = [
   { 
@@ -32,6 +33,13 @@ const images = [
       normal: 'Aliqua id nostrud est labore sit velit tempor elit commodo officia tempor exercitation.' 
     } 
   },
+  {
+    src: require('../assets/images/gradient-grainy-gradient-background_23-2149922238.jpg'),
+    description: {
+      bold: 'Description 5',
+      normal: 'This is the final description page. Tap to start.'
+    }
+  }
 ];
 
 const fetchFonts = () => {
@@ -39,13 +47,13 @@ const fetchFonts = () => {
     'Prompt-Regular': require('../assets/fonts/Prompt-Regular.ttf'),
     'Prompt-Bold': require('../assets/fonts/Prompt-Bold.ttf'),
     'Prompt-Medium': require('../assets/fonts/Prompt-Medium.ttf'),
-
   });
 };
 
 const HowToUseScreen = () => {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [fontLoaded, setFontLoaded] = useState(false);
+  const navigation = useNavigation(); // สำหรับการนำทาง
 
   useEffect(() => {
     fetchFonts().then(() => setFontLoaded(true));
@@ -55,25 +63,21 @@ const HowToUseScreen = () => {
     return <ActivityIndicator size="large" color="#0000ff" />;
   }
 
-  // ฟังก์ชันเลื่อนไปทางขวา
   const handleNext = () => {
     if (currentIndex < images.length - 1) {
       setCurrentIndex(currentIndex + 1);
     }
   };
 
-  // ฟังก์ชันเลื่อนไปทางซ้าย
   const handlePrevious = () => {
     if (currentIndex > 0) {
       setCurrentIndex(currentIndex - 1);
     }
   };
 
-  // เลือกไอคอนสำหรับปุ่มซ้าย
-  const leftIcon = currentIndex === images.length - 1 ? 'leftcircle' : 'leftcircleo';
-
-  // เลือกไอคอนสำหรับปุ่มขวา
-  const rightIcon = currentIndex === images.length - 1 ? 'rightcircleo' : 'rightcircle';
+  const handleStart = () => {
+    navigation.navigate('Home'); // กลับไปยังหน้า HomeScreen
+  };
 
   return (
     <View style={styles.container}>
@@ -85,28 +89,36 @@ const HowToUseScreen = () => {
       </View>
 
       <View style={styles.buttonContainer}>
-        {currentIndex > 0 && (
+        {currentIndex > 0 && currentIndex < images.length - 1 && (
           <TouchableOpacity onPress={handlePrevious} style={[styles.button, styles.leftbutton]}>
-            <AntDesign name={leftIcon} size={40} color="#1e1e1e" />
+            <AntDesign name="leftcircleo" size={40} color="#1e1e1e" />
           </TouchableOpacity>
         )}
 
-        {/* เพิ่มไอคอนวงกลมตรงกลาง */}
-        <View style={styles.circleContainer}>
-          {images.map((_, index) => (
-            <View
-              key={index}
-              style={[
-                styles.circle,
-                { backgroundColor: currentIndex === index ? '#1e1e1e' : '#cccccc' },
-              ]}
-            />
-          ))}
-        </View>
-
         {currentIndex < images.length - 1 && (
           <TouchableOpacity onPress={handleNext} style={[styles.button, styles.rightbutton]}>
-            <AntDesign name={rightIcon} size={40} color="#1e1e1e" />
+            <AntDesign name="rightcircle" size={40} color="#1e1e1e" />
+          </TouchableOpacity>
+        )}
+
+        {currentIndex < images.length - 1 && (
+          <View style={styles.circleContainer}>
+            {images.map((_, index) => (
+              <View
+                key={index}
+                style={[
+                  styles.circle,
+                  { backgroundColor: currentIndex === index ? '#1e1e1e' : '#cccccc' },
+                ]}
+              />
+            ))}
+          </View>
+        )}
+
+        {/* หน้า Description 5: เพิ่มปุ่ม "เริ่มต้น" */}
+        {currentIndex === images.length - 1 && (
+          <TouchableOpacity onPress={handleStart} style={styles.startButton}>
+            <Text style={styles.startButtonText}>เริ่มต้นใช้งาน</Text>
           </TouchableOpacity>
         )}
       </View>
@@ -139,7 +151,7 @@ const styles = StyleSheet.create({
     fontSize: 24,
     textAlign: 'center',
     color: '#f65d3c',
-    fontFamily: 'Prompt-Medium', // ใช้ฟอนต์ที่โหลด
+    fontFamily: 'Prompt-Medium',
   },
   normalText: {
     fontSize: 16,
@@ -147,7 +159,7 @@ const styles = StyleSheet.create({
     marginTop: 10,
     textAlign: 'center',
     lineHeight: 20,
-    fontFamily: 'Prompt-Regular', // ใช้ฟอนต์ที่โหลด
+    fontFamily: 'Prompt-Regular',
   },
   buttonContainer: {
     flexDirection: 'row',
@@ -155,7 +167,7 @@ const styles = StyleSheet.create({
     bottom: 80,
     left: 0,
     right: 0,
-    justifyContent: 'space-between',
+    justifyContent: 'center',
     paddingHorizontal: 20,
   },
   button: {
@@ -176,7 +188,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     position: 'absolute',
-    bottom: -15,  // ปรับตำแหน่งให้เลื่อนลงจากปุ่มและไม่รบกวนองค์ประกอบอื่นๆ
+    bottom: -15,
     left: 0,
     right: 0,
   },
@@ -185,6 +197,20 @@ const styles = StyleSheet.create({
     height: 9,
     borderRadius: 5,
     marginHorizontal: 5,
+  },
+  startButton: {
+    backgroundColor: '#000000',
+    paddingVertical: 15,
+    paddingHorizontal: 30,
+    borderRadius: 30,
+    marginBottom: -20,
+  },
+  startButtonText: {
+    color: '#ffffff',
+    fontSize: 16,
+    fontFamily: 'Prompt-Medium',
+    marginHorizontal: 5,
+    
   },
 });
 
