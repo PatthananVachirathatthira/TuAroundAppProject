@@ -1,7 +1,9 @@
+//HomeScreen.js
 import React, { useState, useEffect } from 'react';
-import { View, TextInput, TouchableOpacity, StyleSheet, ActivityIndicator } from 'react-native';
+import { View, TextInput, Pressable, StyleSheet, ActivityIndicator } from 'react-native';
 import { AntDesign, Ionicons, MaterialIcons, FontAwesome5 } from '@expo/vector-icons';
 import * as Font from 'expo-font'; // นำเข้า expo-font
+import MyMapComponent from '../components/MyMapComponent'; // นำเข้า MyMapComponent
 
 const fetchFonts = () => {
   return Font.loadAsync({
@@ -35,10 +37,10 @@ const HomeScreen = ({ navigation }) => {
   return (
     <View style={styles.container}>
       <View style={styles.searchSection}>
-        <TouchableOpacity
+        <Pressable
           style={styles.searchBarContainer}
           onPress={() => navigation.navigate('RouteSearchScreen')}
-          activeOpacity={1}
+          android_ripple={{ color: '#ddd' }} // Effect on Android
         >
           <TextInput
             style={styles.searchBar}
@@ -53,26 +55,29 @@ const HomeScreen = ({ navigation }) => {
             style={styles.searchIcon}
             onPress={() => navigation.navigate('RouteSearchScreen')}
           />
-        </TouchableOpacity>
+        </Pressable>
 
-        <TouchableOpacity style={styles.dropdownButton} onPress={toggleDropdown}>
+        <Pressable style={styles.dropdownButton} onPress={toggleDropdown}>
           <AntDesign name={dropdownVisible ? 'up' : 'down'} size={24} color="#1e1e1e" />
-        </TouchableOpacity>
+        </Pressable>
       </View>
 
       {dropdownVisible && (
         <View style={styles.dropdown}>
-          <TouchableOpacity style={styles.dropdownItem} onPress={() => selectOption('Option 1')}>
+          <Pressable style={styles.dropdownItem} onPress={() => selectOption('Option 1')}>
             <Ionicons name="bus-outline" size={24} color="#1e1e1e" />
-          </TouchableOpacity>
-          <TouchableOpacity style={styles.dropdownItem} onPress={() => selectOption('Option 2')}>
-           <MaterialIcons name="gps-fixed" size={24} color="#1e1e1e" />
-          </TouchableOpacity>
-          <TouchableOpacity style={styles.dropdownItem} onPress={() => selectOption('Option 3')}>
+          </Pressable>
+          <Pressable style={styles.dropdownItem} onPress={() => selectOption('Option 2')}>
+            <MaterialIcons name="gps-fixed" size={24} color="#1e1e1e" />
+          </Pressable>
+          <Pressable style={styles.dropdownItem} onPress={() => selectOption('Option 3')}>
             <FontAwesome5 name="traffic-light" size={24} color="#1e1e1e" />
-          </TouchableOpacity>
+          </Pressable>
         </View>
       )}
+
+      {/* เพิ่มคอมโพเนนต์แผนที่ลงไปที่นี่ */}
+      <MyMapComponent />
     </View>
   );
 };
@@ -104,6 +109,8 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.10,
     shadowRadius: 1,
     elevation: 1.5,
+    // เพิ่ม boxShadow สำหรับ Web
+    boxShadow: '0px 2px 1px rgba(0, 0, 0, 0.1)',
   },
   searchBar: {
     flex: 1,
@@ -130,6 +137,8 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.10,
     shadowRadius: 1,
     elevation: 1.5,
+    // เพิ่ม boxShadow สำหรับ Web
+    boxShadow: '0px 2px 1px rgba(0, 0, 0, 0.1)',
   },
   dropdown: {
     position: 'absolute',
@@ -145,6 +154,8 @@ const styles = StyleSheet.create({
     elevation: 1.5,
     zIndex: 1,
     marginTop: 70,
+    // เพิ่ม boxShadow สำหรับ Web
+    boxShadow: '0px 2px 1px rgba(0, 0, 0, 0.1)',
   },
   dropdownItem: {
     width: 52,  // Match width of dropdownButton

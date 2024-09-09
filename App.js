@@ -1,4 +1,4 @@
-// HowToUseScreen.js
+//App.js
 import React, { useState, useEffect } from "react";
 import { StyleSheet, ActivityIndicator, View, Text } from "react-native";
 import { NavigationContainer } from "@react-navigation/native";
