@@ -6,10 +6,7 @@ import {
   StyleSheet,
   ActivityIndicator,
   TextInput,
-  Button,
   Image,
-  Alert,
-  Modal,
   Pressable,
 } from "react-native";
 import * as Font from "expo-font";
@@ -17,6 +14,7 @@ import { Feather, Ionicons } from "@expo/vector-icons";
 import { useNavigation } from "@react-navigation/native";
 import DateTimePicker from "@react-native-community/datetimepicker";
 import * as ImagePicker from "expo-image-picker";
+import Modal from "react-native-modal";
 
 const fetchFonts = () => {
   return Font.loadAsync({
@@ -28,12 +26,13 @@ const fetchFonts = () => {
 
 const ReportScreen = () => {
   const [fontLoaded, setFontLoaded] = useState(false);
-  const [problem, setProblem] = useState(""); 
-  const [description, setDescription] = useState(""); 
+  const [problem, setProblem] = useState("");
+  const [description, setDescription] = useState("");
   const [date, setDate] = useState(new Date());
   const [showDatePicker, setShowDatePicker] = useState(false);
   const [image, setImage] = useState(null);
-  const navigation = useNavigation(); 
+  const [isModalVisible, setModalVisible] = useState(false);
+  const navigation = useNavigation();
 
   useEffect(() => {
     fetchFonts().then(() => setFontLoaded(true));
@@ -59,14 +58,17 @@ const ReportScreen = () => {
   };
 
   const handleSubmit = () => {
-    // ตรวจสอบว่ากรอกข้อมูลครบถ้วนหรือไม่
+    console.log('Problem:', problem);
+    console.log('Description:', description);
+    console.log('Date:', date);
+  
     if (!problem || !description || !date) {
-      Alert.alert("กรุณาตรวจสอบข้อมูลที่ต้องกรอกให้ครบถ้วน");
+      console.log('Showing modal');
+      setModalVisible(true);
       return;
     }
-
-    // ถ้าข้อมูลครบแล้ว ให้ดำเนินการส่งข้อมูล
-    Alert.alert("ส่งข้อมูลเรียบร้อยแล้ว");
+    // หากข้อมูลครบแล้ว
+    // ดำเนินการส่งข้อมูล
   };
 
   if (!fontLoaded) {
@@ -153,7 +155,23 @@ const ReportScreen = () => {
         </TouchableOpacity>
       </View>
 
-      
+      <Modal
+        isVisible={isModalVisible}
+        onBackdropPress={() => setModalVisible(false)}
+        style={styles.modal}
+      >
+        <View style={styles.modalContent}>
+          <Text style={styles.modalText}>
+            กรุณาตรวจสอบข้อมูลที่ต้องกรอกให้ครบถ้วน
+          </Text>
+          <TouchableOpacity
+            style={styles.modalButton}
+            onPress={() => setModalVisible(false)}
+          >
+            <Text style={styles.modalButtonText}>ตกลง</Text>
+          </TouchableOpacity>
+        </View>
+      </Modal>
     </View>
   );
 };
@@ -231,14 +249,14 @@ const styles = StyleSheet.create({
   },
   imageButton: {
     width: "85%",
-    height: 125, // เพิ่มความสูง
+    height: 125,
     borderColor: "#ccc",
     borderWidth: 1,
     borderRadius: 15,
     marginBottom: 15,
     justifyContent: "center",
-    alignItems: "center", // ทำให้ไอคอนอยู่ตรงกลาง
-    position: "relative", // สำหรับการจัดตำแหน่งข้อความ
+    alignItems: "center",
+    position: "relative",
   },
   cameraIcon: {
     marginTop: -20,
@@ -247,7 +265,7 @@ const styles = StyleSheet.create({
     fontFamily: "Prompt-Regular",
     color: "#575757",
     position: "absolute",
-    bottom: 25, // วางไว้ด้านล่างสุด
+    bottom: 25,
   },
   buttonContainer: {
     flexDirection: "row",
@@ -278,6 +296,37 @@ const styles = StyleSheet.create({
     fontFamily: "Prompt-Medium",
     color: "white",
     fontSize: 18,
+  },
+  modal: {
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  modalContent: {
+    backgroundColor: "white",
+    padding: 20,
+    borderRadius: 30, // มุมมนของ modal
+    alignItems: "center", // จัดให้ข้อความและปุ่มอยู่กลาง
+    },
+  modalText: {
+    fontFamily: "Prompt-Medium", // ใช้ฟอนต์ Prompt-Medium
+    fontSize: 16,
+    color: "#1e1e1e", // สีข้อความ
+    padding: 20,
+    marginBottom: 5, // ระยะห่างจากปุ่ม
+    textAlign: "center", // จัดข้อความให้อยู่กลาง
+  },
+  modalButton: {
+    backgroundColor: "#f65d3c", // สีพื้นหลังปุ่ม
+    padding: 10,
+    paddingHorizontal: 20,
+    borderRadius: 30, // มุมมนของปุ่ม
+    width: "100%", // ปรับความกว้างของปุ่ม
+    alignItems: "center", // จัดปุ่มให้อยู่กลาง
+  },
+  modalButtonText: {
+    fontFamily: "Prompt-Medium", // ใช้ฟอนต์ Prompt-Medium
+    color: "white",
+    fontSize: 15,
   },
 });
 
