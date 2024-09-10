@@ -168,7 +168,7 @@ const styles = StyleSheet.create({
   input: {
     height: 40,
     fontSize: 14,
-    color: "#f65d3c",
+    color: "#575757",
     fontFamily: 'Prompt-Regular',
   },
   label: {
