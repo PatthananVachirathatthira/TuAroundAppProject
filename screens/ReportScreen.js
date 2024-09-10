@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import {
   View,
   Text,
@@ -8,6 +8,8 @@ import {
   TextInput,
   Image,
   Pressable,
+  Animated,
+  Easing,
 } from "react-native";
 import * as Font from "expo-font";
 import { Feather, Ionicons } from "@expo/vector-icons";
@@ -32,11 +34,24 @@ const ReportScreen = () => {
   const [showDatePicker, setShowDatePicker] = useState(false);
   const [image, setImage] = useState(null);
   const [isModalVisible, setModalVisible] = useState(false);
+  const [showSuccess, setShowSuccess] = useState(false);
+  const animatedValue = useRef(new Animated.Value(0)).current;
   const navigation = useNavigation();
 
   useEffect(() => {
     fetchFonts().then(() => setFontLoaded(true));
   }, []);
+
+  useEffect(() => {
+    if (showSuccess) {
+      Animated.timing(animatedValue, {
+        toValue: 1,
+        duration: 300,
+        easing: Easing.ease,
+        useNativeDriver: true,
+      }).start();
+    }
+  }, [showSuccess]);
 
   const onDateChange = (event, selectedDate) => {
     const currentDate = selectedDate || date;
@@ -58,22 +73,36 @@ const ReportScreen = () => {
   };
 
   const handleSubmit = () => {
-    console.log('Problem:', problem);
-    console.log('Description:', description);
-    console.log('Date:', date);
-  
     if (!problem || !description || !date) {
-      console.log('Showing modal');
       setModalVisible(true);
       return;
     }
-    // หากข้อมูลครบแล้ว
-    // ดำเนินการส่งข้อมูล
+    // Show success message and reset form
+    setShowSuccess(true);
+    setTimeout(() => {
+      setShowSuccess(false);
+    }, 3000); // Hide message after 3 seconds
+    setProblem("");
+    setDescription("");
+    setDate(new Date());
+    setImage(null);
   };
 
   if (!fontLoaded) {
     return <ActivityIndicator size="large" color="#0000ff" />;
   }
+
+  const animatedStyle = {
+    opacity: animatedValue,
+    transform: [
+      {
+        translateY: animatedValue.interpolate({
+          inputRange: [0, 1],
+          outputRange: [100, 0], // Move from below the screen to its final position
+        }),
+      },
+    ],
+  };
 
   return (
     <View style={styles.container}>
@@ -147,10 +176,7 @@ const ReportScreen = () => {
         >
           <Text style={styles.cancelButtonText}>ยกเลิก</Text>
         </TouchableOpacity>
-        <TouchableOpacity
-          style={styles.submitButton}
-          onPress={handleSubmit}
-        >
+        <TouchableOpacity style={styles.submitButton} onPress={handleSubmit}>
           <Text style={styles.submitButtonText}>ส่ง</Text>
         </TouchableOpacity>
       </View>
@@ -172,6 +198,14 @@ const ReportScreen = () => {
           </TouchableOpacity>
         </View>
       </Modal>
+
+      {showSuccess && (
+        <View style={styles.successMessageContainer}>
+          <Animated.View style={[styles.successMessage, animatedStyle]}>
+            <Text style={styles.successText}>ส่งข้อมูลสำเร็จ !</Text>
+          </Animated.View>
+        </View>
+      )}
     </View>
   );
 };
@@ -232,7 +266,7 @@ const styles = StyleSheet.create({
     padding: 10,
     marginBottom: 15,
     fontFamily: "Prompt-Regular",
-    color: '#575757',
+    color: "#575757",
   },
   datePickerButton: {
     width: "85%",
@@ -304,9 +338,9 @@ const styles = StyleSheet.create({
   modalContent: {
     backgroundColor: "white",
     padding: 20,
-    borderRadius: 30, // มุมมนของ modal
+    borderRadius: 50, // มุมมนของ modal
     alignItems: "center", // จัดให้ข้อความและปุ่มอยู่กลาง
-    },
+  },
   modalText: {
     fontFamily: "Prompt-Medium", // ใช้ฟอนต์ Prompt-Medium
     fontSize: 16,
@@ -327,6 +361,35 @@ const styles = StyleSheet.create({
     fontFamily: "Prompt-Medium", // ใช้ฟอนต์ Prompt-Medium
     color: "white",
     fontSize: 15,
+  },
+  successMessageContainer: {
+    position: "absolute",
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  successMessage: {
+    backgroundColor: "#1e1e1e", // สีพื้นหลังของกล่องข้อความสำเร็จ
+    width: '50%', // กำหนดความกว้างของกล่อง
+    maxWidth: 300, // กำหนดความกว้างสูงสุดของกล่อง
+    borderRadius: 30, // มุมมนของกล่อง
+    padding: 20,
+    alignItems: "center",
+    justifyContent: "center",
+    elevation: 5, // เงาของกล่อง (Android)
+    shadowColor: "#000", // เงาของกล่อง (iOS)
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.3,
+    shadowRadius: 4,
+  },
+  successText: {
+    fontFamily: "Prompt-Medium",
+    fontSize: 18,
+    color: "#f65d3c", // สีข้อความของกล่องสำเร็จ
+    textAlign: "center",
   },
 });
 
