@@ -247,7 +247,6 @@ const styles = StyleSheet.create({
     fontSize: 23,
     fontFamily: "Prompt-Medium",
     color: "#1e1e1e",
-    marginBottom: 5,
   },
   label: {
     width: "85%",
@@ -308,7 +307,7 @@ const styles = StyleSheet.create({
     marginTop: 12,
   },
   cancelButton: {
-    backgroundColor: "#ccc",
+    backgroundColor: "rgba(203, 203, 203, 0.59)",
     padding: 15,
     borderRadius: 30,
     width: "47%",
