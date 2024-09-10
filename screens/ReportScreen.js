@@ -5,11 +5,18 @@ import {
   TouchableOpacity,
   StyleSheet,
   ActivityIndicator,
+  TextInput,
+  Button,
+  Image,
+  Alert,
+  Modal,
+  Pressable,
 } from "react-native";
 import * as Font from "expo-font";
-import { Feather } from "@expo/vector-icons";
-import { LinearGradient } from "expo-linear-gradient"; // นำเข้า LinearGradient
-import { useNavigation } from "@react-navigation/native"; // นำเข้า useNavigation
+import { Feather, Ionicons } from "@expo/vector-icons";
+import { useNavigation } from "@react-navigation/native";
+import DateTimePicker from "@react-native-community/datetimepicker";
+import * as ImagePicker from "expo-image-picker";
 
 const fetchFonts = () => {
   return Font.loadAsync({
@@ -21,11 +28,46 @@ const fetchFonts = () => {
 
 const ReportScreen = () => {
   const [fontLoaded, setFontLoaded] = useState(false);
-  const navigation = useNavigation(); // สร้าง navigation
+  const [problem, setProblem] = useState(""); 
+  const [description, setDescription] = useState(""); 
+  const [date, setDate] = useState(new Date());
+  const [showDatePicker, setShowDatePicker] = useState(false);
+  const [image, setImage] = useState(null);
+  const navigation = useNavigation(); 
 
   useEffect(() => {
     fetchFonts().then(() => setFontLoaded(true));
   }, []);
+
+  const onDateChange = (event, selectedDate) => {
+    const currentDate = selectedDate || date;
+    setShowDatePicker(false);
+    setDate(currentDate);
+  };
+
+  const pickImage = async () => {
+    let result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      allowsEditing: true,
+      aspect: [4, 3],
+      quality: 1,
+    });
+
+    if (!result.canceled) {
+      setImage(result.uri);
+    }
+  };
+
+  const handleSubmit = () => {
+    // ตรวจสอบว่ากรอกข้อมูลครบถ้วนหรือไม่
+    if (!problem || !description || !date) {
+      Alert.alert("กรุณาตรวจสอบข้อมูลที่ต้องกรอกให้ครบถ้วน");
+      return;
+    }
+
+    // ถ้าข้อมูลครบแล้ว ให้ดำเนินการส่งข้อมูล
+    Alert.alert("ส่งข้อมูลเรียบร้อยแล้ว");
+  };
 
   if (!fontLoaded) {
     return <ActivityIndicator size="large" color="#0000ff" />;
@@ -33,66 +75,85 @@ const ReportScreen = () => {
 
   return (
     <View style={styles.container}>
-      <TouchableOpacity 
-        style={styles.backButton} 
-        onPress={() => navigation.goBack()} // เมื่อกดปุ่มนี้จะกลับไปหน้าก่อนหน้านี้
+      <TouchableOpacity
+        style={styles.backButton}
+        onPress={() => navigation.goBack()}
       >
         <Feather name="arrow-left" size={27} color="#f65d3c" />
         <Text style={styles.backText}>กลับ</Text>
       </TouchableOpacity>
 
       <View style={styles.textContainer}>
-        <Text style={styles.header1}>รถสาธารณะ</Text>
-        <Text style={styles.header2}>ภายในมหาวิทยาลัย</Text>
+        <Text style={styles.header1}>รายงานปัญหา</Text>
+        <Text style={styles.header2}>ขนส่งภายในมหาวิทยาลัย</Text>
       </View>
-      <TouchableOpacity style={styles.button}>
-        <LinearGradient
-          colors={["#f65d3c", "#f65d3c"]}
-          start={[0, 0]}
-          end={[1, 1]}
-          style={styles.gradient}
-        >
-          <Text style={styles.buttonText}>รถมอเตอร์ไซค์</Text>
-          <Feather
-            name="arrow-up-right"
-            size={27}
-            color="#fffbf7"
-            style={styles.icon}
-          />
-        </LinearGradient>
+
+      <Text style={styles.label}>ปัญหา*</Text>
+      <TextInput
+        style={styles.input}
+        value={problem}
+        onChangeText={setProblem}
+      />
+
+      <Text style={styles.label}>วันที่รายงานปัญหา*</Text>
+      <TouchableOpacity
+        style={styles.datePickerButton}
+        onPress={() => setShowDatePicker(true)}
+      >
+        <Text style={styles.datePickerText}>
+          {date ? date.toLocaleDateString() : "XX/XX/XXXX"}
+        </Text>
       </TouchableOpacity>
-      <TouchableOpacity style={styles.button}>
-        <LinearGradient
-          colors={["#f65d3c", "#f65d3c"]}
-          start={[0, 0]}
-          end={[1, 1]}
-          style={styles.gradient}
-        >
-          <Text style={styles.buttonText}>รถเมล์</Text>
-          <Feather
-            name="arrow-up-right"
-            size={27}
-            color="#fffbf7"
-            style={styles.icon}
-          />
-        </LinearGradient>
+      {showDatePicker && (
+        <DateTimePicker
+          value={date}
+          mode="date"
+          display="default"
+          onChange={onDateChange}
+        />
+      )}
+
+      <Text style={styles.label}>คำอธิบาย*</Text>
+      <TextInput
+        style={[styles.input, { height: 80 }]}
+        value={description}
+        onChangeText={setDescription}
+        multiline
+      />
+
+      <Text style={styles.label}>แนบรูปภาพ (optional)</Text>
+      <TouchableOpacity style={styles.imageButton} onPress={pickImage}>
+        <Ionicons
+          name="camera-outline"
+          size={50}
+          color="#575757"
+          style={styles.cameraIcon}
+        />
+        <Text style={styles.imageButtonText}>เลือกภาพ</Text>
       </TouchableOpacity>
-      <TouchableOpacity style={styles.button}>
-        <LinearGradient
-          colors={["#f65d3c", "#f65d3c"]}
-          start={[0, 0]}
-          end={[1, 1]}
-          style={styles.gradient}
+      {image && <Image source={{ uri: image }} style={styles.image} />}
+
+      <View style={styles.buttonContainer}>
+        <TouchableOpacity
+          style={styles.cancelButton}
+          onPress={() => {
+            setProblem("");
+            setDescription("");
+            setDate(new Date());
+            setImage(null);
+          }}
         >
-          <Text style={styles.buttonText}>รถตู้</Text>
-          <Feather
-            name="arrow-up-right"
-            size={27}
-            color="#fffbf7"
-            style={styles.icon}
-          />
-        </LinearGradient>
-      </TouchableOpacity>
+          <Text style={styles.cancelButtonText}>ยกเลิก</Text>
+        </TouchableOpacity>
+        <TouchableOpacity
+          style={styles.submitButton}
+          onPress={handleSubmit}
+        >
+          <Text style={styles.submitButtonText}>ส่ง</Text>
+        </TouchableOpacity>
+      </View>
+
+      
     </View>
   );
 };
@@ -119,52 +180,104 @@ const styles = StyleSheet.create({
     fontFamily: "Prompt-Regular",
   },
   textContainer: {
-    alignItems: 'flex-start',
+    alignItems: "flex-start",
     marginLeft: 20,
-    width: '85%',
+    width: "85%",
     marginBottom: 15,
   },
   header1: {
     fontSize: 25,
-    fontFamily: 'Prompt-Bold',
-    color: '#f65d3c',
+    fontFamily: "Prompt-Bold",
+    color: "#f65d3c",
     marginBottom: 0,
   },
   header2: {
     fontSize: 23,
-    fontFamily: 'Prompt-Medium',
-    color: '#1e1e1e',
+    fontFamily: "Prompt-Medium",
+    color: "#1e1e1e",
     marginBottom: 5,
   },
-  button: {
-    marginVertical: 11,
-    width: "88%",
-    height: 90,
-    borderRadius: 25,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 1,
-    elevation: 2,
-  },
-  gradient: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "flex-start",
-    borderRadius: 25,
-    paddingVertical: 15,
-    paddingHorizontal: 35,
-  },
-  buttonText: {
-    color: "#fffbf7",
-    fontSize: 25,
+  label: {
+    width: "85%",
     fontFamily: "Prompt-Regular",
+    fontSize: 16,
     marginBottom: 5,
+    marginLeft: 20,
+    color: "#575757",
   },
-  icon: {
+  input: {
+    width: "85%",
+    height: 50,
+    borderColor: "#ccc",
+    borderWidth: 1,
+    borderRadius: 15,
+    padding: 10,
+    marginBottom: 15,
+    fontFamily: "Prompt-Regular",
+    color: '#575757',
+  },
+  datePickerButton: {
+    width: "85%",
+    padding: 15,
+    borderColor: "#ccc",
+    borderWidth: 1,
+    borderRadius: 15,
+    marginBottom: 15,
+    justifyContent: "center",
+  },
+  datePickerText: {
+    fontFamily: "Prompt-Regular",
+    color: "#575757",
+  },
+  imageButton: {
+    width: "85%",
+    height: 125, // เพิ่มความสูง
+    borderColor: "#ccc",
+    borderWidth: 1,
+    borderRadius: 15,
+    marginBottom: 15,
+    justifyContent: "center",
+    alignItems: "center", // ทำให้ไอคอนอยู่ตรงกลาง
+    position: "relative", // สำหรับการจัดตำแหน่งข้อความ
+  },
+  cameraIcon: {
+    marginTop: -20,
+  },
+  imageButtonText: {
+    fontFamily: "Prompt-Regular",
+    color: "#575757",
     position: "absolute",
-    top: 15,
-    right: 15,
+    bottom: 25, // วางไว้ด้านล่างสุด
+  },
+  buttonContainer: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    width: "85%",
+    marginTop: 12,
+  },
+  cancelButton: {
+    backgroundColor: "#ccc",
+    padding: 15,
+    borderRadius: 30,
+    width: "47%",
+    alignItems: "center",
+  },
+  cancelButtonText: {
+    fontFamily: "Prompt-Medium",
+    color: "white",
+    fontSize: 18,
+  },
+  submitButton: {
+    backgroundColor: "#f65d3c",
+    padding: 15,
+    borderRadius: 30,
+    width: "47%",
+    alignItems: "center",
+  },
+  submitButtonText: {
+    fontFamily: "Prompt-Medium",
+    color: "white",
+    fontSize: 18,
   },
 });
 
