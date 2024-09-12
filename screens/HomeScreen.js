@@ -1,32 +1,233 @@
+// import React, { useState, useEffect } from 'react';
+// import { View, TextInput, Pressable, StyleSheet, ActivityIndicator } from 'react-native';
+// import { AntDesign, Ionicons, MaterialIcons, FontAwesome5 } from '@expo/vector-icons';
+// import * as Font from 'expo-font'; // นำเข้า expo-font
+// import MyMapComponent from '../components/MyMapComponent'; // นำเข้า MyMapComponent
+
+// const fetchFonts = () => {
+//   return Font.loadAsync({
+//     'Prompt-Regular': require('../assets/fonts/Prompt-Regular.ttf'),
+//     'Prompt-Bold': require('../assets/fonts/Prompt-Bold.ttf'),
+//     'Prompt-Medium': require('../assets/fonts/Prompt-Medium.ttf'), // ปรับเส้นทางฟอนต์ตามตำแหน่งที่เก็บ
+//   });
+// };
+
+// const HomeScreen = ({ navigation }) => {
+//   const [dropdownVisible, setDropdownVisible] = useState(false);
+//   const [fontLoaded, setFontLoaded] = useState(false);
+
+//   useEffect(() => {
+//     fetchFonts().then(() => setFontLoaded(true));
+//   }, []);
+
+//   const toggleDropdown = () => {
+//     setDropdownVisible(!dropdownVisible);
+//   };
+
+//   const selectOption = (option) => {
+//     setDropdownVisible(false);
+//     console.log('Selected:', option);
+//   };
+
+//   if (!fontLoaded) {
+//     return <ActivityIndicator size="large" color="#0000ff" />;
+//   }
+
+//   return (
+//     <View style={styles.container}>
+//       <View style={styles.searchSection}>
+//         <Pressable
+//           style={styles.searchBarContainer}
+//           onPress={() => navigation.navigate('RouteSearchScreen')}
+//           android_ripple={{ color: '#ddd' }} // Effect on Android
+//         >
+//           <TextInput
+//             style={styles.searchBar}
+//             placeholder="คุณจะไปที่ไหน"
+//             placeholderTextColor="#888"
+//             editable={false}
+//           />
+//           <AntDesign
+//             name="search1"
+//             size={24}
+//             color="#888"
+//             style={styles.searchIcon}
+//             onPress={() => navigation.navigate('RouteSearchScreen')}
+//           />
+//         </Pressable>
+
+//         <Pressable style={styles.dropdownButton} onPress={toggleDropdown}>
+//           <AntDesign name={dropdownVisible ? 'up' : 'down'} size={24} color="#1e1e1e" />
+//         </Pressable>
+//       </View>
+
+//       {dropdownVisible && (
+//         <View style={styles.dropdown}>
+//           <Pressable style={styles.dropdownItem} onPress={() => selectOption('Option 1')}>
+//             <Ionicons name="bus-outline" size={24} color="#1e1e1e" />
+//           </Pressable>
+//           <Pressable style={styles.dropdownItem} onPress={() => selectOption('Option 2')}>
+//             <MaterialIcons name="gps-fixed" size={24} color="#1e1e1e" />
+//           </Pressable>
+//           <Pressable style={styles.dropdownItem} onPress={() => selectOption('Option 3')}>
+//             <FontAwesome5 name="traffic-light" size={24} color="#1e1e1e" />
+//           </Pressable>
+//         </View>
+//       )}
+
+//       {/* เพิ่มคอมโพเนนต์แผนที่ลงไปที่นี่ */}
+//       <MyMapComponent />
+//     </View>
+//   );
+// };
+
+// const styles = StyleSheet.create({
+//   container: {
+//     flex: 1,
+//     justifyContent: 'flex-start',
+//     alignItems: 'center',
+//     backgroundColor: 'white',
+//     paddingTop: 85,
+//   },
+//   searchSection: {
+//     flexDirection: 'row',
+//     alignItems: 'center',
+//     justifyContent: 'center',
+//     marginTop: 20,
+//   },
+//   searchBarContainer: {
+//     flexDirection: 'row',
+//     alignItems: 'center',
+//     backgroundColor: '#fff',
+//     borderRadius: 12,
+//     padding: 6,
+//     width: '75%',
+//     height: 52,
+//     shadowColor: '#000',
+//     shadowOffset: { width: 0, height: 2 },
+//     shadowOpacity: 0.10,
+//     shadowRadius: 1,
+//     elevation: 1.5,
+//     // เพิ่ม boxShadow สำหรับ Web
+//     boxShadow: '0px 2px 1px rgba(0, 0, 0, 0.1)',
+//   },
+//   searchBar: {
+//     flex: 1,
+//     height: '100%',
+//     borderRadius: 12,
+//     paddingLeft: 10,
+//     fontSize: 16,
+//     fontFamily: 'Prompt-Regular', // ใช้ฟอนต์ที่โหลด
+//   },
+//   searchIcon: {
+//     marginRight: 10,
+//   },
+//   dropdownButton: {
+//     backgroundColor: '#fff',
+//     borderRadius: 12,
+//     padding: 6,
+//     marginLeft: 10,
+//     height: 52,
+//     width: 52,
+//     justifyContent: 'center',
+//     alignItems: 'center',
+//     shadowColor: '#000',
+//     shadowOffset: { width: 0, height: 2 },
+//     shadowOpacity: 0.10,
+//     shadowRadius: 1,
+//     elevation: 1.5,
+//     // เพิ่ม boxShadow สำหรับ Web
+//     boxShadow: '0px 2px 1px rgba(0, 0, 0, 0.1)',
+//   },
+//   dropdown: {
+//     position: 'absolute',
+//     top: 95,
+//     right: '4.5%',
+//     width: 52,  // Set width to match dropdownButton
+//     backgroundColor: '#fff',
+//     borderRadius: 12,
+//     shadowColor: '#000',
+//     shadowOffset: { width: 0, height: 2 },
+//     shadowOpacity: 0.10,
+//     shadowRadius: 1,
+//     elevation: 1.5,
+//     zIndex: 1,
+//     marginTop: 70,
+//     // เพิ่ม boxShadow สำหรับ Web
+//     boxShadow: '0px 2px 1px rgba(0, 0, 0, 0.1)',
+//   },
+//   dropdownItem: {
+//     width: 52,  // Match width of dropdownButton
+//     height: 52, // Match height of dropdownButton
+//     justifyContent: 'center',
+//     alignItems: 'center',
+//   },
+// });
+
+// export default HomeScreen;
+
 import React, { useState, useEffect } from 'react';
-import { View, TextInput, Pressable, StyleSheet, ActivityIndicator } from 'react-native';
+import { View, TextInput, Pressable, StyleSheet, ActivityIndicator, Alert } from 'react-native';
 import { AntDesign, Ionicons, MaterialIcons, FontAwesome5 } from '@expo/vector-icons';
-import * as Font from 'expo-font'; // นำเข้า expo-font
-import MyMapComponent from '../components/MyMapComponent'; // นำเข้า MyMapComponent
+import * as Font from 'expo-font';
+import * as Location from 'expo-location'; // นำเข้า expo-location
+import MyMapComponent from '../components/MyMapComponent';
 
 const fetchFonts = () => {
   return Font.loadAsync({
     'Prompt-Regular': require('../assets/fonts/Prompt-Regular.ttf'),
     'Prompt-Bold': require('../assets/fonts/Prompt-Bold.ttf'),
-    'Prompt-Medium': require('../assets/fonts/Prompt-Medium.ttf'), // ปรับเส้นทางฟอนต์ตามตำแหน่งที่เก็บ
+    'Prompt-Medium': require('../assets/fonts/Prompt-Medium.ttf'),
   });
 };
 
 const HomeScreen = ({ navigation }) => {
   const [dropdownVisible, setDropdownVisible] = useState(false);
+  const [selectedBusRoute, setSelectedBusRoute] = useState(null);
+  const [showTraffic, setShowTraffic] = useState(false);
   const [fontLoaded, setFontLoaded] = useState(false);
+  const [location, setLocation] = useState(null); // สถานะสำหรับตำแหน่งที่ตั้งของผู้ใช้
 
   useEffect(() => {
     fetchFonts().then(() => setFontLoaded(true));
+  }, []);
+
+  useEffect(() => {
+    (async () => {
+      let { status } = await Location.requestForegroundPermissionsAsync();
+      if (status !== 'granted') {
+        Alert.alert('Permission Denied', 'Permission to access location was denied.');
+        return;
+      }
+
+      let currentLocation = await Location.getCurrentPositionAsync({});
+      setLocation(currentLocation);
+    })();
   }, []);
 
   const toggleDropdown = () => {
     setDropdownVisible(!dropdownVisible);
   };
 
-  const selectOption = (option) => {
+  const handleBusRouteSelection = (route) => {
+    setSelectedBusRoute(route);
     setDropdownVisible(false);
-    console.log('Selected:', option);
+  };
+
+  const handleResetLocation = () => {
+    setDropdownVisible(false);
+    // ฟังก์ชันรีเซ็ตตำแหน่งผู้ใช้
+    if (location) {
+      console.log('Current Location:', location);
+      // คุณสามารถส่งตำแหน่งนี้ไปยังแผนที่เพื่อรีเซ็ตตำแหน่งที่แสดงได้
+    } else {
+      Alert.alert('Location not available', 'Cannot reset location. Location data is not available.');
+    }
+  };
+
+  const handleToggleTraffic = () => {
+    setShowTraffic(!showTraffic);
+    setDropdownVisible(false);
   };
 
   if (!fontLoaded) {
@@ -39,7 +240,6 @@ const HomeScreen = ({ navigation }) => {
         <Pressable
           style={styles.searchBarContainer}
           onPress={() => navigation.navigate('RouteSearchScreen')}
-          android_ripple={{ color: '#ddd' }} // Effect on Android
         >
           <TextInput
             style={styles.searchBar}
@@ -52,7 +252,6 @@ const HomeScreen = ({ navigation }) => {
             size={24}
             color="#888"
             style={styles.searchIcon}
-            onPress={() => navigation.navigate('RouteSearchScreen')}
           />
         </Pressable>
 
@@ -63,20 +262,35 @@ const HomeScreen = ({ navigation }) => {
 
       {dropdownVisible && (
         <View style={styles.dropdown}>
-          <Pressable style={styles.dropdownItem} onPress={() => selectOption('Option 1')}>
-            <Ionicons name="bus-outline" size={24} color="#1e1e1e" />
+          <Pressable style={styles.dropdownItem} onPress={() => handleBusRouteSelection('Route 1')}>
+            <Ionicons name="bus-outline" size={24} color="red" />
           </Pressable>
-          <Pressable style={styles.dropdownItem} onPress={() => selectOption('Option 2')}>
+          <Pressable style={styles.dropdownItem} onPress={() => handleBusRouteSelection('Route 2')}>
+            <Ionicons name="bus-outline" size={24} color="blue" />
+          </Pressable>
+          <Pressable style={styles.dropdownItem} onPress={() => handleBusRouteSelection('Route 3')}>
+            <Ionicons name="bus-outline" size={24} color="green" />
+          </Pressable>
+          <Pressable style={styles.dropdownItem} onPress={() => handleBusRouteSelection('Route 4')}>
+            <Ionicons name="bus-outline" size={24} color="yellow" />
+          </Pressable>
+          <Pressable style={styles.dropdownItem} onPress={() => handleBusRouteSelection('Route 5')}>
+            <Ionicons name="bus-outline" size={24} color="purple" />
+          </Pressable>
+          <Pressable style={styles.dropdownItem} onPress={handleResetLocation}>
             <MaterialIcons name="gps-fixed" size={24} color="#1e1e1e" />
           </Pressable>
-          <Pressable style={styles.dropdownItem} onPress={() => selectOption('Option 3')}>
+          <Pressable style={styles.dropdownItem} onPress={handleToggleTraffic}>
             <FontAwesome5 name="traffic-light" size={24} color="#1e1e1e" />
           </Pressable>
         </View>
       )}
 
-      {/* เพิ่มคอมโพเนนต์แผนที่ลงไปที่นี่ */}
-      <MyMapComponent />
+      <MyMapComponent
+        selectedBusRoute={selectedBusRoute}
+        showTraffic={showTraffic}
+        userLocation={location} // ส่งข้อมูลตำแหน่งผู้ใช้ไปยัง MyMapComponent
+      />
     </View>
   );
 };
@@ -108,7 +322,6 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.10,
     shadowRadius: 1,
     elevation: 1.5,
-    // เพิ่ม boxShadow สำหรับ Web
     boxShadow: '0px 2px 1px rgba(0, 0, 0, 0.1)',
   },
   searchBar: {
@@ -117,7 +330,7 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     paddingLeft: 10,
     fontSize: 16,
-    fontFamily: 'Prompt-Regular', // ใช้ฟอนต์ที่โหลด
+    fontFamily: 'Prompt-Regular',
   },
   searchIcon: {
     marginRight: 10,
@@ -136,14 +349,13 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.10,
     shadowRadius: 1,
     elevation: 1.5,
-    // เพิ่ม boxShadow สำหรับ Web
     boxShadow: '0px 2px 1px rgba(0, 0, 0, 0.1)',
   },
   dropdown: {
     position: 'absolute',
     top: 95,
     right: '4.5%',
-    width: 52,  // Set width to match dropdownButton
+    width: 52,
     backgroundColor: '#fff',
     borderRadius: 12,
     shadowColor: '#000',
@@ -153,12 +365,11 @@ const styles = StyleSheet.create({
     elevation: 1.5,
     zIndex: 1,
     marginTop: 70,
-    // เพิ่ม boxShadow สำหรับ Web
     boxShadow: '0px 2px 1px rgba(0, 0, 0, 0.1)',
   },
   dropdownItem: {
-    width: 52,  // Match width of dropdownButton
-    height: 52, // Match height of dropdownButton
+    width: 52,
+    height: 52,
     justifyContent: 'center',
     alignItems: 'center',
   },

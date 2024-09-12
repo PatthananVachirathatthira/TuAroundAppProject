@@ -71,7 +71,7 @@ const HomeStackNavigator = () => (
       name="RouteScreen"
       component={RouteScreen}
       options={({ navigation }) => ({
-        headerTitle: "ค้นหาเส้นทาง",
+        headerTitle: "เส้นทาง",
         headerTitleAlign: "center",
         headerTitleStyle: styles.headerTitle,
         headerTransparent: true,

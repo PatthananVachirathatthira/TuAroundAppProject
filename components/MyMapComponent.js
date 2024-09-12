@@ -1,28 +1,42 @@
 import React from 'react';
-import { Image, StyleSheet, View } from 'react-native';
+import MapView, { Marker } from 'react-native-maps';
+import { StyleSheet, View } from 'react-native';
 
-// Import the map image
-import mapImage from '../assets/images/map_image.png';
+const MyMapComponent = ({ selectedBusRoute, showTraffic, userLocation }) => {
+  const initialRegion = {
+    latitude: userLocation ? userLocation.latitude : 13.736717, // ค่าเริ่มต้นหากไม่ได้ตำแหน่งผู้ใช้
+    longitude: userLocation ? userLocation.longitude : 100.523186,
+    latitudeDelta: 0.01,
+    longitudeDelta: 0.01,
+  };
 
-const MyMapComponent = () => {
   return (
-    <View style={styles.container}>
-      <Image source={mapImage} style={styles.mapImage} />
+    <View style={styles.mapContainer}>
+      <MapView
+        style={styles.map}
+        initialRegion={initialRegion}
+        showsTraffic={showTraffic}
+        showsUserLocation={true}  // แสดงตำแหน่งของผู้ใช้
+      >
+        {selectedBusRoute && (
+          <Marker
+            coordinate={{ latitude: 13.736717, longitude: 100.523186 }} // ปรับเป็นตำแหน่งของเส้นทางที่เลือก
+            title={selectedBusRoute}
+          />
+        )}
+      </MapView>
     </View>
   );
 };
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
+  mapContainer: {
+    width: '100%',
+    height: '100%',
   },
-  mapImage: {
-    width: '100%',  // Ensures the image width matches the screen width
-    height: 400,    // You can adjust this height to match your design
-    resizeMode: 'cover', // This ensures the image scales appropriately to cover the area
+  map: {
+    ...StyleSheet.absoluteFillObject,
   },
 });
 
-export default MyMapComponent;  // ส่งออก MyMapComponent เป็นค่าเริ่มต้น
+export default MyMapComponent;
