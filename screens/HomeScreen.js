@@ -1,4 +1,3 @@
-//HomeScreen.js
 import React, { useState, useEffect } from 'react';
 import { View, TextInput, Pressable, StyleSheet, ActivityIndicator } from 'react-native';
 import { AntDesign, Ionicons, MaterialIcons, FontAwesome5 } from '@expo/vector-icons';
