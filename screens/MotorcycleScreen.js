@@ -1,13 +1,57 @@
-import React from "react";
-import { View, Text, StyleSheet } from "react-native";
-import { useNavigation } from '@react-navigation/native';
+import React, { useEffect, useState, useRef } from "react";
+import { View, StyleSheet, Dimensions, TouchableOpacity } from "react-native";
+import MapView, { Marker } from "react-native-maps";
+import * as Location from "expo-location";
+import { MaterialIcons } from "@expo/vector-icons";
 
 const MotorcycleScreen = () => {
-  const navigation = useNavigation();
+  const [location, setLocation] = useState(null);
+  const mapRef = useRef(null);
+
+  const getCurrentLocation = async () => {
+    let { status } = await Location.requestForegroundPermissionsAsync();
+    if (status !== "granted") {
+      console.log("Permission to access location was denied");
+      return;
+    }
+
+    let currentLocation = await Location.getCurrentPositionAsync({});
+    const currentRegion = {
+      latitude: currentLocation.coords.latitude,
+      longitude: currentLocation.coords.longitude,
+      latitudeDelta: 0.01,  // ขยายขอบเขตของการซูมออก
+      longitudeDelta: 0.01, // ขยายขอบเขตของการซูมออก
+    };
+    setLocation(currentRegion);
+
+    if (mapRef.current) {
+      mapRef.current.animateToRegion(currentRegion, 1000);
+    }
+  };
+
+  useEffect(() => {
+    getCurrentLocation();
+  }, []);
 
   return (
     <View style={styles.container}>
-      <Text style={styles.text}>Motorcycle Screen</Text>
+      {location ? (
+        <MapView
+          ref={mapRef}
+          style={styles.map}
+          initialRegion={location}
+          showsUserLocation={true}
+          showsMyLocationButton={false}
+          zoomEnabled={true} // เปิดใช้งานการซูม
+          scrollEnabled={true} // เปิดใช้งานการเลื่อนแผนที่
+        >
+          <Marker coordinate={location} title="คุณอยู่ที่นี่" />
+        </MapView>
+      ) : null}
+
+      <TouchableOpacity style={styles.customButton} onPress={getCurrentLocation}>
+        <MaterialIcons name="gps-fixed" size={24} color="black" />
+      </TouchableOpacity>
     </View>
   );
 };
@@ -15,13 +59,19 @@ const MotorcycleScreen = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    justifyContent: "flex-start",
-    alignItems: "center",
-    backgroundColor: "white",
-    paddingTop: 90,
   },
-  text: {
-    fontSize: 24,
+  map: {
+    width: Dimensions.get("window").width,
+    height: Dimensions.get("window").height,
+  },
+  customButton: {
+    position: "absolute",
+    bottom: 50,
+    right: 20,
+    backgroundColor: "white",
+    padding: 10,
+    borderRadius: 50,
+    elevation: 5,
   },
 });
 
