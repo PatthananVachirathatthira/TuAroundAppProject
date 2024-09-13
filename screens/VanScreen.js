@@ -66,8 +66,8 @@ const styles = StyleSheet.create({
   },
   customButton: {
     position: "absolute",
-    bottom: 50,
-    right: 20,
+    bottom: 35,
+    right: 30,
     backgroundColor: "white",
     padding: 10,
     borderRadius: 50,
