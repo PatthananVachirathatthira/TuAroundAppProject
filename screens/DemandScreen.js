@@ -4,7 +4,7 @@ import MapView from "react-native-maps";
 import * as Location from "expo-location";
 import { MaterialIcons } from "@expo/vector-icons";
 
-const VanScreen = () => {
+const DemandScreen = () => {
   const [location, setLocation] = useState(null);
   const mapRef = useRef(null);
 
@@ -73,4 +73,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default VanScreen;
+export default DemandScreen;

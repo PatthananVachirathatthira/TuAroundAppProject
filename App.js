@@ -15,7 +15,9 @@ import DashboardScreen from "./screens/DashboardScreen";
 import ReportScreen from "./screens/ReportScreen";
 import MotorcycleScreen from "./screens/MotorcycleScreen";
 import VanScreen from "./screens/VanScreen";
-import AnnounceScreen from "./screens/AnnouceScreen"; 
+import AnnounceScreen from "./screens/AnnouceScreen";
+import DemandScreen from "./screens/DemandScreen";
+
 
 const Stack = createStackNavigator();
 const Drawer = createDrawerNavigator();
@@ -144,6 +146,25 @@ const HomeStackNavigator = () => (
         ),
       })}
     />
+    <Stack.Screen
+      name="DemandScreen"
+      component={DemandScreen} 
+      options={({ navigation }) => ({
+        headerTitle: "จำนวนผู้โดยสาร",
+        headerTitleAlign: "center",
+        headerTitleStyle: styles.headerTitle,
+        headerTransparent: true,
+        headerLeft: () => (
+          <AntDesign
+            name="left"
+            size={25}
+            color="#2a2a2a"
+            style={styles.iconStyle}
+            onPress={() => navigation.goBack()}
+          />
+        ),
+      })}
+    />
   </Stack.Navigator>
 );
 
@@ -213,6 +234,15 @@ const CustomDrawerContent = (props) => {
   return (
     <DrawerContentScrollView {...props}>
       <Text style={styles.drawerHeadLabel}>TU AROUND</Text>
+      <DrawerItem
+        label="จำนวนผู้โดยสาร"
+        onPress={() => props.navigation.navigate("DemandScreen")}
+        // icon={({ color, size }) => (
+        //   <Ionicons name="car-sport-sharp" size={size} color="#000000" />
+        // )}
+        labelStyle={styles.drawerLabel}
+        style={styles.drawerItem}
+      />
       <DrawerItem
         label="รถสาธารณะอื่นๆ"
         onPress={() => props.navigation.navigate("TransportScreen")}

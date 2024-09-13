@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useRef } from "react";
 import { View, StyleSheet, Dimensions, TouchableOpacity } from "react-native";
-import MapView, { Marker } from "react-native-maps";
+import MapView from "react-native-maps";
 import * as Location from "expo-location";
 import { MaterialIcons } from "@expo/vector-icons";
 
@@ -19,8 +19,8 @@ const MotorcycleScreen = () => {
     const currentRegion = {
       latitude: currentLocation.coords.latitude,
       longitude: currentLocation.coords.longitude,
-      latitudeDelta: 0.01,  // ขยายขอบเขตของการซูมออก
-      longitudeDelta: 0.01, // ขยายขอบเขตของการซูมออก
+      latitudeDelta: 0.001,  // ขยายขอบเขตของการซูมออก
+      longitudeDelta: 0.001, // ขยายขอบเขตของการซูมออก
     };
     setLocation(currentRegion);
 
@@ -44,9 +44,7 @@ const MotorcycleScreen = () => {
           showsMyLocationButton={false}
           zoomEnabled={true} // เปิดใช้งานการซูม
           scrollEnabled={true} // เปิดใช้งานการเลื่อนแผนที่
-        >
-          <Marker coordinate={location} title="คุณอยู่ที่นี่" />
-        </MapView>
+        />
       ) : null}
 
       <TouchableOpacity style={styles.customButton} onPress={getCurrentLocation}>
