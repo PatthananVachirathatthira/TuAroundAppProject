@@ -1,4 +1,4 @@
-// HowToUseScreen.js
+//App.js
 import React, { useState, useEffect } from "react";
 import { StyleSheet, ActivityIndicator, View, Text } from "react-native";
 import { NavigationContainer } from "@react-navigation/native";
@@ -71,7 +71,7 @@ const HomeStackNavigator = () => (
       name="RouteScreen"
       component={RouteScreen}
       options={({ navigation }) => ({
-        headerTitle: "ค้นหาเส้นทาง",
+        headerTitle: "เส้นทาง",
         headerTitleAlign: "center",
         headerTitleStyle: styles.headerTitle,
         headerTransparent: true,

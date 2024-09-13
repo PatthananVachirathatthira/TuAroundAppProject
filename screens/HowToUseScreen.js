@@ -1,3 +1,5 @@
+// HowToUseScreen.js
+
 import React, { useState, useEffect } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, Image, ActivityIndicator} from 'react-native';
 import * as Font from 'expo-font';
