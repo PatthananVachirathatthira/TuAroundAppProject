@@ -42,16 +42,32 @@ const HomeScreen = ({ navigation }) => {
   };
 
   const handleBusRouteSelection = (route) => {
-    setSelectedBusRoute(route);
+    switch (route) {
+      case 'Route 1':
+        setSelectedBusRoute('1A');
+        break;
+      case 'Route 2':
+        setSelectedBusRoute('1B');
+        break;
+      case 'Route 3':
+        setSelectedBusRoute('2');
+        break;
+      case 'Route 4':
+        setSelectedBusRoute('3');
+        break;
+      case 'Route 5':
+        setSelectedBusRoute('5');
+        break;
+      default:
+        setSelectedBusRoute(null);
+    }
     setDropdownVisible(false);
   };
 
   const handleResetLocation = () => {
     setDropdownVisible(false);
-    // ฟังก์ชันรีเซ็ตตำแหน่งผู้ใช้
     if (location) {
       console.log('Current Location:', location);
-      // คุณสามารถส่งตำแหน่งนี้ไปยังแผนที่เพื่อรีเซ็ตตำแหน่งที่แสดงได้
     } else {
       Alert.alert('Location not available', 'Cannot reset location. Location data is not available.');
     }
@@ -98,16 +114,16 @@ const HomeScreen = ({ navigation }) => {
             <Ionicons name="bus-outline" size={24} color="red" />
           </Pressable>
           <Pressable style={styles.dropdownItem} onPress={() => handleBusRouteSelection('Route 2')}>
-            <Ionicons name="bus-outline" size={24} color="blue" />
+            <Ionicons name="bus-outline" size={24} color="yellow" />
           </Pressable>
           <Pressable style={styles.dropdownItem} onPress={() => handleBusRouteSelection('Route 3')}>
             <Ionicons name="bus-outline" size={24} color="green" />
           </Pressable>
           <Pressable style={styles.dropdownItem} onPress={() => handleBusRouteSelection('Route 4')}>
-            <Ionicons name="bus-outline" size={24} color="yellow" />
+            <Ionicons name="bus-outline" size={24} color="purple" />
           </Pressable>
           <Pressable style={styles.dropdownItem} onPress={() => handleBusRouteSelection('Route 5')}>
-            <Ionicons name="bus-outline" size={24} color="purple" />
+            <Ionicons name="bus-outline" size={24} color="blue" />
           </Pressable>
           <Pressable style={styles.dropdownItem} onPress={handleResetLocation}>
             <MaterialIcons name="gps-fixed" size={24} color="#1e1e1e" />
@@ -208,5 +224,3 @@ const styles = StyleSheet.create({
 });
 
 export default HomeScreen;
-
-//test branch
