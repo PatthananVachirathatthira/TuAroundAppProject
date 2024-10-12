@@ -17,6 +17,28 @@ import { useNavigation } from "@react-navigation/native";
 import DateTimePicker from "@react-native-community/datetimepicker";
 import * as ImagePicker from "expo-image-picker";
 import Modal from "react-native-modal";
+import { database, ref, set, push } from "../firebaseConfig"; 
+
+// ฟังก์ชันสำหรับส่งข้อมูลไปยัง Firebase
+const uploadReport = (problem, description, date, image) => {
+  const reportRef = ref(database, 'Report/File');
+  const newReportRef = push(reportRef);
+
+  const reportData = {
+    Date: date.toLocaleDateString(),
+    Description: description,
+    Pic: image || "",
+    Topic: problem,
+  };
+
+  set(newReportRef, reportData)
+    .then(() => {
+      console.log("Report submitted successfully!");
+    })
+    .catch((error) => {
+      console.error("Error submitting report: ", error);
+    });
+};
 
 const fetchFonts = () => {
   return Font.loadAsync({
@@ -77,7 +99,11 @@ const ReportScreen = () => {
       setModalVisible(true);
       return;
     }
-    // Show success message and reset form
+    
+    // ส่งข้อมูลไปยัง Firebase
+    uploadReport(problem, description, date, image);
+
+    // แสดงข้อความสำเร็จและรีเซ็ตฟอร์ม
     setShowSuccess(true);
     setTimeout(() => {
       setShowSuccess(false);
@@ -87,6 +113,7 @@ const ReportScreen = () => {
     setDate(new Date());
     setImage(null);
   };
+
 
   if (!fontLoaded) {
     return <ActivityIndicator size="large" color="#0000ff" />;

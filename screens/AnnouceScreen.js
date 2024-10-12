@@ -1,47 +1,52 @@
-import React from 'react';
-import { View, Text, StyleSheet, Dimensions, ScrollView } from 'react-native';
+import React, { useEffect, useState } from 'react';
+import { View, Text, StyleSheet, Dimensions, ScrollView, ActivityIndicator } from 'react-native';
+import { database, ref, onValue } from '../firebaseConfig';
 
-const { width } = Dimensions.get('window'); // ใช้ขนาดของหน้าจอ
+const { width } = Dimensions.get('window');
 
 const AnnounceScreen = ({ route }) => {
   const { type } = route.params;
+  const [announcement, setAnnouncement] = useState(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchAnnouncement = () => {
+      const announcementRef = ref(database, 'Notify/Notice/' + type); // ดึงข้อมูลตาม type A, B, C
+      onValue(announcementRef, (snapshot) => {
+        const data = snapshot.val();
+        if (data) {
+          setAnnouncement(data);
+        }
+        setLoading(false); // เปลี่ยนสถานะ loading เมื่อดึงข้อมูลเสร็จ
+      });
+    };
+
+    fetchAnnouncement();
+  }, [type]);
 
   const renderContent = () => {
-    switch (type) {
-      case 'A':
-        return (
-          <View style={styles.contentContainer}>
-            <Text style={styles.header}>การปรัปปรุง EV สาย A</Text>
-            <Text style={styles.date}>32 สิงหา 2024-5.00</Text>
-            <Text style={styles.additionalInfoText}>
-            Consequat amet fugiat ad velit nulla ad ad enim commodo ex nisi et. Anim officia veniam deserunt officia. Enim ipsum esse anim culpa. Et anim ad tempor incididunt. Commodo occaecat aliquip laborum cupidatat dolor et. Et ad velit id ipsum cillum in consectetur culpa labore occaecat velit anim mollit. Cillum laborum occaecat adipisicing aute dolor fugiat do anim in est reprehenderit aliquip aliqua.Deserunt eiusmod laboris quis aliquip fugiat id duis ullamco. Id pariatur eiusmod aliquip ad ut laboris mollit occaecat proident consequat qui deserunt. Mollit consectetur culpa voluptate cillum. Mollit ex magna consectetur commodo in laboris. Voluptate enim reprehenderit ea labore laborum quis fugiat ut voluptate. Labore laboris mollit consequat qui. Culpa aliquip ipsum excepteur velit anim ad officia dolore deserunt aute occaecat ad.Dolor voluptate aliquip et duis exercitation quis laborum ad. Dolore nulla exercitation nulla sunt pariatur consequat reprehenderit labore proident nisi fugiat non. Adipisicing aute sunt dolore irure Lorem elit esse voluptate amet fugiat.
-            </Text>
-          </View>
-        );
-      case 'B':
-        return (
-          <View style={styles.contentContainer}>
-            <Text style={styles.header}>การปรัปปรุง EV สาย B</Text>
-            <Text style={styles.date}>32 สิงหา 2024-5.00</Text>
-            <Text style={styles.additionalInfoText}>
-            Nostrud in est occaecat occaecat cupidatat ex ex. Cupidatat officia consequat amet cupidatat sint in proident excepteur adipisicing et eiusmod ex qui. Do enim dolore qui laboris tempor in eiusmod. Voluptate sunt irure commodo laboris enim veniam aliqua consequat cillum occaecat commodo aute. Sunt commodo exercitation et qui adipisicing ad sit excepteur labore reprehenderit deserunt minim elit.
-            </Text>
-          </View>
-        );
-      case 'C':
-        return (
-          <View style={styles.contentContainer}>
-            <Text style={styles.header}>การปรัปปรุง EV สาย C</Text>
-            <Text style={styles.date}>32 สิงหา 2024-5.00</Text>
-            <Text style={styles.additionalInfoText}>
-            Tempor nulla ad id irure eu sint pariatur non ad aliquip commodo Lorem labore Lorem. Pariatur cillum quis aliquip nostrud cupidatat quis. Laboris sit nostrud ad ullamco. Do anim magna in et velit mollit enim veniam id pariatur Lorem ut.
-            </Text>
-          </View>
-        );
-      default:
-        return null;
-    }
-  };
+  if (loading) {
+    return <ActivityIndicator size="large" color="#0000ff" />;
+  }
+
+  if (announcement) {
+    // ตรวจสอบว่าแต่ละฟิลด์มีข้อมูลหรือไม่
+    const head = announcement.Head || "ไม่มีหัวข้อ";
+    const dateTime = announcement.DateTime || "ไม่มีข้อมูลเวลา";
+    const description = announcement.Des || "ไม่มีรายละเอียดเพิ่มเติม";
+
+    return (
+      <View style={styles.contentContainer}>
+        <Text style={styles.header}>{head}</Text>
+        <Text style={styles.date}>{dateTime}</Text>
+        <Text style={styles.additionalInfoText}>{description}</Text>
+      </View>
+    );
+  }
+
+  return <Text>ไม่มีข้อมูลประกาศ</Text>; // กรณีที่ไม่มีข้อมูลเลย
+};
+
 
   return (
     <View style={styles.container}>
@@ -64,8 +69,8 @@ const styles = StyleSheet.create({
     flexGrow: 1,
   },
   contentWrapper: {
-    alignItems: 'center', // จัดตำแหน่งให้ตรงกลาง
-    marginTop: 85, // ปรับระยะห่างจากด้านบนของหน้าจอ
+    alignItems: 'center',
+    marginTop: 85,
   },
   contentContainer: {
     width: width * 0.9,
@@ -90,7 +95,7 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontFamily: 'Prompt-Regular',
     color: '#6e6e6e',
-    marginTop: 10, // เพิ่มระยะห่างระหว่างข้อความ
+    marginTop: 10,
     textAlign: 'left',
   },
 });
