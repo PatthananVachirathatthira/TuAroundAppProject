@@ -15,9 +15,9 @@ const AnnounceScreen = ({ route }) => {
       onValue(announcementRef, (snapshot) => {
         const data = snapshot.val();
         if (data) {
-          setAnnouncement(data);
+          setAnnouncement(data); // เก็บค่าที่ดึงมาได้จาก Firebase
         }
-        setLoading(false); // เปลี่ยนสถานะ loading เมื่อดึงข้อมูลเสร็จ
+        setLoading(false); // เปลี่ยนสถานะ loading เมื่อดึงข้อมูลเSสร็จ
       });
     };
 
@@ -25,28 +25,27 @@ const AnnounceScreen = ({ route }) => {
   }, [type]);
 
   const renderContent = () => {
-  if (loading) {
-    return <ActivityIndicator size="large" color="#0000ff" />;
-  }
+    if (loading) {
+      return <ActivityIndicator size="large" color="#0000ff" />;
+    }
 
-  if (announcement) {
-    // ตรวจสอบว่าแต่ละฟิลด์มีข้อมูลหรือไม่
-    const head = announcement.Head || "ไม่มีหัวข้อ";
-    const dateTime = announcement.DateTime || "ไม่มีข้อมูลเวลา";
-    const description = announcement.Des || "ไม่มีรายละเอียดเพิ่มเติม";
+    if (announcement) {
+      // แสดงค่าจาก Firebase โดยตรง
+      const head = announcement.Head || "ไม่มีหัวข้อ";
+      const dateTime = announcement.DateTime || "ไม่มีข้อมูลเวลา";
+      const description = announcement.Des || "ไม่มีรายละเอียดเพิ่มเติม";
 
-    return (
-      <View style={styles.contentContainer}>
-        <Text style={styles.header}>{head}</Text>
-        <Text style={styles.date}>{dateTime}</Text>
-        <Text style={styles.additionalInfoText}>{description}</Text>
-      </View>
-    );
-  }
+      return (
+        <View style={styles.contentContainer}>
+          <Text style={styles.header}>{head}</Text>
+          <Text style={styles.date}>{dateTime}</Text>
+          <Text style={styles.additionalInfoText}>{description}</Text>
+        </View>
+      );
+    }
 
-  return <Text>ไม่มีข้อมูลประกาศ</Text>; // กรณีที่ไม่มีข้อมูลเลย
-};
-
+    return <Text>ไม่มีข้อมูลประกาศ</Text>; // กรณีที่ไม่มีข้อมูลเลย
+  };
 
   return (
     <View style={styles.container}>

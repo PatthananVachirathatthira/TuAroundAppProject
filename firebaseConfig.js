@@ -1,6 +1,7 @@
 //firebaseConfig.js
 import { initializeApp } from "firebase/app";
 import { getDatabase, ref, set, onValue, push } from "firebase/database"; // add push for adding new data
+import { getStorage } from "firebase/storage"; // Add this line
 
 // Your web app's Firebase configuration
 const firebaseConfig = {
@@ -17,5 +18,6 @@ const firebaseConfig = {
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);
 const database = getDatabase(app);
+const storage = getStorage(app); // Initialize Firebase Storage
 
-export { database, ref, set, onValue, push };
+export { database, ref, set, onValue, push, storage }; // Export storage
