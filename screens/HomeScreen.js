@@ -1,9 +1,12 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { View, TextInput, Pressable, StyleSheet, ActivityIndicator, Alert, Modal, Text, Animated } from 'react-native';
+import { View, TextInput, Pressable, StyleSheet, ActivityIndicator, Alert, Modal, Text, Animated, ScrollView } from 'react-native';
 import { AntDesign, Ionicons, MaterialIcons, FontAwesome5 } from '@expo/vector-icons';
 import * as Font from 'expo-font';
 import * as Location from 'expo-location';
 import MyMapComponent from '../components/MyMapComponent';
+import { getDatabase, ref, get } from 'firebase/database';
+
+
 
 const fetchFonts = () => {
   return Font.loadAsync({
@@ -50,40 +53,72 @@ const HomeScreen = ({ navigation }) => {
     setDropdownVisible(!dropdownVisible);
   };
 
-  const handleBusRouteSelection = (route) => {
-    let stations = [];
-    switch (route) {
-      case 'Route 1':
-        setSelectedBusRoute('1A');
-        stations = ['Station 1', 'Station 2', 'Station 3'];
-        break;
-      case 'Route 2':
-        setSelectedBusRoute('1B');
-        stations = ['Station 4', 'Station 5', 'Station 6'];
-        break;
-      case 'Route 3':
-        setSelectedBusRoute('2');
-        stations = ['Station 7', 'Station 8', 'Station 9'];
-        break;
-      case 'Route 4':
-        setSelectedBusRoute('3');
-        stations = ['Station 10', 'Station 11', 'Station 12'];
-        break;
-      case 'Route 5':
-        setSelectedBusRoute('5');
-        stations = ['Station 13', 'Station 14', 'Station 15'];
-        break;
-      default:
-        setSelectedBusRoute(null);
+  const handleBusRouteSelection = async (route) => {
+  const db = getDatabase();
+  let routeKey;
+  switch (route) {
+  case 'Route 1':
+    routeKey = '1A-สีแดง'; // ต้องตรงกับคีย์ใน routeColors
+    break;
+  case 'Route 2':
+    routeKey = '1B-สีเหลือง';
+    break;
+  case 'Route 3':
+    routeKey = '2-สีเขียว';
+    break;
+  case 'Route 4':
+    routeKey = '3-ม่วง';
+    break;
+  case 'Route 5':
+    routeKey = '5-ฟ้า';
+    break;
+  default:
+    routeKey = null;
+}
+
+
+  if (routeKey) {
+    const routeRef = ref(db, `EVroute/${routeKey}`);
+    const snapshot = await get(routeRef);
+    if (snapshot.exists()) {
+      const routeData = snapshot.val();
+
+      // สร้าง array ของสถานีและลำดับ
+      let stationsWithOrder = [];
+
+      Object.entries(routeData).forEach(([stationName, order]) => {
+        if (typeof order === 'string') {
+          // กรณีที่มีหลายลำดับ เช่น "24, 27"
+          order.split(', ').forEach(singleOrder => {
+            stationsWithOrder.push({ name: stationName, order: parseInt(singleOrder) });
+          });
+        } else {
+          // กรณีที่มีลำดับเดียว
+          stationsWithOrder.push({ name: stationName, order: order });
+        }
+      });
+
+      // เรียงตามลำดับที่จากน้อยไปหามาก
+      stationsWithOrder.sort((a, b) => a.order - b.order);
+
+      // สร้าง array ของชื่อสถานีที่เรียงแล้ว
+      const stations = stationsWithOrder.map(station => station.name);
+
+      setRouteStations(stations); // กำหนดค่าสถานีจาก Firebase
+      setSelectedBusRoute(routeKey);
+      setModalVisible(true);
+      Animated.timing(slideAnim, {
+        toValue: 0, // เลื่อน modal ขึ้น
+        duration: 500,
+        useNativeDriver: true,
+      }).start();
+    } else {
+      console.log('No data available for this route.');
     }
-    setRouteStations(stations); // กำหนดค่าสถานี
-    setModalVisible(true);
-    Animated.timing(slideAnim, {
-      toValue: 0, // เลื่อนขึ้น
-      duration: 500,
-      useNativeDriver: true,
-    }).start();
-  };
+  }
+};
+
+
 
   const handleCloseModal = () => {
     Animated.timing(slideAnim, {
@@ -170,20 +205,22 @@ const HomeScreen = ({ navigation }) => {
       />
       
       {modalVisible && (
-        <Animated.View
-          style={[styles.modalContainer, { transform: [{ translateY: slideAnim }] }]}
-        >
-          <View style={styles.modalBackground}>
-            <Text>สถานี:</Text>
-            {routeStations.map((station, index) => (
-              <Text key={index}>{station}</Text> // แสดงชื่อสถานี
-            ))}
-            <Pressable onPress={handleCloseModal}>
-              <Text style={styles.closeButton}>ปิด</Text>
-            </Pressable>
-          </View>
-        </Animated.View>
-      )}
+  <Animated.View
+    style={[styles.modalContainer, { transform: [{ translateY: slideAnim }] }]}
+  >
+    <View style={styles.modalBackground}>
+      <Text style={styles.modalTitle}>สถานี:</Text>
+      <ScrollView contentContainerStyle={styles.stationList}>
+        {routeStations.map((station, index) => (
+          <Text key={index} style={styles.stationText}>{`${index + 1}. ${station}`}</Text>
+        ))}
+      </ScrollView>
+      <Pressable onPress={handleCloseModal}>
+        <Text style={styles.closeButton}>ปิด</Text>
+      </Pressable>
+    </View>
+  </Animated.View>
+)}
     </View>
   );
 };
@@ -270,21 +307,55 @@ dropdownText: {
     bottom: 0,
     left: 0,
     right: 0,
-    height: '33%', // ปรับความสูงของ modal ตามที่คุณต้องการ
-    backgroundColor: 'white',
+    height: '40%', // ปรับขนาดของ modal
+    backgroundColor: '#fff',
     borderTopLeftRadius: 20,
     borderTopRightRadius: 20,
-    elevation: 5,
     padding: 20,
+    elevation: 10, // ให้เงาดูสวย
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 5 },
+    shadowOpacity: 0.3,
+    shadowRadius: 4,
   },
   modalBackground: {
-    justifyContent: 'center',
-    alignItems: 'center',
     flex: 1,
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    backgroundColor: '#f9f9f9',
+    borderRadius: 20,
+    padding: 10,
+  },
+  modalTitle: {
+    fontSize: 20,
+    fontFamily: 'Prompt-Bold',
+    marginBottom: 10,
+    color: '#333',
+  },
+  stationList: {
+    alignItems: 'flex-start',
+    paddingBottom: 20,
+  },
+  stationText: {
+    fontSize: 16,
+    fontFamily: 'Prompt-Regular',
+    color: '#555',
+    marginVertical: 5,
+    paddingHorizontal: 10,
+    backgroundColor: '#eaeaea',
+    borderRadius: 10,
+    width: '100%', // ให้ข้อความอยู่ในกรอบ
   },
   closeButton: {
-    color: '#007BFF',
-    marginTop: 20,
+    fontSize: 18,
+    fontFamily: 'Prompt-Medium',
+    color: '#007AFF',
+    paddingVertical: 10,
+    paddingHorizontal: 20,
+    backgroundColor: '#eee',
+    borderRadius: 10,
+    textAlign: 'center',
+    marginTop: 10,
   },
 });
 

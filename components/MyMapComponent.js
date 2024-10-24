@@ -7,12 +7,20 @@ const MyMapComponent = ({ selectedBusRoute, showTraffic, userLocation }) => {
   const [busStops, setBusStops] = useState([]);
   const [busRoutes, setBusRoutes] = useState({});
   const [routeColors, setRouteColors] = useState({
-    '1A': '#FF0000', // สีแดงสำหรับสาย 1A
-    '1B': '#FFFF00', // สีเหลืองสำหรับสาย 1B
-    '2': '#008000',  // สีเขียวสำหรับสาย 2
-    '3': '#800080',  // สีน้ำเงินสำหรับสาย 3
-    '5': '#0000FF',  // สีน้ำเงินสำหรับสาย 5
+    '1A-สีแดง': '#FF0000', // สีแดงสำหรับสาย 1A
+    '1B-สีเหลือง': '#FFFF00', // สีเหลืองสำหรับสาย 1B
+    '2-สีเขียว': '#008000',  // สีเขียวสำหรับสาย 2
+    '3-ม่วง': '#800080',  // สีม่วงสำหรับสาย 3
+    '5-ฟ้า': '#0000FF',  // สีน้ำเงินสำหรับสาย 5
   });
+
+  const routeKeyMapping = {
+    '1A': '1A-สีแดง',
+    '1B': '1B-สีเหลือง',
+    '2': '2-สีเขียว',
+    '3': '3-ม่วง',
+    '5': '5-ฟ้า',
+  };
 
   useEffect(() => {
     // Fetch bus stops
@@ -88,12 +96,18 @@ const MyMapComponent = ({ selectedBusRoute, showTraffic, userLocation }) => {
             />
           </Marker>
         ))}
+
         {selectedBusRoute && busRoutes[selectedBusRoute] && (
-          <Polyline
-            coordinates={busRoutes[selectedBusRoute]}
-            strokeColor={routeColors[selectedBusRoute]} // ใช้สีประจำสายที่เลือก
-            strokeWidth={3}
-          />
+          <>
+            {console.log('Selected Bus Route:', selectedBusRoute)}
+            {console.log('Route Color:', routeColors[routeKeyMapping[selectedBusRoute]])}
+
+            <Polyline
+              coordinates={busRoutes[selectedBusRoute]}
+              strokeColor={routeColors[routeKeyMapping[selectedBusRoute]]} // Use the mapped color
+              strokeWidth={3}
+            />
+          </>
         )}
       </MapView>
     </View>
