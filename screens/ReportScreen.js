@@ -17,6 +17,31 @@ import { useNavigation } from "@react-navigation/native";
 import DateTimePicker from "@react-native-community/datetimepicker";
 import * as ImagePicker from "expo-image-picker";
 import Modal from "react-native-modal";
+import { database, ref, set, push } from "../firebaseConfig"; 
+import { getStorage, ref as storageRef, uploadBytes, getDownloadURL } from "firebase/storage";
+
+
+
+// ฟังก์ชันสำหรับส่งข้อมูลไปยัง Firebase
+const uploadReport = (problem, description, date, image) => {
+  const reportRef = ref(database, 'Report/File');
+  const newReportRef = push(reportRef);
+
+  const reportData = {
+    Date: date.toLocaleDateString(),
+    Description: description,
+    Pic: image || "",
+    Topic: problem,
+  };
+
+  set(newReportRef, reportData)
+    .then(() => {
+      console.log("Report submitted successfully!");
+    })
+    .catch((error) => {
+      console.error("Error submitting report: ", error);
+    });
+};
 
 const fetchFonts = () => {
   return Font.loadAsync({
@@ -32,61 +57,97 @@ const ReportScreen = () => {
   const [description, setDescription] = useState("");
   const [date, setDate] = useState(new Date());
   const [showDatePicker, setShowDatePicker] = useState(false);
-  const [image, setImage] = useState(null);
+  const [images, setImages] = useState([]);
   const [isModalVisible, setModalVisible] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
   const animatedValue = useRef(new Animated.Value(0)).current;
   const navigation = useNavigation();
 
   useEffect(() => {
-    fetchFonts().then(() => setFontLoaded(true));
-  }, []);
+  // โหลดฟอนต์และขออนุญาตเข้าถึงคลังรูปภาพ
+  fetchFonts().then(() => setFontLoaded(true));
 
-  useEffect(() => {
-    if (showSuccess) {
-      Animated.timing(animatedValue, {
-        toValue: 1,
-        duration: 300,
-        easing: Easing.ease,
-        useNativeDriver: true,
-      }).start();
+  (async () => {
+    if (Platform.OS !== 'web') {
+      const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+      if (status !== 'granted') {
+        alert('ขออภัย, แอปต้องการการอนุญาตเพื่อเข้าถึงรูปภาพ');
+      }
     }
-  }, [showSuccess]);
+  })();
+}, []);
 
   const onDateChange = (event, selectedDate) => {
     const currentDate = selectedDate || date;
     setShowDatePicker(false);
     setDate(currentDate);
   };
-
+  // เลือกรูป
+  
   const pickImage = async () => {
-    let result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ImagePicker.MediaTypeOptions.Images,
-      allowsEditing: true,
-      aspect: [4, 3],
-      quality: 1,
-    });
+  let result = await ImagePicker.launchImageLibraryAsync({
+    mediaTypes: ImagePicker.MediaTypeOptions.Images,
+    allowsEditing: true,
+    aspect: [4, 3],
+    quality: 1,
+    allowsMultipleSelection: true, // ให้เลือกรูปหลายรูปได้
+  });
 
-    if (!result.canceled) {
-      setImage(result.uri);
-    }
-  };
+  if (!result.canceled) {
+    const selectedImages = result.assets.map(asset => asset.uri);
+    setImages(selectedImages);  // อัพเดท state เป็นอาร์เรย์ของ URI
+  }
+};
 
-  const handleSubmit = () => {
-    if (!problem || !description || !date) {
-      setModalVisible(true);
-      return;
-    }
-    // Show success message and reset form
-    setShowSuccess(true);
-    setTimeout(() => {
-      setShowSuccess(false);
-    }, 3000); // Hide message after 3 seconds
-    setProblem("");
-    setDescription("");
-    setDate(new Date());
-    setImage(null);
-  };
+
+
+
+  const uploadImagesToFirebase = async (imageUris) => {
+  const storage = getStorage();
+  const downloadURLs = [];
+
+  for (const imageUri of imageUris) {
+    const response = await fetch(imageUri);
+    const blob = await response.blob();
+    const imageRef = storageRef(storage, `reports/${new Date().getTime()}.jpg`);
+    await uploadBytes(imageRef, blob);
+    const downloadURL = await getDownloadURL(imageRef);
+    downloadURLs.push(downloadURL);
+  }
+  return downloadURLs;  // คืนค่ารายการ URL ของภาพ
+};
+
+
+
+
+  const handleSubmit = async () => {
+  if (!problem || !description || !date) {
+    setModalVisible(true);
+    return;
+  }
+
+  let imageUrls = [];
+  if (images.length > 0) {
+    // อัปโหลดภาพและรับ URL
+    imageUrls = await uploadImagesToFirebase(images);
+  }
+
+  // ส่งรายงานไปยัง Firebase
+  uploadReport(problem, description, date, imageUrls); // ส่งอาร์เรย์ของ URL
+
+  // แสดงข้อความสำเร็จและรีเซ็ตฟอร์ม
+  setShowSuccess(true);
+  setTimeout(() => {
+    setShowSuccess(false);
+  }, 3000); // ซ่อนข้อความหลังจาก 3 วินาที
+  setProblem("");
+  setDescription("");
+  setDate(new Date());
+  setImages([]); // รีเซ็ตภาพที่เลือก
+};
+
+
+
 
   if (!fontLoaded) {
     return <ActivityIndicator size="large" color="#0000ff" />;
@@ -162,7 +223,18 @@ const ReportScreen = () => {
         />
         <Text style={styles.imageButtonText}>เลือกภาพ</Text>
       </TouchableOpacity>
-      {image && <Image source={{ uri: image }} style={styles.image} />}
+      {images.length > 0 && (
+  <View style={styles.imagePreviewContainer}>
+    {images.map((image, index) => (
+      <View key={index} style={styles.imageItem}>
+        <Image source={{ uri: image }} style={styles.imagePreview} />
+        <Text style={styles.imagePreviewText}>เลือกภาพนี้</Text>
+      </View>
+    ))}
+  </View>
+)}
+
+
 
       <View style={styles.buttonContainer}>
         <TouchableOpacity
@@ -199,13 +271,13 @@ const ReportScreen = () => {
         </View>
       </Modal>
 
-      {showSuccess && (
-        <View style={styles.successMessageContainer}>
-          <Animated.View style={[styles.successMessage, animatedStyle]}>
-            <Text style={styles.successText}>ส่งข้อมูลสำเร็จ !</Text>
-          </Animated.View>
-        </View>
-      )}
+    {showSuccess && (
+      <View style={styles.successMessageContainer}>
+        <Animated.View style={[styles.successMessage, animatedStyle]}>
+          <Text style={styles.successText}>ส่งข้อมูลสำเร็จ!</Text>
+        </Animated.View>
+      </View>
+)}
     </View>
   );
 };
@@ -389,6 +461,21 @@ const styles = StyleSheet.create({
     fontSize: 18,
     color: "#f65d3c", // สีข้อความของกล่องสำเร็จ
     textAlign: "center",
+  },
+  imagePreviewContainer: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    justifyContent: 'space-between',
+    marginVertical: 10,
+  },
+  imageItem: {
+    width: '48%', // จัดให้แสดง 2 รูปต่อแถว
+    marginBottom: 10,
+  },
+  imagePreview: {
+    width: '100%',
+    height: 100,
+    borderRadius: 8,
   },
 });
 

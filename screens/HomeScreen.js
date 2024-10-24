@@ -1,8 +1,8 @@
-import React, { useState, useEffect } from 'react';
-import { View, TextInput, Pressable, StyleSheet, ActivityIndicator, Alert } from 'react-native';
+import React, { useState, useEffect, useRef } from 'react';
+import { View, TextInput, Pressable, StyleSheet, ActivityIndicator, Alert, Modal, Text, Animated } from 'react-native';
 import { AntDesign, Ionicons, MaterialIcons, FontAwesome5 } from '@expo/vector-icons';
 import * as Font from 'expo-font';
-import * as Location from 'expo-location'; // นำเข้า expo-location
+import * as Location from 'expo-location';
 import MyMapComponent from '../components/MyMapComponent';
 
 const fetchFonts = () => {
@@ -18,7 +18,10 @@ const HomeScreen = ({ navigation }) => {
   const [selectedBusRoute, setSelectedBusRoute] = useState(null);
   const [showTraffic, setShowTraffic] = useState(false);
   const [fontLoaded, setFontLoaded] = useState(false);
-  const [location, setLocation] = useState(null); // สถานะสำหรับตำแหน่งที่ตั้งของผู้ใช้
+  const [location, setLocation] = useState(null);
+  const [modalVisible, setModalVisible] = useState(false);
+  const [routeStations, setRouteStations] = useState([]); // ประกาศสถานี
+  const slideAnim = useRef(new Animated.Value(300)).current; // เริ่มต้นที่ 300
 
   useEffect(() => {
     fetchFonts().then(() => setFontLoaded(true));
@@ -32,7 +35,13 @@ const HomeScreen = ({ navigation }) => {
         return;
       }
 
-      let currentLocation = await Location.getCurrentPositionAsync({});
+      let currentLocation = await Location.getCurrentPositionAsync({
+        accuracy: Location.Accuracy.Highest,
+        maximumAge: 10000,
+        timeout: 5000,
+      });
+
+      console.log('Location:', currentLocation);
       setLocation(currentLocation);
     })();
   }, []);
@@ -42,16 +51,56 @@ const HomeScreen = ({ navigation }) => {
   };
 
   const handleBusRouteSelection = (route) => {
-    setSelectedBusRoute(route);
-    setDropdownVisible(false);
+    let stations = [];
+    switch (route) {
+      case 'Route 1':
+        setSelectedBusRoute('1A');
+        stations = ['Station 1', 'Station 2', 'Station 3'];
+        break;
+      case 'Route 2':
+        setSelectedBusRoute('1B');
+        stations = ['Station 4', 'Station 5', 'Station 6'];
+        break;
+      case 'Route 3':
+        setSelectedBusRoute('2');
+        stations = ['Station 7', 'Station 8', 'Station 9'];
+        break;
+      case 'Route 4':
+        setSelectedBusRoute('3');
+        stations = ['Station 10', 'Station 11', 'Station 12'];
+        break;
+      case 'Route 5':
+        setSelectedBusRoute('5');
+        stations = ['Station 13', 'Station 14', 'Station 15'];
+        break;
+      default:
+        setSelectedBusRoute(null);
+    }
+    setRouteStations(stations); // กำหนดค่าสถานี
+    setModalVisible(true);
+    Animated.timing(slideAnim, {
+      toValue: 0, // เลื่อนขึ้น
+      duration: 500,
+      useNativeDriver: true,
+    }).start();
   };
+
+  const handleCloseModal = () => {
+    Animated.timing(slideAnim, {
+      toValue: 300, // กลับไปที่ 300
+      duration: 500,
+      useNativeDriver: true,
+    }).start(() => setModalVisible(false));
+  };
+
+  if (!fontLoaded) {
+    return <ActivityIndicator size="large" color="#0000ff" />;
+  }
 
   const handleResetLocation = () => {
     setDropdownVisible(false);
-    // ฟังก์ชันรีเซ็ตตำแหน่งผู้ใช้
     if (location) {
       console.log('Current Location:', location);
-      // คุณสามารถส่งตำแหน่งนี้ไปยังแผนที่เพื่อรีเซ็ตตำแหน่งที่แสดงได้
     } else {
       Alert.alert('Location not available', 'Cannot reset location. Location data is not available.');
     }
@@ -61,10 +110,6 @@ const HomeScreen = ({ navigation }) => {
     setShowTraffic(!showTraffic);
     setDropdownVisible(false);
   };
-
-  if (!fontLoaded) {
-    return <ActivityIndicator size="large" color="#0000ff" />;
-  }
 
   return (
     <View style={styles.container}>
@@ -98,16 +143,16 @@ const HomeScreen = ({ navigation }) => {
             <Ionicons name="bus-outline" size={24} color="red" />
           </Pressable>
           <Pressable style={styles.dropdownItem} onPress={() => handleBusRouteSelection('Route 2')}>
-            <Ionicons name="bus-outline" size={24} color="blue" />
+            <Ionicons name="bus-outline" size={24} color="yellow" />
           </Pressable>
           <Pressable style={styles.dropdownItem} onPress={() => handleBusRouteSelection('Route 3')}>
             <Ionicons name="bus-outline" size={24} color="green" />
           </Pressable>
           <Pressable style={styles.dropdownItem} onPress={() => handleBusRouteSelection('Route 4')}>
-            <Ionicons name="bus-outline" size={24} color="yellow" />
+            <Ionicons name="bus-outline" size={24} color="purple" />
           </Pressable>
           <Pressable style={styles.dropdownItem} onPress={() => handleBusRouteSelection('Route 5')}>
-            <Ionicons name="bus-outline" size={24} color="purple" />
+            <Ionicons name="bus-outline" size={24} color="blue" />
           </Pressable>
           <Pressable style={styles.dropdownItem} onPress={handleResetLocation}>
             <MaterialIcons name="gps-fixed" size={24} color="#1e1e1e" />
@@ -121,8 +166,24 @@ const HomeScreen = ({ navigation }) => {
       <MyMapComponent
         selectedBusRoute={selectedBusRoute}
         showTraffic={showTraffic}
-        userLocation={location} // ส่งข้อมูลตำแหน่งผู้ใช้ไปยัง MyMapComponent
+        userLocation={location}
       />
+      
+      {modalVisible && (
+        <Animated.View
+          style={[styles.modalContainer, { transform: [{ translateY: slideAnim }] }]}
+        >
+          <View style={styles.modalBackground}>
+            <Text>สถานี:</Text>
+            {routeStations.map((station, index) => (
+              <Text key={index}>{station}</Text> // แสดงชื่อสถานี
+            ))}
+            <Pressable onPress={handleCloseModal}>
+              <Text style={styles.closeButton}>ปิด</Text>
+            </Pressable>
+          </View>
+        </Animated.View>
+      )}
     </View>
   );
 };
@@ -181,32 +242,50 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.10,
     shadowRadius: 1,
     elevation: 1.5,
-    boxShadow: '0px 2px 1px rgba(0, 0, 0, 0.1)',
   },
   dropdown: {
     position: 'absolute',
-    top: 95,
-    right: '4.5%',
-    width: 52,
+    top: 70, // Adjust this as needed for positioning
+    right: '5%',
     backgroundColor: '#fff',
     borderRadius: 12,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.10,
+    shadowOpacity: 0.1,
     shadowRadius: 1,
     elevation: 1.5,
     zIndex: 1,
-    marginTop: 70,
-    boxShadow: '0px 2px 1px rgba(0, 0, 0, 0.1)',
-  },
-  dropdownItem: {
-    width: 52,
-    height: 52,
+},
+dropdownItem: {
+    padding: 10,
     justifyContent: 'center',
     alignItems: 'center',
+},
+dropdownText: {
+    fontFamily: 'Prompt-Regular',
+    color: '#1e1e1e',
+},
+  modalContainer: {
+    position: 'absolute',
+    bottom: 0,
+    left: 0,
+    right: 0,
+    height: '33%', // ปรับความสูงของ modal ตามที่คุณต้องการ
+    backgroundColor: 'white',
+    borderTopLeftRadius: 20,
+    borderTopRightRadius: 20,
+    elevation: 5,
+    padding: 20,
+  },
+  modalBackground: {
+    justifyContent: 'center',
+    alignItems: 'center',
+    flex: 1,
+  },
+  closeButton: {
+    color: '#007BFF',
+    marginTop: 20,
   },
 });
 
 export default HomeScreen;
-
-//test branch

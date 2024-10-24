@@ -9,6 +9,7 @@ import {
 } from "react-native";
 import { AntDesign } from '@expo/vector-icons';
 import * as Font from 'expo-font';
+import { database, ref, onValue } from '../firebaseConfig'; // Import Firebase
 
 const fetchFonts = () => {
   return Font.loadAsync({
@@ -22,75 +23,64 @@ const { width } = Dimensions.get('window'); // ใช้ขนาดของห
 
 const DashboardScreen = ({ navigation }) => {
   const [fontLoaded, setFontLoaded] = useState(false);
+  const [notifyData, setNotifyData] = useState(null); // เก็บข้อมูลที่ดึงจาก Firebase
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     fetchFonts().then(() => setFontLoaded(true));
+
+    const fetchNotifyData = () => {
+      const notifyRef = ref(database, 'Notify'); // อ้างอิงไปที่ 'Notify'
+      onValue(notifyRef, (snapshot) => {
+        const data = snapshot.val();
+        if (data) {
+          setNotifyData(data); // เก็บข้อมูลใน state
+        }
+        setLoading(false); // หยุด loading เมื่อดึงข้อมูลเสร็จ
+      });
+    };
+
+    fetchNotifyData();
   }, []);
 
-  if (!fontLoaded) {
+  if (!fontLoaded || loading) {
     return <ActivityIndicator size="large" color="#0000ff" />;
   }
 
   return (
     <View style={styles.container}>
       <View style={styles.textContainer}>
-        <Text style={styles.header1}>ประกาศ</Text>
-        <Text style={styles.header2}>จากขนส่งภายในมหาวิทยาลัย</Text>
+        {/* ดึงข้อมูล Head และ Des จาก Firebase มาแสดง */}
+        <Text style={styles.header1}>{notifyData.Head}</Text>
+        <Text style={styles.header2}>{notifyData.Des}</Text>
       </View>
-      <View style={styles.buttonContainer}>
-        <TouchableOpacity
-          style={styles.button}
-          onPress={() => navigation.navigate('AnnounceScreen', { type: 'A' })}
-        >
-          <View style={styles.buttonContent}>
-            <Text style={styles.buttonTitleText}>การปรัปปรุง EV สาย A</Text>
-            <Text style={styles.buttonText}>32 สิงหา 2024-5.00</Text>
-          </View>
-          <AntDesign
-            name="right"
-            size={22}
-            color="#f65d3c"
-            style={styles.icon}
-          />
-        </TouchableOpacity>
-        <View style={styles.separator} />
-      </View>
-      <View style={styles.buttonContainer}>
-        <TouchableOpacity
-          style={styles.button}
-          onPress={() => navigation.navigate('AnnounceScreen', { type: 'B' })}
-        >
-          <View style={styles.buttonContent}>
-            <Text style={styles.buttonTitleText}>การปรัปปรุง EV สาย B</Text>
-            <Text style={styles.buttonText}>32 สิงหา 2024-5.00</Text>
-          </View>
-          <AntDesign
-            name="right"
-            size={22}
-            color="#f65d3c"
-            style={styles.icon}
-          />
-        </TouchableOpacity>
-        <View style={styles.separator} />
-      </View>
-      <View style={styles.buttonContainer}>
-        <TouchableOpacity
-          style={styles.button}
-          onPress={() => navigation.navigate('AnnounceScreen', { type: 'C' })}
-        >
-          <View style={styles.buttonContent}>
-            <Text style={styles.buttonTitleText}>การปรัปปรุง EV สาย C</Text>
-            <Text style={styles.buttonText}>32 สิงหา 2024-5.00</Text>
-          </View>
-          <AntDesign
-            name="right"
-            size={22}
-            color="#f65d3c"
-            style={styles.icon}
-          />
-        </TouchableOpacity>
-        <View style={styles.separator} />
-      </View>
+
+      {/* แสดงประกาศแต่ละตัว */}
+      {Object.keys(notifyData.Notice).map((key) => (
+        <View key={key} style={styles.buttonContainer}>
+          <TouchableOpacity
+            style={styles.button}
+            onPress={() => navigation.navigate('AnnounceScreen', { type: key })} // ส่ง type (A, B, C) ไปยังหน้ารายละเอียด
+          >
+            <View style={styles.buttonContent}>
+              {/* ดึงหัวข้อและวันที่จาก Notice */}
+              <Text style={styles.buttonTitleText}>
+                {notifyData.Notice[key].Head}
+              </Text>
+              <Text style={styles.buttonText}>
+                {notifyData.Notice[key].DateTime}
+              </Text>
+            </View>
+            <AntDesign
+              name="right"
+              size={22}
+              color="#f65d3c"
+              style={styles.icon}
+            />
+          </TouchableOpacity>
+          <View style={styles.separator} />
+        </View>
+      ))}
     </View>
   );
 };
