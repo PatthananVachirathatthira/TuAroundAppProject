@@ -1,12 +1,10 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { View, TextInput, Pressable, StyleSheet, ActivityIndicator, Alert, Modal, Text, Animated, ScrollView } from 'react-native';
+import { View, TextInput, Pressable, StyleSheet, ActivityIndicator, Alert, Modal, Text, Animated, ScrollView, PanResponder} from 'react-native';
 import { AntDesign, Ionicons, MaterialIcons, FontAwesome5 } from '@expo/vector-icons';
 import * as Font from 'expo-font';
 import * as Location from 'expo-location';
 import MyMapComponent from '../components/MyMapComponent';
 import { getDatabase, ref, get } from 'firebase/database';
-
-
 
 const fetchFonts = () => {
   return Font.loadAsync({
@@ -23,8 +21,13 @@ const HomeScreen = ({ navigation }) => {
   const [fontLoaded, setFontLoaded] = useState(false);
   const [location, setLocation] = useState(null);
   const [modalVisible, setModalVisible] = useState(false);
-  const [routeStations, setRouteStations] = useState([]); // ประกาศสถานี
-  const slideAnim = useRef(new Animated.Value(300)).current; // เริ่มต้นที่ 300
+  const [routeStations, setRouteStations] = useState([]);
+  const [routeColor, setRouteColor] = useState('');
+  const [busRoutes, setBusRoutes] = useState({});
+  const [polylineCoordinates, setPolylineCoordinates] = useState([]); // Added state for polyline coordinates
+  const [polylineColor, setPolylineColor] = useState(''); // Added state for polyline color
+
+  const slideAnim = useRef(new Animated.Value(300)).current;
 
   useEffect(() => {
     fetchFonts().then(() => setFontLoaded(true));
@@ -54,75 +57,81 @@ const HomeScreen = ({ navigation }) => {
   };
 
   const handleBusRouteSelection = async (route) => {
-  const db = getDatabase();
-  let routeKey;
-  switch (route) {
-  case 'Route 1':
-    routeKey = '1A-สีแดง'; // ต้องตรงกับคีย์ใน routeColors
-    break;
-  case 'Route 2':
-    routeKey = '1B-สีเหลือง';
-    break;
-  case 'Route 3':
-    routeKey = '2-สีเขียว';
-    break;
-  case 'Route 4':
-    routeKey = '3-ม่วง';
-    break;
-  case 'Route 5':
-    routeKey = '5-ฟ้า';
-    break;
-  default:
-    routeKey = null;
-}
+    let routeKey, routeColorKey;
 
-
-  if (routeKey) {
-    const routeRef = ref(db, `EVroute/${routeKey}`);
-    const snapshot = await get(routeRef);
-    if (snapshot.exists()) {
-      const routeData = snapshot.val();
-
-      // สร้าง array ของสถานีและลำดับ
-      let stationsWithOrder = [];
-
-      Object.entries(routeData).forEach(([stationName, order]) => {
-        if (typeof order === 'string') {
-          // กรณีที่มีหลายลำดับ เช่น "24, 27"
-          order.split(', ').forEach(singleOrder => {
-            stationsWithOrder.push({ name: stationName, order: parseInt(singleOrder) });
-          });
-        } else {
-          // กรณีที่มีลำดับเดียว
-          stationsWithOrder.push({ name: stationName, order: order });
-        }
-      });
-
-      // เรียงตามลำดับที่จากน้อยไปหามาก
-      stationsWithOrder.sort((a, b) => a.order - b.order);
-
-      // สร้าง array ของชื่อสถานีที่เรียงแล้ว
-      const stations = stationsWithOrder.map(station => station.name);
-
-      setRouteStations(stations); // กำหนดค่าสถานีจาก Firebase
-      setSelectedBusRoute(routeKey);
-      setModalVisible(true);
-      Animated.timing(slideAnim, {
-        toValue: 0, // เลื่อน modal ขึ้น
-        duration: 500,
-        useNativeDriver: true,
-      }).start();
-    } else {
-      console.log('No data available for this route.');
+    switch (route) {
+      case 'Route 1':
+        routeKey = '1A-สีแดง';
+        routeColorKey = '1A-สีแดง';
+        break;
+      case 'Route 2':
+        routeKey = '1B-สีเหลือง';
+        routeColorKey = '1B-สีเหลือง';
+        break;
+      case 'Route 3':
+        routeKey = '2-สีเขียว';
+        routeColorKey = '2-สีเขียว';
+        break;
+      case 'Route 4':
+        routeKey = '3-ม่วง';
+        routeColorKey = '3-ม่วง';
+        break;
+      case 'Route 5':
+        routeKey = '5-ฟ้า';
+        routeColorKey = '5-ฟ้า';
+        break;
+      default:
+        routeKey = null;
+        routeColorKey = null;
     }
-  }
-};
 
+    if (routeKey && routeColorKey) {
+      const db = getDatabase();
+      const routeRef = ref(db, `EVroute/${routeKey}`);
+      const colorRef = ref(db, `EVturn/${routeColorKey}`);
+
+      const routeSnapshot = await get(routeRef);
+      const colorSnapshot = await get(colorRef);
+
+      if (routeSnapshot.exists() && colorSnapshot.exists()) {
+        const routeData = routeSnapshot.val();
+        const routeColorData = colorSnapshot.val();
+
+        const stationsWithOrder = Object.entries(routeData).map(([stationName, order]) => {
+          return { name: stationName, order: parseInt(order) };
+        }).sort((a, b) => a.order - b.order);
+
+        const stations = stationsWithOrder.map(station => station.name);
+
+        const coordinates = routeColorData
+          .filter(coord => coord !== null)
+          .map(coord => {
+            const coords = coord.split(',').map(Number);
+            return { latitude: coords[0], longitude: coords[1] };
+          });
+
+        setRouteStations(stations);
+        setSelectedBusRoute(routeKey);
+        setBusRoutes({ ...busRoutes, [routeColorKey]: coordinates });
+        
+        setModalVisible(true);
+        Animated.timing(slideAnim, {
+          toValue: 0,
+          duration: 500,
+          useNativeDriver: true,
+        }).start();
+      } else {
+        console.log('No data available for this route.');
+      }
+    } else {
+      console.log('Invalid route selection.');
+    }
+  };
 
 
   const handleCloseModal = () => {
     Animated.timing(slideAnim, {
-      toValue: 300, // กลับไปที่ 300
+      toValue: 300,
       duration: 500,
       useNativeDriver: true,
     }).start(() => setModalVisible(false));
@@ -131,6 +140,8 @@ const HomeScreen = ({ navigation }) => {
   if (!fontLoaded) {
     return <ActivityIndicator size="large" color="#0000ff" />;
   }
+
+  
 
   const handleResetLocation = () => {
     setDropdownVisible(false);
@@ -202,28 +213,44 @@ const HomeScreen = ({ navigation }) => {
         selectedBusRoute={selectedBusRoute}
         showTraffic={showTraffic}
         userLocation={location}
+        busRoutes={busRoutes} // Pass the busRoutes
+        setBusRoutes={setBusRoutes} // Pass the setter function
+        polylineCoordinates={polylineCoordinates} // Pass polyline coordinates
+        polylineColor={polylineColor} // Pass polyline color
       />
       
       {modalVisible && (
   <Animated.View
     style={[styles.modalContainer, { transform: [{ translateY: slideAnim }] }]}
   >
-    <View style={styles.modalBackground}>
-      <Text style={styles.modalTitle}>สถานี:</Text>
-      <ScrollView contentContainerStyle={styles.stationList}>
+    <View style={styles.modalContent}>
+      <Text style={styles.modalTitle}>ข้อมูลเส้นทาง</Text>
+      
+      <View style={styles.routeInfo}>
+        <Text style={styles.routeText}>สถานีที่ผ่าน: {routeColor}</Text>
+      </View>
+      
+      {/* Scrollable list of stations */}
+      <ScrollView style={styles.stationScrollView} contentContainerStyle={styles.stationList}>
         {routeStations.map((station, index) => (
-          <Text key={index} style={styles.stationText}>{`${index + 1}. ${station}`}</Text>
+          <Text key={index} style={styles.stationText}>{station}</Text>
         ))}
       </ScrollView>
-      <Pressable onPress={handleCloseModal}>
-        <Text style={styles.closeButton}>ปิด</Text>
+
+      {/* Collapse button */}
+      <Pressable style={styles.closeButton} onPress={handleCloseModal}>
+        <Text style={styles.closeButtonText}>ปิด</Text>
       </Pressable>
     </View>
   </Animated.View>
 )}
+
     </View>
   );
 };
+
+
+
 
 const styles = StyleSheet.create({
   container: {
@@ -302,37 +329,47 @@ dropdownText: {
     fontFamily: 'Prompt-Regular',
     color: '#1e1e1e',
 },
-  modalContainer: {
+modalContainer: {
     position: 'absolute',
     bottom: 0,
     left: 0,
     right: 0,
-    height: '40%', // ปรับขนาดของ modal
+    height: '50%',
     backgroundColor: '#fff',
     borderTopLeftRadius: 20,
     borderTopRightRadius: 20,
     padding: 20,
-    elevation: 10, // ให้เงาดูสวย
+    elevation: 10,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 5 },
     shadowOpacity: 0.3,
     shadowRadius: 4,
   },
-  modalBackground: {
+  modalContent: {
     flex: 1,
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    backgroundColor: '#f9f9f9',
-    borderRadius: 20,
-    padding: 10,
+    justifyContent: 'center',
   },
   modalTitle: {
     fontSize: 20,
     fontFamily: 'Prompt-Bold',
-    marginBottom: 10,
     color: '#333',
+    textAlign: 'center',
+    marginBottom: 10,
+  },
+  routeInfo: {
+    marginBottom: 15,
+  },
+  routeText: {
+    fontSize: 16,
+    fontFamily: 'Prompt-Regular',
+    color: '#555',
+  },
+  stationScrollView: {
+    flex: 1,
+    marginVertical: 10,
   },
   stationList: {
+    flexDirection: 'column',
     alignItems: 'flex-start',
     paddingBottom: 20,
   },
@@ -340,22 +377,24 @@ dropdownText: {
     fontSize: 16,
     fontFamily: 'Prompt-Regular',
     color: '#555',
-    marginVertical: 5,
-    paddingHorizontal: 10,
+    padding: 10,
     backgroundColor: '#eaeaea',
     borderRadius: 10,
-    width: '100%', // ให้ข้อความอยู่ในกรอบ
+    marginVertical: 5,
+    width: '100%',
   },
   closeButton: {
+    alignSelf: 'center',
+    paddingVertical: 10,
+    paddingHorizontal: 30,
+    backgroundColor: '#eee',
+    borderRadius: 10,
+    marginTop: 15,
+  },
+  closeButtonText: {
     fontSize: 18,
     fontFamily: 'Prompt-Medium',
     color: '#007AFF',
-    paddingVertical: 10,
-    paddingHorizontal: 20,
-    backgroundColor: '#eee',
-    borderRadius: 10,
-    textAlign: 'center',
-    marginTop: 10,
   },
 });
 
