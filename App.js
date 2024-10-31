@@ -17,6 +17,7 @@ import MotorcycleScreen from "./screens/MotorcycleScreen";
 import VanScreen from "./screens/VanScreen";
 import AnnounceScreen from "./screens/AnnouceScreen";
 import DemandScreen from "./screens/DemandScreen";
+import SongthaewScreen from "./screens/SongthaewScreen";
 
 
 const Stack = createStackNavigator();
@@ -213,6 +214,25 @@ const TransportStackNavigator = () => (
       component={VanScreen}
       options={({ navigation }) => ({
         headerTitle: "รถตู้",
+        headerTitleAlign: "center",
+        headerTitleStyle: styles.headerTitle,
+        headerTransparent: true,
+        headerLeft: () => (
+          <AntDesign
+            name="left"
+            size={25}
+            color="#2a2a2a"
+            style={styles.iconStyle}
+            onPress={() => navigation.goBack()}
+          />
+        ),
+      })}
+    />
+     <Stack.Screen
+      name="SongthaewScreen"
+      component={SongthaewScreen}
+      options={({ navigation }) => ({
+        headerTitle: "รถสองแถว",
         headerTitleAlign: "center",
         headerTitleStyle: styles.headerTitle,
         headerTransparent: true,

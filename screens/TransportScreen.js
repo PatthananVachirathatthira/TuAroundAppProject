@@ -75,6 +75,25 @@ const TransportScreen = () => {
           />
         </LinearGradient>
       </TouchableOpacity>
+      <TouchableOpacity
+        style={styles.button}
+        onPress={() => navigation.navigate("SongthaewScreen")} // นำทางไปยัง MotorcycleScreen
+      >
+        <LinearGradient
+          colors={["#f65d3c", "#f65d3c"]}
+          start={[0, 0]}
+          end={[1, 1]}
+          style={styles.gradient}
+        >
+          <Text style={styles.buttonText}>รถสองแถว</Text>
+          <Feather
+            name="arrow-up-right"
+            size={27}
+            color="#fffbf7"
+            style={styles.icon}
+          />
+        </LinearGradient>
+      </TouchableOpacity>
     </View>
   );
 };
