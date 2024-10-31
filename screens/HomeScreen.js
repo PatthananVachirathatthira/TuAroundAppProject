@@ -135,7 +135,8 @@ const HomeScreen = ({ navigation }) => {
   const handleResetLocation = () => {
     setDropdownVisible(false);
     if (location) {
-      console.log('Current Location:', location);
+      console.log('Current Location:', location.coords);
+      Alert.alert('Current Location', `Latitude: ${location.coords.latitude}, Longitude: ${location.coords.longitude}`);
     } else {
       Alert.alert('Location not available', 'Cannot reset location. Location data is not available.');
     }
@@ -202,6 +203,7 @@ const HomeScreen = ({ navigation }) => {
         selectedBusRoute={selectedBusRoute}
         showTraffic={showTraffic}
         userLocation={location}
+        style={{ flex: 1 }}
       />
       
       {modalVisible && (
