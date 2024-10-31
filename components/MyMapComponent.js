@@ -6,21 +6,13 @@ import { database, ref, onValue } from '../firebaseConfig';
 const MyMapComponent = ({ selectedBusRoute, showTraffic, userLocation }) => {
   const [busStops, setBusStops] = useState([]);
   const [busRoutes, setBusRoutes] = useState({});
-  const [routeColors, setRouteColors] = useState({
-    '1A-สีแดง': '#FF0000', // สีแดงสำหรับสาย 1A
-    '1B-สีเหลือง': '#FFFF00', // สีเหลืองสำหรับสาย 1B
-    '2-สีเขียว': '#008000',  // สีเขียวสำหรับสาย 2
-    '3-ม่วง': '#800080',  // สีม่วงสำหรับสาย 3
-    '5-ฟ้า': '#0000FF',  // สีน้ำเงินสำหรับสาย 5
+  const [routeColors] = useState({
+    '1A-สีแดง': '#FF0000',
+    '1B-สีเหลือง': '#FFFF00',
+    '2-สีเขียว': '#008000',
+    '3-ม่วง': '#800080',
+    '5-ฟ้า': '#0000FF',
   });
-
-  const routeKeyMapping = {
-    '1A': '1A-สีแดง',
-    '1B': '1B-สีเหลือง',
-    '2': '2-สีเขียว',
-    '3': '3-ม่วง',
-    '5': '5-ฟ้า',
-  };
 
   useEffect(() => {
     // Fetch bus stops
@@ -30,47 +22,53 @@ const MyMapComponent = ({ selectedBusRoute, showTraffic, userLocation }) => {
       if (data) {
         const stops = Object.keys(data).map(key => {
           const coords = data[key].split(', ').map(coord => parseFloat(coord));
-          if (coords.length === 2 && !isNaN(coords[0]) && !isNaN(coords[1])) {
-            return { latitude: coords[0], longitude: coords[1], title: key };
-          }
-          return null;
+          return coords.length === 2 && !isNaN(coords[0]) && !isNaN(coords[1]) 
+            ? { latitude: coords[0], longitude: coords[1], title: key } 
+            : null;
         }).filter(stop => stop !== null);
         setBusStops(stops);
       }
     });
 
-    // Fetch bus routes from Firebase and filter out `null` values
+    // Fetch bus routes from Firebase
     const routesRef = ref(database, 'EVturn');
     onValue(routesRef, (snapshot) => {
       const data = snapshot.val();
       if (data) {
         const fetchedRoutes = Object.keys(data).reduce((acc, routeKey) => {
           const coordinates = data[routeKey]
-            .filter(coord => coord !== null) // Remove null entries
+            .filter(coord => coord !== null) // Check for non-null
             .map(coord => {
               const [latitude, longitude] = coord.split(', ').map(Number);
-              if (!isNaN(latitude) && !isNaN(longitude)) {
-                return { latitude, longitude };
-              } else {
-                console.error(`Invalid coordinates for ${routeKey}: ${coord}`);
-                return null;
-              }
+              return !isNaN(latitude) && !isNaN(longitude) ? { latitude, longitude } : null;
             })
-            .filter(coord => coord !== null); // Filter out invalid coordinates
-          acc[routeKey] = coordinates;
+            .filter(coord => coord !== null);
+          acc[routeKey] = coordinates; // Store processed coordinates
           return acc;
         }, {});
-        setBusRoutes(fetchedRoutes);
+        setBusRoutes(fetchedRoutes); // Set busRoutes
       }
     });
   }, []);
-
+  
   const initialRegion = {
     latitude: userLocation ? userLocation.latitude : 14.070074,
     longitude: userLocation ? userLocation.longitude : 100.604836,
     latitudeDelta: 0.01,
     longitudeDelta: 0.01,
   };
+
+  // Function to map route name to color
+  const getRouteNameWithColor = (routeNumber) => {
+    return Object.keys(routeColors).find(routeName => routeName.startsWith(routeNumber));
+  };
+
+  const mappedRouteName = getRouteNameWithColor(selectedBusRoute);
+  console.log('Mapped Route Name:', mappedRouteName);
+
+  const selectedRouteCoordinates = busRoutes[mappedRouteName] || [];
+  console.log('Selected Route Coordinates:', selectedRouteCoordinates);
+
 
   return (
     <View style={styles.mapContainer}>
@@ -79,10 +77,11 @@ const MyMapComponent = ({ selectedBusRoute, showTraffic, userLocation }) => {
         initialRegion={initialRegion}
         showsTraffic={showTraffic}
         showsUserLocation={true}
-        zoomEnabled={true}
-        scrollEnabled={true}
       >
-        {busStops.length === 0 && <Marker coordinate={initialRegion} title="No Bus Stops Available" />}
+        {busStops.length === 0 && (
+          <Marker coordinate={initialRegion} title="No Bus Stops Available" />
+        )}
+        
         {busStops.map((stop, index) => (
           <Marker
             key={index}
@@ -97,17 +96,15 @@ const MyMapComponent = ({ selectedBusRoute, showTraffic, userLocation }) => {
           </Marker>
         ))}
 
-        {selectedBusRoute && busRoutes[selectedBusRoute] && (
-          <>
-            {console.log('Selected Bus Route:', selectedBusRoute)}
-            {console.log('Route Color:', routeColors[routeKeyMapping[selectedBusRoute]])}
+        
 
-            <Polyline
-              coordinates={busRoutes[selectedBusRoute]}
-              strokeColor={routeColors[routeKeyMapping[selectedBusRoute]]} // Use the mapped color
-              strokeWidth={3}
-            />
-          </>
+        {/* Render polyline for the selected bus route */}
+        {selectedRouteCoordinates.length > 0 && (
+          <Polyline
+            coordinates={selectedRouteCoordinates}
+            strokeColor={routeColors[mappedRouteName]} // Use the correct color from routeColors
+            strokeWidth={3}
+          />
         )}
       </MapView>
     </View>
