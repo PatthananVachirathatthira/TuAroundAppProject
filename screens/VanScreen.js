@@ -1,9 +1,18 @@
-import React, { useEffect, useState, useRef } from "react"; 
-import { View, StyleSheet, Dimensions, TouchableOpacity, Text, Modal, ScrollView } from "react-native";
+import React, { useEffect, useState, useRef } from "react";
+import {
+  View,
+  StyleSheet,
+  Dimensions,
+  TouchableOpacity,
+  Text,
+  Modal,
+  ScrollView,
+} from "react-native";
 import MapView, { Marker } from "react-native-maps";
 import * as Location from "expo-location";
-import { MaterialIcons } from "@expo/vector-icons";
-import { database, ref, onValue } from '../firebaseConfig';
+import * as Font from "expo-font";
+import { MaterialIcons, AntDesign } from "@expo/vector-icons";
+import { database, ref, onValue } from "../firebaseConfig";
 
 const VanScreen = () => {
   const [location, setLocation] = useState({
@@ -16,6 +25,19 @@ const VanScreen = () => {
   const [modalVisible, setModalVisible] = useState(false);
   const [ticketInfo, setTicketInfo] = useState(null);
   const mapRef = useRef(null);
+  const [fontLoaded, setFontLoaded] = useState(false);
+
+  const fetchFonts = () => {
+    return Font.loadAsync({
+      "Prompt-Regular": require("../assets/fonts/Prompt-Regular.ttf"),
+      "Prompt-Bold": require("../assets/fonts/Prompt-Bold.ttf"),
+      "Prompt-Medium": require("../assets/fonts/Prompt-Medium.ttf"),
+    });
+  };
+
+  useEffect(() => {
+    fetchFonts().then(() => setFontLoaded(true));
+  }, []);
 
   const getCurrentLocation = async () => {
     let { status } = await Location.requestForegroundPermissionsAsync();
@@ -43,23 +65,23 @@ const VanScreen = () => {
       mapRef.current.animateToRegion(location, 1000);
     }
 
-    const vanRef = ref(database, 'Van');
+    const vanRef = ref(database, "Van");
     onValue(vanRef, (snapshot) => {
       const data = snapshot.val();
       if (data) {
         const stops = [];
         Object.entries(data).forEach(([name, details]) => {
-          if (typeof details === 'object') {
+          if (typeof details === "object") {
             Object.entries(details).forEach(([key, value]) => {
               if (key.startsWith("ท่า")) {
-                const coords = value || '';
-                const [latitude, longitude] = coords.split(', ').map(Number);
+                const coords = value || "";
+                const [latitude, longitude] = coords.split(", ").map(Number);
                 stops.push({ name: key, latitude, longitude });
               }
             });
           } else if (name.startsWith("ท่า")) {
-            const coords = details || '';
-            const [latitude, longitude] = coords.split(', ').map(Number);
+            const coords = details || "";
+            const [latitude, longitude] = coords.split(", ").map(Number);
             stops.push({ name, latitude, longitude });
           }
         });
@@ -83,30 +105,45 @@ const VanScreen = () => {
 
   const renderTicketInfo = () => {
     if (!ticketInfo) return null;
-
+  
     const filteredTicketInfo = Object.fromEntries(
-      Object.entries(ticketInfo).filter(([location]) => 
-        location !== "ท่ารถตู้"
-      )
+      Object.entries(ticketInfo).filter(([location]) => location !== "ท่ารถตู้")
     );
-
+  
     return (
-      <ScrollView>
+      <ScrollView
+        showsVerticalScrollIndicator={false}
+        showsHorizontalScrollIndicator={false} // ปิดเส้นเลื่อนแนวนอน
+      >
         <Text style={styles.title}>ข้อมูลการโดยสาร</Text>
         {Object.entries(filteredTicketInfo).map(([location, routes]) => (
           <View key={location} style={styles.infoContainer}>
-            <TouchableOpacity onPress={() => {
-              const coords = routes["ท่า" + location] || "";
-              const [latitude, longitude] = coords.split(', ').map(Number);
-              handleLocationPress(latitude, longitude);
-            }}>
+            <TouchableOpacity
+              onPress={() => {
+                const coords = routes["ท่า" + location] || "";
+                const [latitude, longitude] = coords.split(", ").map(Number);
+                handleLocationPress(latitude, longitude);
+              }}
+            >
               <Text style={styles.locationName}>{location}</Text>
             </TouchableOpacity>
             {Object.entries(routes).map(([route, details]) => {
-              if (typeof details === 'object') {
+              if (typeof details === "object") {
                 return (
                   <Text key={route}>
-                    {route}: รอบแรก {details["รอบแรก"]}, รอบสุดท้าย {details["รอบสุดท้าย"]}, ราคา {details["ราคา"]} บาท
+                    <Text style={styles.routeName}>{route}</Text>
+                    {"\n"} {/* เพิ่มบรรทัดใหม่ */}
+                    รอบแรก:{" "}
+                    <Text style={styles.routeValue}>{details["รอบแรก"]}</Text>
+                    {"\n"} {/* เพิ่มบรรทัดใหม่ */}
+                    รอบสุดท้าย:{" "}
+                    <Text style={styles.routeValue}>
+                      {details["รอบสุดท้าย"]}
+                    </Text>
+                    {"\n"} {/* เพิ่มบรรทัดใหม่ */}
+                    ราคา:{" "}
+                    <Text style={styles.routeValue}>{details["ราคา"]} บาท</Text>
+                    {"\n\n"} {/* เพิ่มบรรทัดว่างระหว่างรายการ */}
                   </Text>
                 );
               }
@@ -138,12 +175,18 @@ const VanScreen = () => {
         ))}
       </MapView>
 
-      <TouchableOpacity style={styles.customButton} onPress={getCurrentLocation}>
+      <TouchableOpacity
+        style={styles.customButton}
+        onPress={getCurrentLocation}
+      >
         <MaterialIcons name="gps-fixed" size={24} color="black" />
       </TouchableOpacity>
 
-      <TouchableOpacity style={styles.detailsButton} onPress={() => setModalVisible(true)}>
-        <Text style={styles.detailsButtonText}>รายละเอียด</Text>
+      <TouchableOpacity
+        style={styles.detailsButton}
+        onPress={() => setModalVisible(true)}
+      >
+        <AntDesign name="infocirlceo" size={24} color="black" />
       </TouchableOpacity>
 
       <Modal
@@ -155,8 +198,11 @@ const VanScreen = () => {
         <View style={styles.modalContainer}>
           <View style={styles.modalContent}>
             {renderTicketInfo()}
-            <TouchableOpacity style={styles.closeButton} onPress={() => setModalVisible(false)}>
-              <Text style={styles.closeButtonText}>ปิด</Text>
+            <TouchableOpacity
+              style={styles.closeButton}
+              onPress={() => setModalVisible(false)}
+            >
+              <MaterialIcons name="close" size={24} color="white" />
             </TouchableOpacity>
           </View>
         </View>
@@ -166,6 +212,14 @@ const VanScreen = () => {
 };
 
 const styles = StyleSheet.create({
+  routeName: {
+    fontSize: 14,
+    fontFamily: 'Prompt-Regular',
+  },
+  routeValue: {
+    color: '#000',
+    fontFamily: 'Prompt-Regular',
+  },
   container: {
     flex: 1,
   },
@@ -175,20 +229,27 @@ const styles = StyleSheet.create({
   },
   customButton: {
     position: "absolute",
-    bottom: 80,
+    bottom: 70,
     right: 30,
     backgroundColor: "white",
-    padding: 10,
-    borderRadius: 50,
+    width: 50,
+    height: 50,
+    borderRadius: 25,
+    justifyContent: "center",
+    alignItems: "center",
     elevation: 5,
   },
   detailsButton: {
     position: "absolute",
-    bottom: 35,
-    left: 30,
-    backgroundColor: "blue",
-    padding: 10,
-    borderRadius: 5,
+    bottom: 140, // ระยะห่างจากปุ่ม gps-fixed
+    right: 30,
+    backgroundColor: "white",
+    width: 50,
+    height: 50,
+    borderRadius: 25,
+    justifyContent: "center",
+    alignItems: "center",
+    elevation: 5,
   },
   detailsButtonText: {
     color: "white",
@@ -205,29 +266,44 @@ const styles = StyleSheet.create({
     padding: 20,
     backgroundColor: "white",
     borderRadius: 10,
-    alignItems: "flex-start",
+    alignItems: "center", // ศูนย์กลางในแนวนอน
+    justifyContent: "center", // ศูนย์กลางในแนวตั้ง
+    position: "relative",
   },
   title: {
-    fontSize: 18,
-    fontWeight: "bold",
+    fontSize: 20,
     marginBottom: 10,
+    fontFamily: "Prompt-Bold",
   },
   infoContainer: {
-    marginBottom: 15,
+    marginBottom: 10, // ลด margin ด้านล่าง
+    paddingVertical: 5, // เพิ่ม padding แนวตั้ง
+    paddingHorizontal: 5, // ลด padding ซ้าย-ขวา
   },
   locationName: {
-    fontWeight: "bold",
-    fontSize: 16,
+    fontSize: 18,
+    fontFamily: "Prompt-Medium",
+    alignSelf: 'flex-start', // ชิดซ้าย
   },
   closeButton: {
-    marginTop: 20,
-    backgroundColor: "red",
-    padding: 10,
-    borderRadius: 5,
+    position: "absolute", // ใช้ absolute เพื่อให้วางปุ่มได้อิสระ
+    top: 14,
+    right: 15,
+    backgroundColor: "black",
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    justifyContent: "center",
+    alignItems: "center",
+    elevation: 5,
   },
   closeButtonText: {
     color: "white",
-    fontWeight: "bold",
+    fontFamily: "Prompt-Regular",
+  },
+  routeText: {
+    fontSize: 14,
+    fontFamily: "Prompt-Regular",
   },
 });
 
