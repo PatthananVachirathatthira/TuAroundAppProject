@@ -214,14 +214,7 @@ const HomeScreen = ({ navigation }) => {
         selectedBusRoute={selectedBusRoute}
         showTraffic={showTraffic}
         userLocation={location}
-<<<<<<< HEAD
         style={{ flex: 1 }}
-=======
-        busRoutes={busRoutes} // Pass the busRoutes
-        setBusRoutes={setBusRoutes} // Pass the setter function
-        polylineCoordinates={polylineCoordinates} // Pass polyline coordinates
-        polylineColor={polylineColor} // Pass polyline color
->>>>>>> 88da78913da09077ba5bd04b7a86b8fb5a535206
       />
       
       {modalVisible && (
