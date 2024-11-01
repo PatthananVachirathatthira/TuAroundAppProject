@@ -1,55 +1,48 @@
-import React, { useEffect, useState, useRef } from "react";
-import { View, StyleSheet, Dimensions, TouchableOpacity } from "react-native";
-import MapView from "react-native-maps";
-import * as Location from "expo-location";
-import { MaterialIcons } from "@expo/vector-icons";
+import React, { useEffect, useState } from "react";
+import { View, Text, StyleSheet, Image, FlatList } from "react-native";
+import { database, ref, onValue } from "../firebaseConfig"; // Import firebase configuration
 
 const SongthaewScreen = () => {
-  const [location, setLocation] = useState(null);
-  const mapRef = useRef(null);
-
-  const getCurrentLocation = async () => {
-    let { status } = await Location.requestForegroundPermissionsAsync();
-    if (status !== "granted") {
-      console.log("Permission to access location was denied");
-      return;
-    }
-
-    let currentLocation = await Location.getCurrentPositionAsync({});
-    const currentRegion = {
-      latitude: currentLocation.coords.latitude,
-      longitude: currentLocation.coords.longitude,
-      latitudeDelta: 0.001,
-      longitudeDelta: 0.001,
-    };
-    setLocation(currentRegion);
-
-    if (mapRef.current) {
-      mapRef.current.animateToRegion(currentRegion, 1000);
-    }
-  };
+  const [data, setData] = useState({});
 
   useEffect(() => {
-    getCurrentLocation();
+    const fetchData = () => {
+      const songthaewRef = ref(database, "songthaew"); // Reference to the "songthaew" node in Firebase
+      onValue(songthaewRef, (snapshot) => {
+        const songthaewData = snapshot.val(); // Get the data from the snapshot
+        if (songthaewData) {
+          setData(songthaewData); // Set the data to state
+        }
+      });
+    };
+
+    fetchData();
   }, []);
+
+  const renderItem = ({ item }) => (
+    <View style={styles.itemContainer}>
+      <Text style={styles.routeText}>{item.route}</Text>
+      <Text style={styles.priceText}>{item.price} บาท</Text>
+    </View>
+  );
+
+  const songthaewRoutes = Object.entries(data).map(([route, price]) => ({
+    route,
+    price,
+  }));
 
   return (
     <View style={styles.container}>
-      {location ? (
-        <MapView
-          ref={mapRef}
-          style={styles.map}
-          initialRegion={location}
-          showsUserLocation={true}
-          showsMyLocationButton={false}
-          zoomEnabled={true}
-          scrollEnabled={true}
-        />
-      ) : null}
-
-      <TouchableOpacity style={styles.customButton} onPress={getCurrentLocation}>
-        <MaterialIcons name="gps-fixed" size={24} color="black" />
-      </TouchableOpacity>
+      <Image
+        source={require('../assets/images/songthaw.jpg')} // Path to your bus stop image
+        style={styles.image}
+      />
+      <FlatList
+        data={songthaewRoutes}
+        renderItem={renderItem}
+        keyExtractor={(item) => item.route}
+        contentContainerStyle={styles.list}
+      />
     </View>
   );
 };
@@ -57,19 +50,39 @@ const SongthaewScreen = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    backgroundColor: "#FFFAF0", // สีพื้นหลังโทนส้มอ่อน
+    alignItems: "center",
+    padding: 20,
   },
-  map: {
-    width: Dimensions.get("window").width,
-    height: Dimensions.get("window").height,
+  image: {
+    width: "100%",
+    height: 250, // ปรับขนาดให้สูงขึ้น
+    resizeMode: "cover", // ปรับเป็น cover เพื่อให้ดูดีขึ้น
+    borderRadius: 15, // เพิ่มมุมโค้งให้กับภาพ
+    overflow: "hidden", // ซ่อนส่วนที่เกินออกไป
+    marginBottom: 20,
   },
-  customButton: {
-    position: "absolute",
-    bottom: 35,
-    right: 30,
-    backgroundColor: "white",
-    padding: 10,
-    borderRadius: 50,
-    elevation: 5,
+  list: {
+    paddingBottom: 20,
+  },
+  itemContainer: {
+    backgroundColor: "#FFA500", // สีส้ม
+    borderRadius: 10,
+    padding: 20,
+    marginVertical: 10,
+    width: "100%",
+    alignItems: "center",
+    elevation: 5, // เพิ่มเงา
+  },
+  routeText: {
+    fontSize: 20,
+    fontWeight: "bold",
+    color: "#FFFFFF",
+    textTransform: "uppercase", // ทำให้ตัวอักษรเป็นตัวพิมพ์ใหญ่ทั้งหมด
+  },
+  priceText: {
+    fontSize: 18,
+    color: "#FFFFFF",
   },
 });
 

@@ -7,6 +7,8 @@ import {
   Text,
   Modal,
   ScrollView,
+  Image, // Import Image component
+
 } from "react-native";
 import MapView, { Marker } from "react-native-maps";
 import * as Location from "expo-location";
@@ -22,6 +24,7 @@ const VanScreen = () => {
     longitudeDelta: 0.01,
   });
   const [vanStops, setVanStops] = useState([]);
+  const [busStops, setBusStops] = useState([]); // Add state for bus stops
   const [modalVisible, setModalVisible] = useState(false);
   const [ticketInfo, setTicketInfo] = useState(null);
   const mapRef = useRef(null);
@@ -61,10 +64,7 @@ const VanScreen = () => {
   };
 
   useEffect(() => {
-    if (mapRef.current) {
-      mapRef.current.animateToRegion(location, 1000);
-    }
-
+    // Fetch van stops
     const vanRef = ref(database, "Van");
     onValue(vanRef, (snapshot) => {
       const data = snapshot.val();
@@ -87,6 +87,23 @@ const VanScreen = () => {
         });
         setVanStops(stops);
         setTicketInfo(data);
+      }
+    });
+
+    // Fetch bus stops
+    const busStopsRef = ref(database, "EVstop");
+    onValue(busStopsRef, (snapshot) => {
+      const data = snapshot.val();
+      if (data) {
+        const stops = Object.keys(data)
+          .map((key) => {
+            const coords = data[key].split(", ").map((coord) => parseFloat(coord));
+            return coords.length === 2 && !isNaN(coords[0]) && !isNaN(coords[1])
+              ? { latitude: coords[0], longitude: coords[1], title: key }
+              : null;
+          })
+          .filter((stop) => stop !== null);
+        setBusStops(stops); // Set busStops
       }
     });
   }, []);
@@ -173,6 +190,20 @@ const VanScreen = () => {
             title={stop.name}
           />
         ))}
+        
+        {/* Display bus stops */}
+        {busStops.map((stop, index) => (
+          <Marker
+            key={`bus-${index}`}
+            coordinate={{ latitude: stop.latitude, longitude: stop.longitude }}
+          >
+            <Image
+              source={require('../assets/images/bus-stop.png')} // Your bus stop image path
+              style={{ width: 18, height: 18 }} // Adjust the size as needed
+              resizeMode="contain"
+            />
+          </Marker>
+        ))}
       </MapView>
 
       <TouchableOpacity
@@ -209,7 +240,7 @@ const VanScreen = () => {
       </Modal>
     </View>
   );
-};
+};;
 
 const styles = StyleSheet.create({
   routeName: {

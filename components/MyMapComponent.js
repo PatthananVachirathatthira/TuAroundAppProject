@@ -89,7 +89,7 @@ const MyMapComponent = ({ selectedBusRoute, showTraffic, userLocation }) => {
             title={stop.title}
           >
             <Image
-              source={require('../assets/bus-stop.png')}
+              source={require('../assets/images/bus-stop.png')}
               style={{ width: 18, height: 18 }}
               resizeMode="contain"
             />
