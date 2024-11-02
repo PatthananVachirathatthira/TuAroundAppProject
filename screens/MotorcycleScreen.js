@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useRef } from "react";
-import { View, StyleSheet, Dimensions, TouchableOpacity, Image, Modal, Text, Pressable } from "react-native"; // Import Modal and Pressable
+import { View, StyleSheet, Dimensions, TouchableOpacity, Image, Modal, Text, Pressable, ScrollView } from "react-native";
 import MapView, { Marker } from "react-native-maps";
 import * as Location from "expo-location";
 import { MaterialIcons } from "@expo/vector-icons";
@@ -15,9 +15,8 @@ const MotorcycleScreen = () => {
 
   const [bikeLocations, setBikeLocations] = useState([]);
   const [busStops, setBusStops] = useState([]);
-  const [modalVisible, setModalVisible] = useState(false); // State for modal visibility
-  const [selectedStop, setSelectedStop] = useState(null); // State for the selected bus stop
-  const [priceDetails, setPriceDetails] = useState(null); // State for price details
+  const [feeData, setFeeData] = useState(null); 
+  const [modalVisible, setModalVisible] = useState(false);
   const mapRef = useRef(null);
 
   const getCurrentLocation = async () => {
@@ -31,8 +30,8 @@ const MotorcycleScreen = () => {
     const currentRegion = {
       latitude: currentLocation.coords.latitude,
       longitude: currentLocation.coords.longitude,
-      latitudeDelta: 0.01,
-      longitudeDelta: 0.01,
+      latitudeDelta: 0.001,
+      longitudeDelta: 0.001,
     };
     setLocation(currentRegion);
 
@@ -73,27 +72,13 @@ const MotorcycleScreen = () => {
         setBikeLocations(locations);
       }
     });
-  }, []);
 
-  // Function to fetch price details from Firebase
-  const fetchPriceDetails = (locationId) => {
-    const priceRef = ref(database, `priceData/${locationId}`); // Update the path as needed
-    onValue(priceRef, (snapshot) => {
+    const feeRef = ref(database, "fee");
+    onValue(feeRef, (snapshot) => {
       const data = snapshot.val();
-      if (data) {
-        setPriceDetails(data); // Set price details from Firebase
-      } else {
-        setPriceDetails(null); // Clear details if no data is found
-      }
+      setFeeData(data);
     });
-  };
-
-  // Function to handle marker press
-  const handleMarkerPress = (stop) => {
-    setSelectedStop(stop);
-    fetchPriceDetails(stop.title); // Fetch price details for the clicked stop
-    setModalVisible(true); // Show the modal when a marker is pressed
-  };
+  }, []);
 
   return (
     <View style={styles.container}>
@@ -103,37 +88,33 @@ const MotorcycleScreen = () => {
           style={styles.map}
           initialRegion={location}
           showsUserLocation={true}
-          showsMyLocationButton={true}
+          showsMyLocationButton={false}
           zoomEnabled={true}
           scrollEnabled={true}
         >
-          {/* Show EVStop markers */}
           {busStops.map((stop, index) => (
             <Marker
               key={`bus-${index}`}
               coordinate={{ latitude: stop.latitude, longitude: stop.longitude }}
               title={stop.title}
-              onPress={() => handleMarkerPress(stop)} // Handle marker press
             >
               <Image
                 source={require('../assets/images/bus-stop.png')}
-                style={{ width: 18, height: 18 }}
+                style={{ width: 20, height: 20 }}
                 resizeMode="contain"
               />
             </Marker>
           ))}
-
-          {/* Show bike location markers */}
+          
           {bikeLocations.map((location, index) => (
             <Marker
               key={`bike-${index}`}
               coordinate={{ latitude: location.latitude, longitude: location.longitude }}
               title={location.title}
-              onPress={() => handleMarkerPress(location)} // Handle marker press
             >
               <Image
                 source={require('../assets/images/taxi-motorcycle.jpg')}
-                style={{ width: 18, height: 18 }}
+                style={{ width: 20, height: 20 }}
                 resizeMode="contain"
               />
             </Marker>
@@ -141,33 +122,45 @@ const MotorcycleScreen = () => {
         </MapView>
       ) : null}
 
-      {/* Current location button */}
       <TouchableOpacity style={styles.customButton} onPress={getCurrentLocation}>
         <MaterialIcons name="gps-fixed" size={24} color="black" />
       </TouchableOpacity>
 
-      {/* Modal for showing bus stop details */}
+      <TouchableOpacity style={styles.openModalButton} onPress={() => setModalVisible(true)}>
+        <Text style={styles.buttonText}>info</Text>
+      </TouchableOpacity>
+
       <Modal
         animationType="slide"
         transparent={true}
         visible={modalVisible}
-        onRequestClose={() => {
-          setModalVisible(!modalVisible);
-        }}
+        onRequestClose={() => setModalVisible(false)}
       >
-        <View style={styles.modalView}>
-          <Text style={styles.modalText}>{selectedStop ? selectedStop.title : ''}</Text>
-          {priceDetails && (
-            <>
-              <Text>สถานที่: {priceDetails.location}</Text>
-              <Text>ราคา: {priceDetails.price} บาท</Text>
-            </>
-          )}
-          <Pressable
-            style={[styles.button, styles.buttonClose]}
-            onPress={() => setModalVisible(false)}
-          >
-            <Text style={styles.textStyle}>Close</Text>
+        <View style={styles.modalContainer}>
+          <ScrollView contentContainerStyle={styles.modalContent}>
+            <Text style={styles.modalTitle}>รายละเอียด</Text>
+            {feeData ? (
+              Object.keys(feeData).map((origin) => (
+                <View key={origin}>
+                  <Text style={styles.originText}>ต้นทาง: {origin}</Text>
+                  {Object.keys(feeData[origin]).map((destination) => (
+                    <View key={destination} style={styles.destinationContainer}>
+                      <Text style={styles.destinationText}>{destination}</Text>
+                      {Object.keys(feeData[origin][destination]).map((stop) => (
+                        <Text key={stop} style={styles.feeText}>
+                          {stop}: {feeData[origin][destination][stop]} บาท
+                        </Text>
+                      ))}
+                    </View>
+                  ))}
+                </View>
+              ))
+            ) : (
+              <Text>Loading...</Text>
+            )}
+          </ScrollView>
+          <Pressable style={styles.closeButton} onPress={() => setModalVisible(false)}>
+            <Text style={styles.closeButtonText}>Close</Text>
           </Pressable>
         </View>
       </Modal>
@@ -187,42 +180,70 @@ const styles = StyleSheet.create({
     position: "absolute",
     bottom: 35,
     right: 30,
-    backgroundColor: "white",
-    padding: 10,
+    backgroundColor: "#FFFFFF",
+    padding: 12,
     borderRadius: 50,
-    elevation: 5,
+    elevation: 6,
   },
-  modalView: {
-    margin: 20,
-    backgroundColor: "white",
-    borderRadius: 20,
-    padding: 35,
-    alignItems: "center",
-    shadowColor: "#000",
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
-    shadowOpacity: 0.25,
-    shadowRadius: 4,
-    elevation: 5,
+  openModalButton: {
+    position: "absolute",
+    bottom: 35,
+    left: 30,
+    backgroundColor: "#4CAF50",
+    padding: 12,
+    borderRadius: 50,
+    elevation: 6,
   },
-  button: {
-    borderRadius: 20,
-    padding: 10,
-    elevation: 2,
+  buttonText: {
+    color: "#FFFFFF",
+    fontWeight: "bold",
   },
-  buttonClose: {
+  modalContainer: {
+    flex: 1,
+    justifyContent: 'flex-end',
+    backgroundColor: "rgba(0,0,0,0.3)",
+  },
+  modalContent: {
+    backgroundColor: "#FFFFFF",
+    borderTopLeftRadius: 20,
+    borderTopRightRadius: 20,
+    padding: 20,
+  },
+  modalTitle: {
+    fontSize: 22,
+    fontWeight: '600',
+    marginBottom: 15,
+    color: "#333",
+  },
+  originText: {
+    fontSize: 18,
+    fontWeight: '500',
+    marginVertical: 8,
+  },
+  destinationContainer: {
+    paddingVertical: 5,
+    paddingHorizontal: 10,
+  },
+  destinationText: {
+    fontSize: 16,
+    color: "#555",
+    marginVertical: 2,
+  },
+  feeText: {
+    fontSize: 14,
+    color: "#888",
+  },
+  closeButton: {
+    alignSelf: "center",
     backgroundColor: "#2196F3",
+    paddingVertical: 10,
+    paddingHorizontal: 20,
+    borderRadius: 20,
+    marginTop: 15,
   },
-  textStyle: {
+  closeButtonText: {
     color: "white",
     fontWeight: "bold",
-    textAlign: "center",
-  },
-  modalText: {
-    marginBottom: 15,
-    textAlign: "center",
   },
 });
 
