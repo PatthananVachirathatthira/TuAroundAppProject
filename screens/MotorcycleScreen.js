@@ -14,9 +14,9 @@ const MotorcycleScreen = () => {
   });
 
   const [bikeLocations, setBikeLocations] = useState([]);
-  const [busStops, setBusStops] = useState([]);
-  const [feeData, setFeeData] = useState(null); 
+  const [feeData, setFeeData] = useState(null);
   const [modalVisible, setModalVisible] = useState(false);
+  const [selectedBikeLocation, setSelectedBikeLocation] = useState(null); // State for selected bike location
   const mapRef = useRef(null);
 
   const getCurrentLocation = async () => {
@@ -41,22 +41,7 @@ const MotorcycleScreen = () => {
   };
 
   useEffect(() => {
-    const busStopsRef = ref(database, "EVstop");
-    onValue(busStopsRef, (snapshot) => {
-      const data = snapshot.val();
-      if (data) {
-        const stops = Object.keys(data)
-          .map((key) => {
-            const coords = data[key].split(", ").map((coord) => parseFloat(coord));
-            return coords.length === 2 && !isNaN(coords[0]) && !isNaN(coords[1])
-              ? { latitude: coords[0], longitude: coords[1], title: key }
-              : null;
-          })
-          .filter((stop) => stop !== null);
-        setBusStops(stops);
-      }
-    });
-
+    
     const bikeLocationRef = ref(database, "BikeLocation");
     onValue(bikeLocationRef, (snapshot) => {
       const data = snapshot.val();
@@ -73,12 +58,20 @@ const MotorcycleScreen = () => {
       }
     });
 
-    const feeRef = ref(database, "fee");
+    const feeRef = ref(database, "BikeFee");
     onValue(feeRef, (snapshot) => {
       const data = snapshot.val();
       setFeeData(data);
     });
   }, []);
+
+  const handleMarkerPress = (location) => {
+    if (feeData && feeData[location.title]) {
+      setSelectedBikeLocation({ ...location, fees: feeData[location.title] });
+    } else {
+      setSelectedBikeLocation({ ...location, fees: {} });
+    }
+  };
 
   return (
     <View style={styles.container}>
@@ -92,25 +85,14 @@ const MotorcycleScreen = () => {
           zoomEnabled={true}
           scrollEnabled={true}
         >
-          {busStops.map((stop, index) => (
-            <Marker
-              key={`bus-${index}`}
-              coordinate={{ latitude: stop.latitude, longitude: stop.longitude }}
-              title={stop.title}
-            >
-              <Image
-                source={require('../assets/images/bus-stop.png')}
-                style={{ width: 20, height: 20 }}
-                resizeMode="contain"
-              />
-            </Marker>
-          ))}
+          
           
           {bikeLocations.map((location, index) => (
             <Marker
               key={`bike-${index}`}
               coordinate={{ latitude: location.latitude, longitude: location.longitude }}
               title={location.title}
+              onPress={() => handleMarkerPress(location)} // Use handleMarkerPress to set selected location with fees
             >
               <Image
                 source={require('../assets/images/taxi-motorcycle.jpg')}
@@ -130,6 +112,7 @@ const MotorcycleScreen = () => {
         <Text style={styles.buttonText}>info</Text>
       </TouchableOpacity>
 
+      {/* Modal for general information */}
       <Modal
         animationType="slide"
         transparent={true}
@@ -146,11 +129,9 @@ const MotorcycleScreen = () => {
                   {Object.keys(feeData[origin]).map((destination) => (
                     <View key={destination} style={styles.destinationContainer}>
                       <Text style={styles.destinationText}>{destination}</Text>
-                      {Object.keys(feeData[origin][destination]).map((stop) => (
-                        <Text key={stop} style={styles.feeText}>
-                          {stop}: {feeData[origin][destination][stop]} บาท
-                        </Text>
-                      ))}
+                      <Text style={styles.feeText}>
+                        ค่าบริการ: {feeData[origin][destination]} บาท
+                      </Text>
                     </View>
                   ))}
                 </View>
@@ -164,6 +145,39 @@ const MotorcycleScreen = () => {
           </Pressable>
         </View>
       </Modal>
+
+      {/* Modal for selected bike location details */}
+      {selectedBikeLocation && (
+  <Modal
+    animationType="slide"
+    transparent={true}
+    visible={!!selectedBikeLocation}
+    onRequestClose={() => setSelectedBikeLocation(null)}
+  >
+    <View style={styles.modalContainer}>
+      <View style={styles.modalContent}>
+        <Text style={styles.modalTitle}>{selectedBikeLocation.title}</Text>
+        {selectedBikeLocation.fees ? (
+          Object.keys(selectedBikeLocation.fees).map((destination) => (
+            selectedBikeLocation.fees[destination] > 0 && ( // Only show if fee is greater than 0
+              <View key={destination} style={styles.destinationContainer}>
+                <Text style={styles.destinationText}>{destination}</Text>
+                <Text style={styles.feeText}>
+                  ค่าบริการ: {selectedBikeLocation.fees[destination]} บาท
+                </Text>
+              </View>
+            )
+          ))
+        ) : (
+          <Text>No fee data available.</Text>
+        )}
+        <Pressable style={styles.closeButton} onPress={() => setSelectedBikeLocation(null)}>
+          <Text style={styles.closeButtonText}>Close</Text>
+        </Pressable>
+      </View>
+    </View>
+  </Modal>
+)}
     </View>
   );
 };
@@ -240,6 +254,15 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     borderRadius: 20,
     marginTop: 15,
+  },
+  closeButtonText: {
+    color: "white",
+    fontWeight: "bold",
+  },
+   modalText: {
+    fontSize: 16,
+    color: "#555",
+    marginVertical: 5,
   },
   closeButtonText: {
     color: "white",

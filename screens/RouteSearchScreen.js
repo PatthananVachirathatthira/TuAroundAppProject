@@ -22,20 +22,29 @@ const fetchFonts = () => {
 
 const RouteSearchScreen = ({ navigation }) => {
   const places = [
-    { id: "1", name: "หอสมุดป๋วย" },
-    { id: "2", name: "อาคารเรียนรวม 1" },
-    { id: "3", name: "กรีนแคนทีน" },
+    { id: "1", name: "SC CANTEEN" },
+    { id: "2", name: "SIIT" },
+    { id: "3", name: "สถานีขนส่ง รถตู้" },
   ];
 
   const [startLocation, setStartLocation] = useState("");
   const [endLocation, setEndLocation] = useState("");
   const [inputField, setInputField] = useState(null);
   const [fontLoaded, setFontLoaded] = useState(false);
-  const [errorMessage, setErrorMessage] = useState(""); // เพิ่ม state สำหรับแสดงข้อความผิดพลาด
+  const [errorMessage, setErrorMessage] = useState("");
+  const [filteredPlaces, setFilteredPlaces] = useState([]); // สำหรับเก็บสถานที่ที่กรองแล้ว
 
   useEffect(() => {
     fetchFonts().then(() => setFontLoaded(true));
   }, []);
+
+  // ฟังก์ชันสำหรับกรองสถานที่
+  const filterPlaces = (text) => {
+    const filtered = places.filter(place => 
+      place.name.toLowerCase().includes(text.toLowerCase())
+    );
+    setFilteredPlaces(filtered);
+  };
 
   const renderPlace = ({ item }) => (
     <TouchableOpacity
@@ -46,6 +55,7 @@ const RouteSearchScreen = ({ navigation }) => {
         } else if (inputField === "end") {
           setEndLocation(item.name);
         }
+        setFilteredPlaces([]); // รีเซ็ตคำแนะนำเมื่อเลือกสถานที่
       }}
     >
       <MaterialIcons name="stars" size={22} color="#f65d3c" />
@@ -55,14 +65,14 @@ const RouteSearchScreen = ({ navigation }) => {
 
   const handleSearchRoute = () => {
     if (!startLocation) {
-      setStartLocation("ตำแหน่งปัจจุบัน"); // ตั้งค่าเริ่มต้นถ้าผู้ใช้ไม่กรอกค่า
+      setStartLocation("ตำแหน่งปัจจุบัน");
     }
-    
+
     if (!endLocation) {
-      setErrorMessage("กรุณาเลือกสถานีปลายทาง"); // แสดงข้อความผิดพลาดถ้าไม่กรอกปลายทาง
+      setErrorMessage("กรุณาเลือกสถานีปลายทาง");
     } else {
-      setErrorMessage(""); // ล้างข้อความผิดพลาด
-      navigation.navigate("RouteScreen");
+      setErrorMessage("");
+      navigation.navigate("RouteScreen", { start: startLocation, end: endLocation });
     }
   };
 
@@ -84,10 +94,23 @@ const RouteSearchScreen = ({ navigation }) => {
             style={styles.input}
             placeholder="ตำแหน่งปัจจุบัน"
             placeholderTextColor="#D3D3D3"
-            value={startLocation} // ถ้าไม่ได้กรอกให้ใช้ค่าเริ่มต้น
-            onChangeText={(text) => setStartLocation(text)}
+            value={startLocation}
+            onChangeText={(text) => {
+              setStartLocation(text);
+              filterPlaces(text); // เรียกใช้ฟังก์ชันกรองสถานที่
+              setInputField("start"); // ตั้งค่าฟิลด์ที่กำลังแก้ไข
+            }}
             onFocus={() => setInputField("start")}
           />
+          {/* แสดงคำแนะนำเมื่อมีการกรอกข้อมูล */}
+          {inputField === "start" && filteredPlaces.length > 0 && (
+            <FlatList
+              data={filteredPlaces}
+              renderItem={renderPlace}
+              keyExtractor={(item) => item.id}
+              style={styles.suggestionList}
+            />
+          )}
         </View>
       </View>
       <View style={styles.row}>
@@ -103,9 +126,22 @@ const RouteSearchScreen = ({ navigation }) => {
             placeholder=""
             placeholderTextColor="#f65d3c"
             value={endLocation}
-            onChangeText={(text) => setEndLocation(text)}
+            onChangeText={(text) => {
+              setEndLocation(text);
+              filterPlaces(text); // เรียกใช้ฟังก์ชันกรองสถานที่
+              setInputField("end"); // ตั้งค่าฟิลด์ที่กำลังแก้ไข
+            }}
             onFocus={() => setInputField("end")}
           />
+          {/* แสดงคำแนะนำเมื่อมีการกรอกข้อมูล */}
+          {inputField === "end" && filteredPlaces.length > 0 && (
+            <FlatList
+              data={filteredPlaces}
+              renderItem={renderPlace}
+              keyExtractor={(item) => item.id}
+              style={styles.suggestionList}
+            />
+          )}
         </View>
       </View>
 
@@ -210,16 +246,27 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontFamily: 'Prompt-Regular',
   },
+  suggestionList: {
+    maxHeight: 150,
+    borderWidth: 1,
+    borderColor: "#D3D3D3",
+    borderRadius: 10,
+    backgroundColor: "#FFFFFF",
+    marginTop: 5,
+    position: 'absolute',
+    zIndex: 1,
+    width: '100%',
+  },
   errorContainer: {
-    backgroundColor: "#ffcccb", // สีพื้นหลังกล่องข้อความผิดพลาด
-    borderRadius: 10, // ทำให้เป็นสี่เหลี่ยมมน
+    backgroundColor: "#ffcccb",
+    borderRadius: 10,
     padding: 10,
     marginVertical: 10,
   },
   errorText: {
-    color: "#b22222", // สีข้อความ
-    fontFamily: 'Prompt-Bold', // เปลี่ยนเป็นฟอนต์หนา
-    textDecorationLine: 'underline', // เพิ่มการขีดเส้นใต้
+    color: "#b22222",
+    fontFamily: 'Prompt-Bold',
+    textDecorationLine: 'underline',
   },
 });
 

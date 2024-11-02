@@ -1,55 +1,127 @@
-import React, { useState } from "react";
-import { View, Text, StyleSheet, TouchableOpacity } from "react-native";
+import React, { useState, useEffect, useRef } from "react";
+import { View, Text, StyleSheet, TouchableOpacity, ScrollView } from "react-native";
 import MapView, { Marker } from "react-native-maps";
-import Modal from "react-native-modal";
+import { database, ref, onValue } from '../firebaseConfig';
 
-const RouteScreen = () => {
-  const [isModalVisible, setModalVisible] = useState(false);
-  const [selectedRoute, setSelectedRoute] = useState(null);
+const RouteScreen = ({ route }) => {
+  const [isModalVisible, setModalVisible] = useState(true); // เปิด Modal โดยเริ่มต้น
+  const [startLocation, setStartLocation] = useState(null);
+  const [endLocation, setEndLocation] = useState(null);
+  const [routes, setRoutes] = useState([]); // เพิ่ม state สำหรับสาย
+  const mapRef = useRef(null);
 
-  const toggleModal = () => {
-    setModalVisible(!isModalVisible);
-  };
+  const { start, end } = route.params;
 
-  const routes = [
-    { id: 1, title: "เส้นทางที่ 1", description: "รายละเอียดเส้นทางที่ 1", latitude: 13.736717, longitude: 100.523186 },
-    { id: 2, title: "เส้นทางที่ 2", description: "รายละเอียดเส้นทางที่ 2", latitude: 13.737717, longitude: 100.524186 },
-  ];
+  useEffect(() => {
+    const evStopRef = ref(database, "EVstop");
+    const evRouteRef = ref(database, "EVroute"); // ดึงข้อมูลเส้นทาง
 
-  const handleMarkerPress = (route) => {
-    setSelectedRoute(route);
-    toggleModal();
+    // ดึงข้อมูลสถานี
+    onValue(evStopRef, (snapshot) => {
+      const data = snapshot.val();
+      if (data) {
+        const startCoords = data[start].split(", ").map((coord) => parseFloat(coord));
+        const endCoords = data[end].split(", ").map((coord) => parseFloat(coord));
+
+        setStartLocation({
+          title: start,
+          coords: startCoords,
+        });
+        setEndLocation({
+          title: end,
+          coords: endCoords,
+        });
+
+        // Animate ไปยังสถานีต้นทางที่เลือก
+        mapRef.current.animateToRegion({
+          latitude: startCoords[0],
+          longitude: startCoords[1],
+          latitudeDelta: 0.01,
+          longitudeDelta: 0.01,
+        }, 1000);
+      }
+    });
+
+    // ดึงข้อมูลสายที่ต้องใช้
+    onValue(evRouteRef, (snapshot) => {
+      const routeData = snapshot.val();
+      const availableRoutes = [];
+
+      // ตรวจสอบสายที่เหมาะสม
+      for (const routeName in routeData) {
+        const stations = routeData[routeName];
+        const startValue = stations[start];
+        const endValue = stations[end];
+
+        if (startValue < endValue) {
+          availableRoutes.push(routeName);
+        }
+      }
+
+      setRoutes(availableRoutes); // เก็บสายที่ได้จากการตรวจสอบ
+    });
+  }, [start, end]);
+
+  const closeModal = () => {
+    setModalVisible(false);
   };
 
   return (
     <View style={styles.container}>
       <MapView
+        ref={mapRef}
         style={styles.map}
         initialRegion={{
-          latitude: 13.736717,
-          longitude: 100.523186,
+          latitude: 14.07007,
+          longitude: 100.604836,
           latitudeDelta: 0.01,
           longitudeDelta: 0.01,
         }}
       >
-        {routes.map((route) => (
+        {startLocation && (
           <Marker
-            key={route.id}
-            coordinate={{ latitude: route.latitude, longitude: route.longitude }}
-            title={route.title}
-            onPress={() => handleMarkerPress(route)}
+            coordinate={{
+              latitude: startLocation.coords[0],
+              longitude: startLocation.coords[1],
+            }}
+            title={startLocation.title}
           />
-        ))}
+        )}
+        {endLocation && (
+          <Marker
+            coordinate={{
+              latitude: endLocation.coords[0],
+              longitude: endLocation.coords[1],
+            }}
+            title={endLocation.title}
+          />
+        )}
       </MapView>
-      <Modal isVisible={isModalVisible} onBackdropPress={toggleModal}>
-        <View style={styles.modalContent}>
-          <Text style={styles.modalTitle}>{selectedRoute?.title}</Text>
-          <Text style={styles.modalDescription}>{selectedRoute?.description}</Text>
-          <TouchableOpacity onPress={toggleModal} style={styles.closeButton}>
-            <Text style={styles.closeButtonText}>ปิด</Text>
-          </TouchableOpacity>
+      
+      {isModalVisible && (
+        <View style={styles.modalContainer}>
+          <View style={styles.modalContent}>
+            <Text style={styles.modalTitle}>รายละเอียดเส้นทาง</Text>
+            <ScrollView style={styles.stationScrollView}>
+              <View style={styles.stationList}>
+                <Text style={styles.routeInfo}>{`จาก: ${start}`}</Text>
+                <Text style={styles.routeInfo}>{`ถึง: ${end}`}</Text>
+                {/* แสดงข้อมูลสายที่ต้องขึ้น */}
+                {routes.length > 0 ? (
+                  routes.map((routeName, index) => (
+                    <Text key={index} style={styles.stationText}>{routeName}</Text>
+                  ))
+                ) : (
+                  <Text style={styles.stationText}>ไม่มีสายที่เหมาะสม</Text>
+                )}
+              </View>
+            </ScrollView>
+            <TouchableOpacity onPress={closeModal} style={styles.closeButton}>
+              <Text style={styles.closeButtonText}>ปิด</Text>
+            </TouchableOpacity>
+          </View>
         </View>
-      </Modal>
+      )}
     </View>
   );
 };
@@ -62,32 +134,67 @@ const styles = StyleSheet.create({
   map: {
     flex: 1,
   },
+  modalContainer: {
+    position: 'absolute',
+    bottom: 0,
+    left: 0,
+    right: 0,
+    height: '50%',
+    backgroundColor: '#fff',
+    borderTopLeftRadius: 20,
+    borderTopRightRadius: 20,
+    padding: 20,
+    elevation: 10,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 5 },
+    shadowOpacity: 0.3,
+    shadowRadius: 4,
+  },
   modalContent: {
-    backgroundColor: "white",
-    padding: 22,
-    justifyContent: "center",
-    alignItems: "center",
-    borderRadius: 4,
+    flex: 1,
+    justifyContent: 'center',
   },
   modalTitle: {
-    fontSize: 18,
-    fontWeight: "bold",
+    fontSize: 20,
+    fontFamily: 'Prompt-Bold',
+    color: '#333',
+    textAlign: 'center',
     marginBottom: 10,
   },
-  modalDescription: {
+  routeInfo: {
+    marginBottom: 15,
+  },
+  stationScrollView: {
+    flex: 1,
+    marginVertical: 10,
+  },
+  stationList: {
+    flexDirection: 'column',
+    alignItems: 'flex-start',
+    paddingBottom: 20,
+  },
+  stationText: {
     fontSize: 16,
-    marginBottom: 20,
-    textAlign: "center",
+    fontFamily: 'Prompt-Regular',
+    color: '#555',
+    padding: 10,
+    backgroundColor: '#eaeaea',
+    borderRadius: 10,
+    marginVertical: 5,
+    width: '100%',
   },
   closeButton: {
-    backgroundColor: "#2196F3",
-    padding: 10,
-    borderRadius: 4,
+    alignSelf: 'center',
+    paddingVertical: 10,
+    paddingHorizontal: 30,
+    backgroundColor: '#eee',
+    borderRadius: 10,
+    marginTop: 15,
   },
   closeButtonText: {
-    color: "white",
-    fontWeight: "bold",
-    textAlign: "center",
+    fontSize: 18,
+    fontFamily: 'Prompt-Medium',
+    color: '#007AFF',
   },
 });
 
