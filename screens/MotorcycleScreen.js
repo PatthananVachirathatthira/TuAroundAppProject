@@ -127,12 +127,15 @@ const MotorcycleScreen = () => {
                 <View key={origin}>
                   <Text style={styles.originText}>ต้นทาง: {origin}</Text>
                   {Object.keys(feeData[origin]).map((destination) => (
+                    feeData[origin][destination] > 0 && ( // Only show if fee is greater than 0
+
                     <View key={destination} style={styles.destinationContainer}>
                       <Text style={styles.destinationText}>{destination}</Text>
                       <Text style={styles.feeText}>
                         ค่าบริการ: {feeData[origin][destination]} บาท
                       </Text>
-                    </View>
+                      </View>
+                    )
                   ))}
                 </View>
               ))
