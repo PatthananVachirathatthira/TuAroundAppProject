@@ -307,10 +307,10 @@ const styles = StyleSheet.create({
   },
   dropdown: {
     position: 'absolute',
-    top: 70, // Adjust this as needed for positioning
+    top: 170, // Adjust this as needed for positioning
     right: '5%',
     backgroundColor: '#fff',
-    borderRadius: 12,
+    borderRadius: 10,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
@@ -320,6 +320,7 @@ const styles = StyleSheet.create({
 },
 dropdownItem: {
     padding: 10,
+    width: 52,
     justifyContent: 'center',
     alignItems: 'center',
 },
