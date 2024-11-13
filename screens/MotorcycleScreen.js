@@ -224,7 +224,7 @@ const styles = StyleSheet.create({
     zIndex: 1,
   },
   tableHeaderText: {
-    fontSize: 14,
+    fontSize: 15,
     fontFamily: "Prompt-Medium",
     color: "white",
     textAlign: "center",

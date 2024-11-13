@@ -136,7 +136,7 @@ const VanScreen = () => {
             <Text style={[styles.tableHeaderText, { flex: 1 }]}>รอบสุดท้าย</Text>
             <Text style={[styles.tableHeaderText, { flex: 1 }]}>ราคา</Text>
           </View>
-          {Object.entries(filteredTicketInfo).map(([location, routes], index) => (
+          {Object.entries(filteredTicketInfo).map(([location, routes], index) =>
             Object.entries(routes).map(([route, details]) => {
               if (typeof details === "object") {
                 return (
@@ -144,7 +144,16 @@ const VanScreen = () => {
                     key={`${location}-${route}`}
                     style={index % 2 === 0 ? styles.tableRow : styles.tableRowAlternate}
                   >
-                    <Text style={[styles.tableCell, { flex: 1 }]}>{location}</Text>
+                    <TouchableOpacity
+                      onPress={() => {
+                        const coords = routes["ท่า" + location] || "";
+                        const [latitude, longitude] = coords.split(", ").map(Number);
+                        handleLocationPress(latitude, longitude);
+                      }}
+                      style={{ flex: 1 }}
+                    >
+                      <Text style={styles.locationName}>{location}</Text>
+                    </TouchableOpacity>
                     <Text style={[styles.tableCell, { flex: 1 }]}>{details["รอบแรก"]}</Text>
                     <Text style={[styles.tableCell, { flex: 1 }]}>{details["รอบสุดท้าย"]}</Text>
                     <Text style={[styles.tableCell, { flex: 1 }]}>{details["ราคา"]} บาท</Text>
@@ -153,7 +162,7 @@ const VanScreen = () => {
               }
               return null;
             })
-          ))}
+          )}
         </View>
       </ScrollView>
     );
@@ -270,7 +279,7 @@ const styles = StyleSheet.create({
   },
   tableHeader: {
     flexDirection: "row",
-    backgroundColor: '#1e1e1e',
+    backgroundColor: "#1e1e1e",
     paddingVertical: 15,
   },
   tableHeaderText: {
@@ -296,11 +305,16 @@ const styles = StyleSheet.create({
   tableCell: {
     fontSize: 14,
     fontFamily: "Prompt-Regular",
-    color: '#1e1e1e',
+    color: "#1e1e1e",
+    textAlign: "center",
+  },
+  locationName: {
+    fontSize: 14,
+    fontFamily: "Prompt-Medium",
     textAlign: "center",
   },
   closeButton: {
-    backgroundColor: '#1e1e1e',
+    backgroundColor: "#1e1e1e",
     width: 90,
     alignSelf: "center",
     paddingVertical: 12,
