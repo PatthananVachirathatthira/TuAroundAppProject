@@ -76,13 +76,13 @@ const styles = StyleSheet.create({
   },
   routeText: {
     fontSize: 20,
-    fontWeight: "bold",
     color: "#FFFFFF",
-    textTransform: "uppercase", // ทำให้ตัวอักษรเป็นตัวพิมพ์ใหญ่ทั้งหมด
+    fontFamily: "Prompt-Bold", 
   },
   priceText: {
     fontSize: 18,
     color: "#FFFFFF",
+    fontFamily: "Prompt-Regular", 
   },
 });
 
