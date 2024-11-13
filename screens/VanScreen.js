@@ -126,15 +126,24 @@ const VanScreen = () => {
     const filteredTicketInfo = Object.fromEntries(
       Object.entries(ticketInfo).filter(([location]) => location !== "ท่ารถตู้")
     );
-  
+    
     return (
       <ScrollView
+        contentContainerStyle={{ alignItems: "flex-start" }}
         showsVerticalScrollIndicator={false}
-        showsHorizontalScrollIndicator={false} // ปิดเส้นเลื่อนแนวนอน
+        showsHorizontalScrollIndicator={false}
       >
         <Text style={styles.title}>ข้อมูลการโดยสาร</Text>
-        {Object.entries(filteredTicketInfo).map(([location, routes]) => (
-          <View key={location} style={styles.infoContainer}>
+        {Object.entries(filteredTicketInfo).map(([location, routes], index) => (
+          <View
+            key={location}
+            style={[
+              styles.infoContainer,
+              index === Object.entries(filteredTicketInfo).length - 1
+                ? { borderBottomWidth: 0 } // ซ่อนเส้นแบ่งที่รายการสุดท้าย
+                : {}
+            ]}
+          >
             <TouchableOpacity
               onPress={() => {
                 const coords = routes["ท่า" + location] || "";
@@ -149,18 +158,13 @@ const VanScreen = () => {
                 return (
                   <Text key={route}>
                     <Text style={styles.routeName}>{route}</Text>
-                    {"\n"} {/* เพิ่มบรรทัดใหม่ */}
-                    รอบแรก:{" "}
-                    <Text style={styles.routeValue}>{details["รอบแรก"]}</Text>
-                    {"\n"} {/* เพิ่มบรรทัดใหม่ */}
-                    รอบสุดท้าย:{" "}
-                    <Text style={styles.routeValue}>
-                      {details["รอบสุดท้าย"]}
-                    </Text>
-                    {"\n"} {/* เพิ่มบรรทัดใหม่ */}
-                    ราคา:{" "}
-                    <Text style={styles.routeValue}>{details["ราคา"]} บาท</Text>
-                    {"\n\n"} {/* เพิ่มบรรทัดว่างระหว่างรายการ */}
+                    {"\n"}
+                    รอบแรก: <Text style={styles.routeValue}>{details["รอบแรก"]}</Text>
+                    {"\n"}
+                    รอบสุดท้าย: <Text style={styles.routeValue}>{details["รอบสุดท้าย"]}</Text>
+                    {"\n"}
+                    ราคา: <Text style={styles.routeValue}>{details["ราคา"]} บาท</Text>
+                    {"\n"}
                   </Text>
                 );
               }
@@ -246,10 +250,13 @@ const styles = StyleSheet.create({
   routeName: {
     fontSize: 14,
     fontFamily: 'Prompt-Regular',
+    alignSelf: 'flex-start',
   },
   routeValue: {
     color: '#000',
     fontFamily: 'Prompt-Regular',
+    alignSelf: 'flex-start', // ชิดซ้าย
+    marginBottom: 3,
   },
   container: {
     flex: 1,
@@ -293,12 +300,14 @@ const styles = StyleSheet.create({
     backgroundColor: "rgba(0, 0, 0, 0.5)",
   },
   modalContent: {
-    width: "80%",
-    padding: 20,
+    width: "80%", // เพิ่มขนาด modal ให้เต็มจอมากขึ้น
+    maxHeight: "80%", // กำหนดความสูงสูงสุดให้ modal เพื่อให้มีพื้นที่เหลือสำหรับการเลื่อน
+    paddingVertical: 20,
+    paddingHorizontal: 20, // ลดขนาด padding ด้านข้าง
     backgroundColor: "white",
     borderRadius: 10,
-    alignItems: "center", // ศูนย์กลางในแนวนอน
-    justifyContent: "center", // ศูนย์กลางในแนวตั้ง
+    alignItems: "stretch", // ทำให้เนื้อหาใน modal ครอบคลุมเต็มพื้นที่
+    justifyContent: "flex-start", // ชิดด้านบนของ modal
     position: "relative",
   },
   title: {
@@ -307,9 +316,12 @@ const styles = StyleSheet.create({
     fontFamily: "Prompt-Bold",
   },
   infoContainer: {
-    marginBottom: 10, // ลด margin ด้านล่าง
-    paddingVertical: 5, // เพิ่ม padding แนวตั้ง
-    paddingHorizontal: 5, // ลด padding ซ้าย-ขวา
+    marginBottom: 10,
+    paddingVertical: 5,
+    paddingHorizontal: 10, // ลด padding แนวนอนเพื่อลดระยะซ้ายขวา
+    borderBottomWidth: 1,
+    borderBottomColor: "#aaa", // เพิ่มเส้นแบ่งด้านล่างเพื่อแยกรายการ
+    width: '100%', // ให้เนื้อหาใช้พื้นที่ทั้งหมดของ modalContent
   },
   locationName: {
     fontSize: 18,
