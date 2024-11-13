@@ -312,6 +312,7 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontFamily: "Prompt-Medium",
     textAlign: "center",
+    color: "#1e1e1e",
   },
   closeButton: {
     backgroundColor: "#1e1e1e",

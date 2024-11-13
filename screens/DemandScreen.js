@@ -1,9 +1,17 @@
 import React, { useState, useRef, useEffect } from "react";
-import { View, StyleSheet, Dimensions, TouchableOpacity, Image, Text, Alert } from "react-native";
+import {
+  View,
+  StyleSheet,
+  Dimensions,
+  TouchableOpacity,
+  Image,
+  Text,
+  Modal,
+} from "react-native";
 import MapView, { Marker } from "react-native-maps";
 import * as Location from "expo-location";
 import { MaterialIcons } from "@expo/vector-icons";
-import { database, ref, onValue, update } from "../firebaseConfig"; // import update function
+import { database, ref, onValue } from "../firebaseConfig"; // นำเข้า Firebase
 
 const DemandScreen = () => {
   const [location, setLocation] = useState({
@@ -13,6 +21,9 @@ const DemandScreen = () => {
     longitudeDelta: 0.01,
   });
   const [busStops, setBusStops] = useState([]);
+  const [modalVisible, setModalVisible] = useState(false);
+  const [checkInStatus, setCheckInStatus] = useState(null); // true = success, false = fail
+  const [checkInMessage, setCheckInMessage] = useState("");
   const mapRef = useRef(null);
 
   const getCurrentLocation = async () => {
@@ -36,27 +47,28 @@ const DemandScreen = () => {
     }
   };
 
-  // Fetch bus stops data and passenger count
   useEffect(() => {
     const busStopsRef = ref(database, "EVstop");
     const passengerCountRef = ref(database, "PassengerCount");
 
-    // Fetch bus stop coordinates and passenger counts
     onValue(busStopsRef, (snapshot) => {
       const busStopData = snapshot.val();
       if (busStopData) {
-        const busStopsList = Object.keys(busStopData).map((key) => {
-          const coords = busStopData[key].split(", ").map((coord) => parseFloat(coord));
-          return coords.length === 2 && !isNaN(coords[0]) && !isNaN(coords[1])
-            ? { latitude: coords[0], longitude: coords[1], title: key }
-            : null;
-        }).filter(stop => stop !== null);
+        const busStopsList = Object.keys(busStopData)
+          .map((key) => {
+            const coords = busStopData[key]
+              .split(", ")
+              .map((coord) => parseFloat(coord));
+            return coords.length === 2 && !isNaN(coords[0]) && !isNaN(coords[1])
+              ? { latitude: coords[0], longitude: coords[1], title: key }
+              : null;
+          })
+          .filter((stop) => stop !== null);
 
-        // Fetch passenger counts for each bus stop
         onValue(passengerCountRef, (countSnapshot) => {
           const countData = countSnapshot.val();
           const updatedBusStops = busStopsList.map((stop) => {
-            const count = countData[stop.title] || 0; // Default to 0 if no count found
+            const count = countData[stop.title] || 0;
             return { ...stop, count };
           });
           setBusStops(updatedBusStops);
@@ -80,50 +92,36 @@ const DemandScreen = () => {
     return R * c; // Distance in meters
   };
 
-  // Inside your check-in function
-const checkInAtBusStop = () => {
-  let nearestStop = null;
-  let minDistance = Infinity;
+  const checkInAtBusStop = () => {
+    let nearestStop = null;
+    let minDistance = Infinity;
 
-  // Find the nearest bus stop
-  busStops.forEach((stop) => {
-    const distance = getDistance(
-      location.latitude,
-      location.longitude,
-      stop.latitude,
-      stop.longitude
-    );
-    if (distance <= 100 && distance < minDistance) { // Update to 50 meters
-      minDistance = distance;
-      nearestStop = stop;
-    }
-  });
-
-  if (nearestStop) {
-    // Update PassengerCount in Firebase
-    const passengerCountRef = ref(database, "PassengerCount/" + nearestStop.title);
-
-    onValue(passengerCountRef, (snapshot) => {
-      const currentCount = snapshot.val() || 0; // Default to 0 if no count found
-      const newCount = currentCount + 1; // Increment the count
-
-      // Correct way to update the count in Firebase to ensure the value is a number
-      update(passengerCountRef, {
-        [nearestStop.title]: newCount, // Pass only the new count as a number
-      })
-        .then(() => {
-          Alert.alert("Check-In Successful", `You are at ${nearestStop.title}. ${newCount} passengers now.`);
-        })
-        .catch((error) => {
-          console.error("Error updating passenger count:", error);
-          Alert.alert("Error", "Failed to update the check-in count.");
-        });
+    busStops.forEach((stop) => {
+      const distance = getDistance(
+        location.latitude,
+        location.longitude,
+        stop.latitude,
+        stop.longitude
+      );
+      if (distance <= 100 && distance < minDistance) {
+        minDistance = distance;
+        nearestStop = stop;
+      }
     });
-  } else {
-    Alert.alert("No Nearby Stop", "You are not within 50 meters of any bus stop.");
-  }
-};
 
+    if (nearestStop) {
+      setCheckInStatus(true);
+      setCheckInMessage(
+        `You are at ${nearestStop.title}. ${
+          nearestStop.count + 1
+        } passengers now`
+      );
+    } else {
+      setCheckInStatus(false);
+      setCheckInMessage("You are not within 50 meters of any bus stop");
+    }
+    setModalVisible(true);
+  };
 
   return (
     <View style={styles.container}>
@@ -141,10 +139,10 @@ const checkInAtBusStop = () => {
             key={`bus-${index}`}
             coordinate={{ latitude: stop.latitude, longitude: stop.longitude }}
             title={stop.title}
-            description={`Check-ins: ${stop.count}`} // Display check-in count
+            description={`Check-ins: ${stop.count}`}
           >
             <Image
-              source={require('../assets/images/bus-stop.png')}
+              source={require("../assets/images/bus-stop.png")}
               style={{ width: 18, height: 18 }}
               resizeMode="contain"
             />
@@ -159,6 +157,42 @@ const checkInAtBusStop = () => {
       <TouchableOpacity style={styles.checkInButton} onPress={checkInAtBusStop}>
         <Text style={styles.checkInText}>Check In</Text>
       </TouchableOpacity>
+
+      <Modal
+        animationType="slide"
+        transparent={true}
+        visible={modalVisible}
+        onRequestClose={() => setModalVisible(false)}
+      >
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalContainer}>
+            <View style={styles.iconContainer}>
+              <View
+                style={[
+                  styles.iconBackground,
+                  { backgroundColor: checkInStatus ? "#4CAF50" : "#FF3B30" },
+                ]}
+              >
+                <MaterialIcons
+                  name={checkInStatus ? "check" : "close"}
+                  size={40}
+                  color="white"
+                />
+              </View>
+            </View>
+            <Text style={styles.modalTitle}>
+              {checkInStatus ? "Check-In Successful" : "No Nearby Stop"}
+            </Text>
+            <Text style={styles.modalMessage}>{checkInMessage}</Text>
+            <TouchableOpacity
+              onPress={() => setModalVisible(false)}
+              style={styles.closeButton}
+            >
+              <Text style={styles.closeButtonText}>Close</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
     </View>
   );
 };
@@ -184,16 +218,68 @@ const styles = StyleSheet.create({
     position: "absolute",
     bottom: 90,
     right: 30,
-    backgroundColor: "blue",
+    backgroundColor: "white",
     paddingVertical: 10,
     paddingHorizontal: 20,
-    borderRadius: 5,
+    borderRadius: 20,
     elevation: 5,
   },
   checkInText: {
+    color: "#1e1e1e",
+    fontSize: 16,
+    fontFamily: "Prompt-Medium",
+  },
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: "rgba(0, 0, 0, 0.5)",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  modalContainer: {
+    width: "75%",
+    backgroundColor: "white",
+    borderRadius: 20,
+    padding: 20,
+    alignItems: "center",
+  },
+  iconContainer: {
+    marginBottom: 15,
+  },
+  iconBackground: {
+    width: 60,
+    height: 60,
+    borderRadius: 30,
+    backgroundColor: "#4CAF50", // สีเขียวแบบในภาพ
+    justifyContent: "center",
+    alignItems: "center",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 4,
+    elevation: 5,
+  },
+  modalTitle: {
+    fontSize: 22,
+    fontFamily: "Prompt-Medium",
+    marginBottom: 10,
+  },
+  modalMessage: {
+    fontSize: 16,
+    textAlign: "center",
+    marginBottom: 25,
+    fontFamily: "Prompt-Regular",
+    color: "#575757",
+  },
+  closeButton: {
+    backgroundColor: "#1e1e1e",
+    borderRadius: 20,
+    paddingVertical: 10,
+    paddingHorizontal: 20,
+  },
+  closeButtonText: {
     color: "white",
     fontSize: 16,
-    fontWeight: "bold",
+    fontFamily: "Prompt-Medium",
   },
 });
 
