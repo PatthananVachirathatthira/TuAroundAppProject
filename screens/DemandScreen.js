@@ -1,3 +1,4 @@
+// DemandScreen.js
 import React, { useState, useRef, useEffect } from "react";
 import {
   View,
@@ -17,7 +18,7 @@ import {
   AntDesign,
   Feather,
 } from "@expo/vector-icons";
-import { database, ref, onValue } from "../firebaseConfig";
+import { database, ref, onValue, update } from "../firebaseConfig";
 
 const DemandScreen = () => {
   const [location, setLocation] = useState({
@@ -31,9 +32,11 @@ const DemandScreen = () => {
   const [checkInStatus, setCheckInStatus] = useState(null);
   const [checkInMessage, setCheckInMessage] = useState("");
   const [showCheckInButton, setShowCheckInButton] = useState(false);
+  const [userCheckedInStop, setUserCheckedInStop] = useState(null);
   const slideAnim = useRef(new Animated.Value(0)).current;
   const mapRef = useRef(null);
 
+  // ฟังก์ชันเพื่อขอและตั้งค่า location ปัจจุบัน
   const getCurrentLocation = async () => {
     let { status } = await Location.requestForegroundPermissionsAsync();
     if (status !== "granted") {
@@ -55,6 +58,7 @@ const DemandScreen = () => {
     }
   };
 
+  // อ่านข้อมูล bus stops และ passenger count จาก Firebase
   useEffect(() => {
     const busStopsRef = ref(database, "EVstop");
     const passengerCountRef = ref(database, "PassengerCount");
@@ -85,8 +89,9 @@ const DemandScreen = () => {
     });
   }, []);
 
+  // ฟังก์ชันคำนวณระยะห่างระหว่างสองจุด
   const getDistance = (lat1, lon1, lat2, lon2) => {
-    const R = 6371e3;
+    const R = 6371e3; // Radius of Earth in meters
     const φ1 = (lat1 * Math.PI) / 180;
     const φ2 = (lat2 * Math.PI) / 180;
     const Δφ = ((lat2 - lat1) * Math.PI) / 180;
@@ -97,9 +102,10 @@ const DemandScreen = () => {
       Math.cos(φ1) * Math.cos(φ2) * Math.sin(Δλ / 2) * Math.sin(Δλ / 2);
     const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
 
-    return R * c;
+    return R * c; // Distance in meters
   };
 
+  // ฟังก์ชัน check-in ที่ป้ายรถเมล์
   const checkInAtBusStop = () => {
     let nearestStop = null;
     let minDistance = Infinity;
@@ -118,19 +124,24 @@ const DemandScreen = () => {
     });
 
     if (nearestStop) {
+      const currentCount = nearestStop.count || 0;
+      update(ref(database, "PassengerCount"), {
+        [nearestStop.title]: currentCount + 1,
+      });
+
       setCheckInStatus(true);
+      setUserCheckedInStop(nearestStop.title);  // เก็บชื่อป้ายที่ผู้ใช้เช็คอิน
       setCheckInMessage(
-        `You are at ${nearestStop.title}. ${
-          nearestStop.count + 1
-        } passengers now`
+        `You are at ${nearestStop.title}. ${currentCount + 1} passengers now`
       );
     } else {
       setCheckInStatus(false);
-      setCheckInMessage("You are not within 50 meters of any bus stop");
+      setCheckInMessage("You are not within 100 meters of any bus stop");
     }
     setModalVisible(true);
   };
 
+  // ฟังก์ชัน toggle ของปุ่ม slide
   const toggleSlide = () => {
     const toValue = showCheckInButton ? 0 : -60;
     Animated.timing(slideAnim, {
@@ -141,6 +152,36 @@ const DemandScreen = () => {
       setShowCheckInButton(!showCheckInButton);
     });
   };
+
+  // ตรวจสอบการ check-out ของผู้ใช้
+  useEffect(() => {
+    const interval = setInterval(() => {
+      if (userCheckedInStop) {  // ตรวจสอบเฉพาะป้ายที่ผู้ใช้เช็คอินไว้
+        const checkedInStop = busStops.find((stop) => stop.title === userCheckedInStop);
+        if (checkedInStop) {
+          const distance = getDistance(
+            location.latitude,
+            location.longitude,
+            checkedInStop.latitude,
+            checkedInStop.longitude
+          );
+
+          if (distance > 100) {
+            const currentCount = checkedInStop.count || 1;
+            update(ref(database, "PassengerCount"), {
+              [checkedInStop.title]: Math.max(currentCount - 1, 0),
+            });
+
+            setCheckInMessage(`You have checked out from ${checkedInStop.title}`);
+            setModalVisible(true);
+            setUserCheckedInStop(null);  // ล้างสถานะ check-in
+          }
+        }
+      }
+    }, 5000); // เช็คทุกๆ 5 วินาที
+
+    return () => clearInterval(interval);
+  }, [location, busStops, userCheckedInStop]);
 
   return (
     <View style={styles.container}>
@@ -153,20 +194,24 @@ const DemandScreen = () => {
         zoomEnabled={true}
         scrollEnabled={true}
       >
-        {busStops.map((stop, index) => (
-          <Marker
-            key={`bus-${index}`}
-            coordinate={{ latitude: stop.latitude, longitude: stop.longitude }}
-            title={stop.title}
-            description={`Check-ins: ${stop.count}`}
-          >
-            <Image
-              source={require("../assets/images/bus-stop.png")}
-              style={{ width: 18, height: 18 }}
-              resizeMode="contain"
-            />
-          </Marker>
-        ))}
+        {busStops.map((stop, index) => {
+          let markerColor = "green";
+          if (stop.count >= 5 && stop.count <= 10) markerColor = "yellow";
+          else if (stop.count > 10) markerColor = "red";
+
+          return (
+            <Marker
+              key={`bus-${index}`}
+              coordinate={{ latitude: stop.latitude, longitude: stop.longitude }}
+              title={stop.title}
+              description={`Check-ins: ${stop.count}`}
+            >
+              <View style={[styles.marker, { backgroundColor: markerColor }]}>
+                <Text style={styles.markerText}>{stop.count}</Text>
+              </View>
+            </Marker>
+          );
+        })}
       </MapView>
 
       <TouchableOpacity style={styles.gpsButton} onPress={getCurrentLocation}>
@@ -176,9 +221,9 @@ const DemandScreen = () => {
       <View style={styles.userButtonContainer}>
         <TouchableOpacity style={styles.userButton} onPress={toggleSlide}>
           {showCheckInButton ? (
-            <AntDesign name="close" size={24} color="black" /> // ใช้ไอคอน close ของ AntDesign
+            <AntDesign name="close" size={24} color="black" />
           ) : (
-            <Feather name="user" size={24} color="black" /> // ใช้ไอคอน user ของ Feather แทน user-check
+            <Feather name="user" size={24} color="black" />
           )}
         </TouchableOpacity>
       </View>
@@ -188,63 +233,41 @@ const DemandScreen = () => {
           styles.checkInButtonContainer,
           {
             transform: [{ translateX: slideAnim }],
-            zIndex: showCheckInButton ? 1 : 0, // ตั้ง zIndex ให้ต่ำกว่าเมื่อถูกซ่อน
+            zIndex: showCheckInButton ? 1 : 0,
           },
         ]}
         pointerEvents={showCheckInButton ? "auto" : "none"}
       >
         <TouchableOpacity
-          style={[
-            styles.checkInButton,
-            showCheckInButton ? {} : { opacity: 0 },
-          ]}
+          style={styles.checkInButton}
           onPress={checkInAtBusStop}
         >
-          <Text style={styles.checkInText}>Check In</Text>
+          <FontAwesome5 name="walking" size={24} color="black" />
+          <Text>Check-In</Text>
         </TouchableOpacity>
       </Animated.View>
-
-      <View style={styles.userButtonContainer}>
-        <TouchableOpacity style={styles.userButton} onPress={toggleSlide}>
-          {showCheckInButton ? (
-            <AntDesign name="close" size={24} color="black" /> // ใช้ไอคอน close ของ AntDesign
-          ) : (
-            <Feather name="user-check" size={24} color="black" /> // ใช้ไอคอน user-check ของ Feather
-          )}
-        </TouchableOpacity>
-      </View>
 
       <Modal
         animationType="slide"
         transparent={true}
         visible={modalVisible}
-        onRequestClose={() => setModalVisible(false)}
+        onRequestClose={() => {
+          setModalVisible(false);
+        }}
       >
-        <View style={styles.modalOverlay}>
+        <View style={styles.modalBackground}>
           <View style={styles.modalContainer}>
-            <View style={styles.iconContainer}>
-              <View
-                style={[
-                  styles.iconBackground,
-                  { backgroundColor: checkInStatus ? "#4CAF50" : "#FF3B30" },
-                ]}
-              >
-                {checkInStatus ? (
-                  <MaterialIcons name="check" size={40} color="white" />
-                ) : (
-                  <AntDesign name="close" size={40} color="white" /> // ใช้ไอคอน close ของ AntDesign
-                )}
-              </View>
-            </View>
-            <Text style={styles.modalTitle}>
-              {checkInStatus ? "Check-In Successful" : "No Nearby Stop"}
-            </Text>
-            <Text style={styles.modalMessage}>{checkInMessage}</Text>
+            {checkInStatus ? (
+              <FontAwesome5 name="check-circle" size={50} color="green" />
+            ) : (
+              <FontAwesome5 name="times-circle" size={50} color="red" />
+            )}
+            <Text style={styles.checkInMessage}>{checkInMessage}</Text>
             <TouchableOpacity
+              style={styles.modalButton}
               onPress={() => setModalVisible(false)}
-              style={styles.closeButton}
             >
-              <Text style={styles.closeButtonText}>Close</Text>
+              <Text style={styles.modalButtonText}>Close</Text>
             </TouchableOpacity>
           </View>
         </View>
@@ -258,102 +281,99 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   map: {
-    width: Dimensions.get("window").width,
-    height: Dimensions.get("window").height,
+    flex: 1,
+  },
+  marker: {
+    width: 30,
+    height: 30,
+    borderRadius: 15,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  markerText: {
+    color: "white",
+    fontWeight: "bold",
   },
   gpsButton: {
     position: "absolute",
-    bottom: 70,
-    right: 30,
+    top: 10,
+    right: 10,
+    padding: 10,
     backgroundColor: "white",
-    width: 50,
-    height: 50,
-    borderRadius: 25,
-    justifyContent: "center",
-    alignItems: "center",
+    borderRadius: 20,
+    shadowColor: "black",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.3,
+    shadowRadius: 3.84,
     elevation: 5,
   },
   userButtonContainer: {
     position: "absolute",
-    bottom: 140,
-    right: 30,
+    bottom: 10,
+    right: 10,
   },
   userButton: {
     backgroundColor: "white",
-    width: 50,
-    height: 50,
-    borderRadius: 25,
-    justifyContent: "center",
-    alignItems: "center",
+    padding: 10,
+    borderRadius: 20,
+    shadowColor: "black",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.3,
+    shadowRadius: 3.84,
     elevation: 5,
   },
   checkInButtonContainer: {
     position: "absolute",
-    bottom: 140,
-    right: 30,
+    bottom: 20,
+    right: 80,
+    backgroundColor: "white",
+    padding: 10,
+    borderRadius: 20,
+    flexDirection: "row",
+    alignItems: "center",
+    shadowColor: "black",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.3,
+    shadowRadius: 3.84,
+    elevation: 5,
   },
   checkInButton: {
-    backgroundColor: "white",
-    paddingVertical: 14,
-    paddingHorizontal: 20,
-    borderRadius: 30,
-    elevation: 5,
+    flexDirection: "row",
+    alignItems: "center",
   },
-  checkInText: {
-    color: "#1e1e1e",
-    fontSize: 16,
-    fontFamily: "Prompt-Medium",
-  },
-  modalOverlay: {
+  modalBackground: {
     flex: 1,
-    backgroundColor: "rgba(0, 0, 0, 0.5)",
     justifyContent: "center",
     alignItems: "center",
+    backgroundColor: "rgba(0, 0, 0, 0.5)",
   },
   modalContainer: {
-    width: "75%",
-    backgroundColor: "white",
-    borderRadius: 20,
+    width: 300,
     padding: 20,
+    backgroundColor: "white",
+    borderRadius: 10,
     alignItems: "center",
-  },
-  iconContainer: {
-    marginBottom: 15,
-  },
-  iconBackground: {
-    width: 60,
-    height: 60,
-    borderRadius: 30,
-    justifyContent: "center",
-    alignItems: "center",
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 4 },
+    shadowColor: "black",
+    shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.3,
-    shadowRadius: 4,
+    shadowRadius: 3.84,
     elevation: 5,
   },
-  modalTitle: {
-    fontSize: 22,
-    fontFamily: "Prompt-Medium",
-    marginBottom: 10,
-  },
-  modalMessage: {
+  checkInMessage: {
+    marginTop: 10,
     fontSize: 16,
     textAlign: "center",
-    marginBottom: 25,
-    fontFamily: "Prompt-Regular",
-    color: "#575757",
   },
-  closeButton: {
-    backgroundColor: "#1e1e1e",
-    borderRadius: 20,
+  modalButton: {
+    marginTop: 20,
     paddingVertical: 10,
     paddingHorizontal: 20,
+    backgroundColor: "blue",
+    borderRadius: 5,
   },
-  closeButtonText: {
+  modalButtonText: {
     color: "white",
-    fontSize: 16,
-    fontFamily: "Prompt-Medium",
+    fontWeight: "bold",
   },
 });
 
