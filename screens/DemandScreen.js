@@ -3,7 +3,7 @@ import { View, StyleSheet, Dimensions, TouchableOpacity, Image, Text, Alert } fr
 import MapView, { Marker } from "react-native-maps";
 import * as Location from "expo-location";
 import { MaterialIcons } from "@expo/vector-icons";
-import { database, ref, onValue, update } from "../firebaseConfig"; // import update function
+import { database, ref, onValue, update } from "../firebaseConfig";
 
 const DemandScreen = () => {
   const [location, setLocation] = useState({
@@ -13,6 +13,7 @@ const DemandScreen = () => {
     longitudeDelta: 0.01,
   });
   const [busStops, setBusStops] = useState([]);
+  const [checkedInStop, setCheckedInStop] = useState(null); // Track the current check-in
   const mapRef = useRef(null);
 
   const getCurrentLocation = async () => {
@@ -36,7 +37,6 @@ const DemandScreen = () => {
     }
   };
 
-  // Fetch bus stops data and passenger count
   useEffect(() => {
     const busStopsRef = ref(database, "EVstop");
     const passengerCountRef = ref(database, "PassengerCount");
@@ -65,6 +65,49 @@ const DemandScreen = () => {
     });
   }, []);
 
+  useEffect(() => {
+  let locationSubscription;
+
+  const startLocationUpdates = async () => {
+    locationSubscription = await Location.watchPositionAsync(
+      { accuracy: Location.Accuracy.High, distanceInterval: 10 },
+      (newLocation) => {
+        setLocation({
+          latitude: newLocation.coords.latitude,
+          longitude: newLocation.coords.longitude,
+          latitudeDelta: 0.01,
+          longitudeDelta: 0.01,
+        });
+
+        // ตรวจสอบว่าผู้ใช้ได้ออกจากระยะ 100 เมตรจากจุดที่ check-in ไว้หรือไม่
+        if (checkedInStop) {
+          const distance = getDistance(
+            newLocation.coords.latitude,
+            newLocation.coords.longitude,
+            checkedInStop.latitude,
+            checkedInStop.longitude
+          );
+
+          if (distance > 100) {
+            resetPassengerCount(checkedInStop.title);
+            setCheckedInStop(null); // ลบสถานะการ check-in
+          }
+        }
+      }
+    );
+  };
+
+  startLocationUpdates();
+
+  // ฟังก์ชัน cleanup เพื่อลบ location watcher
+  return () => {
+    if (locationSubscription) {
+      locationSubscription.remove();
+    }
+  };
+}, [checkedInStop]);
+
+
   const getDistance = (lat1, lon1, lat2, lon2) => {
     const R = 6371e3; // Earth radius in meters
     const φ1 = (lat1 * Math.PI) / 180;
@@ -80,50 +123,57 @@ const DemandScreen = () => {
     return R * c; // Distance in meters
   };
 
-  // Inside your check-in function
-const checkInAtBusStop = () => {
-  let nearestStop = null;
-  let minDistance = Infinity;
+  const checkInAtBusStop = () => {
+    let nearestStop = null;
+    let minDistance = Infinity;
 
-  // Find the nearest bus stop
-  busStops.forEach((stop) => {
-    const distance = getDistance(
-      location.latitude,
-      location.longitude,
-      stop.latitude,
-      stop.longitude
-    );
-    if (distance <= 100 && distance < minDistance) { // Update to 50 meters
-      minDistance = distance;
-      nearestStop = stop;
-    }
-  });
-
-  if (nearestStop) {
-    // Update PassengerCount in Firebase
-    const passengerCountRef = ref(database, "PassengerCount/" + nearestStop.title);
-
-    onValue(passengerCountRef, (snapshot) => {
-      const currentCount = snapshot.val() || 0; // Default to 0 if no count found
-      const newCount = currentCount + 1; // Increment the count
-
-      // Correct way to update the count in Firebase to ensure the value is a number
-      update(passengerCountRef, {
-        [nearestStop.title]: newCount, // Pass only the new count as a number
-      })
-        .then(() => {
-          Alert.alert("Check-In Successful", `You are at ${nearestStop.title}. ${newCount} passengers now.`);
-        })
-        .catch((error) => {
-          console.error("Error updating passenger count:", error);
-          Alert.alert("Error", "Failed to update the check-in count.");
-        });
+    busStops.forEach((stop) => {
+      const distance = getDistance(
+        location.latitude,
+        location.longitude,
+        stop.latitude,
+        stop.longitude
+      );
+      if (distance <= 100 && distance < minDistance) {
+        minDistance = distance;
+        nearestStop = stop;
+      }
     });
-  } else {
-    Alert.alert("No Nearby Stop", "You are not within 50 meters of any bus stop.");
-  }
-};
 
+    if (nearestStop) {
+      const passengerCountRef = ref(database, "PassengerCount/" + nearestStop.title);
+
+      onValue(passengerCountRef, (snapshot) => {
+        const currentCount = snapshot.val() || 0;
+        const newCount = currentCount + 1;
+
+        update(passengerCountRef, {
+          [nearestStop.title]: newCount,
+        })
+          .then(() => {
+            Alert.alert("Check-In Successful", `You are at ${nearestStop.title}. ${newCount} passengers now.`);
+            setCheckedInStop(nearestStop); // Set the checked-in stop
+          })
+          .catch((error) => {
+            console.error("Error updating passenger count:", error);
+            Alert.alert("Error", "Failed to update the check-in count.");
+          });
+      });
+    } else {
+      Alert.alert("No Nearby Stop", "You are not within 100 meters of any bus stop.");
+    }
+  };
+
+  const resetPassengerCount = (stopTitle) => {
+    const passengerCountRef = ref(database, "PassengerCount/" + stopTitle);
+    update(passengerCountRef, { [stopTitle]: 0 })
+      .then(() => {
+        console.log(`Passenger count reset to 0 for ${stopTitle}`);
+      })
+      .catch((error) => {
+        console.error("Error resetting passenger count:", error);
+      });
+  };
 
   return (
     <View style={styles.container}>
@@ -141,7 +191,7 @@ const checkInAtBusStop = () => {
             key={`bus-${index}`}
             coordinate={{ latitude: stop.latitude, longitude: stop.longitude }}
             title={stop.title}
-            description={`Check-ins: ${stop.count}`} // Display check-in count
+            description={`Check-ins: ${stop.count}`}
           >
             <Image
               source={require('../assets/images/bus-stop.png')}
