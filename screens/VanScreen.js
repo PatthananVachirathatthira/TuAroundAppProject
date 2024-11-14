@@ -7,8 +7,7 @@ import {
   Text,
   Modal,
   ScrollView,
-  Image, // Import Image component
-
+  Image,
 } from "react-native";
 import MapView, { Marker } from "react-native-maps";
 import * as Location from "expo-location";
@@ -24,7 +23,7 @@ const VanScreen = () => {
     longitudeDelta: 0.01,
   });
   const [vanStops, setVanStops] = useState([]);
-  const [busStops, setBusStops] = useState([]); // Add state for bus stops
+  const [busStops, setBusStops] = useState([]);
   const [modalVisible, setModalVisible] = useState(false);
   const [ticketInfo, setTicketInfo] = useState(null);
   const mapRef = useRef(null);
@@ -64,7 +63,6 @@ const VanScreen = () => {
   };
 
   useEffect(() => {
-    // Fetch van stops
     const vanRef = ref(database, "Van");
     onValue(vanRef, (snapshot) => {
       const data = snapshot.val();
@@ -90,7 +88,6 @@ const VanScreen = () => {
       }
     });
 
-    // Fetch bus stops
     const busStopsRef = ref(database, "EVstop");
     onValue(busStopsRef, (snapshot) => {
       const data = snapshot.val();
@@ -103,7 +100,7 @@ const VanScreen = () => {
               : null;
           })
           .filter((stop) => stop !== null);
-        setBusStops(stops); // Set busStops
+        setBusStops(stops);
       }
     });
   }, []);
@@ -122,52 +119,51 @@ const VanScreen = () => {
 
   const renderTicketInfo = () => {
     if (!ticketInfo) return null;
-  
+
     const filteredTicketInfo = Object.fromEntries(
       Object.entries(ticketInfo).filter(([location]) => location !== "ท่ารถตู้")
     );
-  
+
     return (
       <ScrollView
+        contentContainerStyle={{ alignItems: "flex-start" }}
         showsVerticalScrollIndicator={false}
-        showsHorizontalScrollIndicator={false} // ปิดเส้นเลื่อนแนวนอน
       >
-        <Text style={styles.title}>ข้อมูลการโดยสาร</Text>
-        {Object.entries(filteredTicketInfo).map(([location, routes]) => (
-          <View key={location} style={styles.infoContainer}>
-            <TouchableOpacity
-              onPress={() => {
-                const coords = routes["ท่า" + location] || "";
-                const [latitude, longitude] = coords.split(", ").map(Number);
-                handleLocationPress(latitude, longitude);
-              }}
-            >
-              <Text style={styles.locationName}>{location}</Text>
-            </TouchableOpacity>
-            {Object.entries(routes).map(([route, details]) => {
+        <View style={styles.table}>
+          <View style={styles.tableHeader}>
+            <Text style={[styles.tableHeaderText, { flex: 1 }]}>สถานที่</Text>
+            <Text style={[styles.tableHeaderText, { flex: 1 }]}>รอบแรก</Text>
+            <Text style={[styles.tableHeaderText, { flex: 1 }]}>รอบสุดท้าย</Text>
+            <Text style={[styles.tableHeaderText, { flex: 1 }]}>ราคา</Text>
+          </View>
+          {Object.entries(filteredTicketInfo).map(([location, routes], index) =>
+            Object.entries(routes).map(([route, details]) => {
               if (typeof details === "object") {
                 return (
-                  <Text key={route}>
-                    <Text style={styles.routeName}>{route}</Text>
-                    {"\n"} {/* เพิ่มบรรทัดใหม่ */}
-                    รอบแรก:{" "}
-                    <Text style={styles.routeValue}>{details["รอบแรก"]}</Text>
-                    {"\n"} {/* เพิ่มบรรทัดใหม่ */}
-                    รอบสุดท้าย:{" "}
-                    <Text style={styles.routeValue}>
-                      {details["รอบสุดท้าย"]}
-                    </Text>
-                    {"\n"} {/* เพิ่มบรรทัดใหม่ */}
-                    ราคา:{" "}
-                    <Text style={styles.routeValue}>{details["ราคา"]} บาท</Text>
-                    {"\n\n"} {/* เพิ่มบรรทัดว่างระหว่างรายการ */}
-                  </Text>
+                  <View
+                    key={`${location}-${route}`}
+                    style={index % 2 === 0 ? styles.tableRow : styles.tableRowAlternate}
+                  >
+                    <TouchableOpacity
+                      onPress={() => {
+                        const coords = routes["ท่า" + location] || "";
+                        const [latitude, longitude] = coords.split(", ").map(Number);
+                        handleLocationPress(latitude, longitude);
+                      }}
+                      style={{ flex: 1 }}
+                    >
+                      <Text style={styles.locationName}>{location}</Text>
+                    </TouchableOpacity>
+                    <Text style={[styles.tableCell, { flex: 1 }]}>{details["รอบแรก"]}</Text>
+                    <Text style={[styles.tableCell, { flex: 1 }]}>{details["รอบสุดท้าย"]}</Text>
+                    <Text style={[styles.tableCell, { flex: 1 }]}>{details["ราคา"]} บาท</Text>
+                  </View>
                 );
               }
               return null;
-            })}
-          </View>
-        ))}
+            })
+          )}
+        </View>
       </ScrollView>
     );
   };
@@ -190,33 +186,25 @@ const VanScreen = () => {
             title={stop.name}
           />
         ))}
-        
-        {/* Display bus stops */}
         {busStops.map((stop, index) => (
           <Marker
             key={`bus-${index}`}
             coordinate={{ latitude: stop.latitude, longitude: stop.longitude }}
           >
             <Image
-              source={require('../assets/images/bus-stop.png')} // Your bus stop image path
-              style={{ width: 18, height: 18 }} // Adjust the size as needed
+              source={require('../assets/images/bus-stop.png')}
+              style={{ width: 18, height: 18 }}
               resizeMode="contain"
             />
           </Marker>
         ))}
       </MapView>
 
-      <TouchableOpacity
-        style={styles.customButton}
-        onPress={getCurrentLocation}
-      >
+      <TouchableOpacity style={styles.customButton} onPress={getCurrentLocation}>
         <MaterialIcons name="gps-fixed" size={24} color="black" />
       </TouchableOpacity>
 
-      <TouchableOpacity
-        style={styles.detailsButton}
-        onPress={() => setModalVisible(true)}
-      >
+      <TouchableOpacity style={styles.detailsButton} onPress={() => setModalVisible(true)}>
         <AntDesign name="infocirlceo" size={24} color="black" />
       </TouchableOpacity>
 
@@ -229,28 +217,17 @@ const VanScreen = () => {
         <View style={styles.modalContainer}>
           <View style={styles.modalContent}>
             {renderTicketInfo()}
-            <TouchableOpacity
-              style={styles.closeButton}
-              onPress={() => setModalVisible(false)}
-            >
-              <MaterialIcons name="close" size={24} color="white" />
-            </TouchableOpacity>
           </View>
+          <TouchableOpacity style={styles.closeButton} onPress={() => setModalVisible(false)}>
+            <Text style={styles.closeButtonText}>ปิด</Text>
+          </TouchableOpacity>
         </View>
       </Modal>
     </View>
   );
-};;
+};
 
 const styles = StyleSheet.create({
-  routeName: {
-    fontSize: 14,
-    fontFamily: 'Prompt-Regular',
-  },
-  routeValue: {
-    color: '#000',
-    fontFamily: 'Prompt-Regular',
-  },
   container: {
     flex: 1,
   },
@@ -272,7 +249,7 @@ const styles = StyleSheet.create({
   },
   detailsButton: {
     position: "absolute",
-    bottom: 140, // ระยะห่างจากปุ่ม gps-fixed
+    bottom: 140,
     right: 30,
     backgroundColor: "white",
     width: 50,
@@ -282,59 +259,75 @@ const styles = StyleSheet.create({
     alignItems: "center",
     elevation: 5,
   },
-  detailsButtonText: {
-    color: "white",
-    fontWeight: "bold",
-  },
   modalContainer: {
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
     backgroundColor: "rgba(0, 0, 0, 0.5)",
+    padding: 25,
   },
   modalContent: {
-    width: "80%",
-    padding: 20,
+    width: "100%",
+    maxHeight: "80%",
     backgroundColor: "white",
-    borderRadius: 10,
-    alignItems: "center", // ศูนย์กลางในแนวนอน
-    justifyContent: "center", // ศูนย์กลางในแนวตั้ง
-    position: "relative",
+    borderRadius: 15,
+    overflow: "hidden",
   },
-  title: {
-    fontSize: 20,
-    marginBottom: 10,
-    fontFamily: "Prompt-Bold",
+  table: {
+    width: "100%",
+    borderRadius: 15,
   },
-  infoContainer: {
-    marginBottom: 10, // ลด margin ด้านล่าง
-    paddingVertical: 5, // เพิ่ม padding แนวตั้ง
-    paddingHorizontal: 5, // ลด padding ซ้าย-ขวา
+  tableHeader: {
+    flexDirection: "row",
+    backgroundColor: "#1e1e1e",
+    paddingVertical: 15,
+  },
+  tableHeaderText: {
+    fontSize: 16,
+    fontFamily: "Prompt-Medium",
+    color: "white",
+    textAlign: "center",
+  },
+  tableRow: {
+    flexDirection: "row",
+    backgroundColor: "white",
+    borderBottomWidth: 1,
+    borderBottomColor: "#e0e0e0",
+    paddingVertical: 10,
+  },
+  tableRowAlternate: {
+    flexDirection: "row",
+    backgroundColor: "#f8f8f8",
+    borderBottomWidth: 1,
+    borderBottomColor: "#e0e0e0",
+    paddingVertical: 10,
+  },
+  tableCell: {
+    fontSize: 14,
+    fontFamily: "Prompt-Regular",
+    color: "#1e1e1e",
+    textAlign: "center",
   },
   locationName: {
-    fontSize: 18,
+    fontSize: 14,
     fontFamily: "Prompt-Medium",
-    alignSelf: 'flex-start', // ชิดซ้าย
+    textAlign: "center",
+    color: "#1e1e1e",
   },
   closeButton: {
-    position: "absolute", // ใช้ absolute เพื่อให้วางปุ่มได้อิสระ
-    top: 14,
-    right: 15,
-    backgroundColor: "black",
-    width: 40,
-    height: 40,
+    backgroundColor: "#1e1e1e",
+    width: 90,
+    alignSelf: "center",
+    paddingVertical: 12,
     borderRadius: 20,
     justifyContent: "center",
     alignItems: "center",
-    elevation: 5,
+    marginTop: 20,
   },
   closeButtonText: {
     color: "white",
-    fontFamily: "Prompt-Regular",
-  },
-  routeText: {
-    fontSize: 14,
-    fontFamily: "Prompt-Regular",
+    fontFamily: "Prompt-Medium",
+    fontSize: 18,
   },
 });
 

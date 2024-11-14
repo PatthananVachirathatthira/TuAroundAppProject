@@ -9,7 +9,7 @@ import {
   Image,
   Pressable,
   Animated,
-  Easing,
+  Easing,  Platform ,
 } from "react-native";
 import * as Font from "expo-font";
 import { Feather, Ionicons } from "@expo/vector-icons";
@@ -17,14 +17,17 @@ import { useNavigation } from "@react-navigation/native";
 import DateTimePicker from "@react-native-community/datetimepicker";
 import * as ImagePicker from "expo-image-picker";
 import Modal from "react-native-modal";
-import { database, ref, set, push } from "../firebaseConfig"; 
-import { getStorage, ref as storageRef, uploadBytes, getDownloadURL } from "firebase/storage";
-
-
+import { database, ref, set, push } from "../firebaseConfig";
+import {
+  getStorage,
+  ref as storageRef,
+  uploadBytes,
+  getDownloadURL,
+} from "firebase/storage";
 
 // ฟังก์ชันสำหรับส่งข้อมูลไปยัง Firebase
 const uploadReport = (problem, description, date, image) => {
-  const reportRef = ref(database, 'Report/File');
+  const reportRef = ref(database, "Report/File");
   const newReportRef = push(reportRef);
 
   const reportData = {
@@ -64,18 +67,19 @@ const ReportScreen = () => {
   const navigation = useNavigation();
 
   useEffect(() => {
-  // โหลดฟอนต์และขออนุญาตเข้าถึงคลังรูปภาพ
-  fetchFonts().then(() => setFontLoaded(true));
+    // โหลดฟอนต์และขออนุญาตเข้าถึงคลังรูปภาพ
+    fetchFonts().then(() => setFontLoaded(true));
 
-  (async () => {
-    if (Platform.OS !== 'web') {
-      const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
-      if (status !== 'granted') {
-        alert('ขออภัย, แอปต้องการการอนุญาตเพื่อเข้าถึงรูปภาพ');
+    (async () => {
+      if (Platform.OS !== "web") {
+        const { status } =
+          await ImagePicker.requestMediaLibraryPermissionsAsync();
+        if (status !== "granted") {
+          alert("ขออภัย, แอปต้องการการอนุญาตเพื่อเข้าถึงรูปภาพ");
+        }
       }
-    }
-  })();
-}, []);
+    })();
+  }, []);
 
   const onDateChange = (event, selectedDate) => {
     const currentDate = selectedDate || date;
@@ -83,71 +87,65 @@ const ReportScreen = () => {
     setDate(currentDate);
   };
   // เลือกรูป
-  
+
   const pickImage = async () => {
-  let result = await ImagePicker.launchImageLibraryAsync({
-    mediaTypes: ImagePicker.MediaTypeOptions.Images,
-    allowsEditing: true,
-    aspect: [4, 3],
-    quality: 1,
-    allowsMultipleSelection: true, // ให้เลือกรูปหลายรูปได้
-  });
-
-  if (!result.canceled) {
-    const selectedImages = result.assets.map(asset => asset.uri);
-    setImages(selectedImages);  // อัพเดท state เป็นอาร์เรย์ของ URI
-  }
-};
-
-
-
+    let result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      allowsEditing: false, // ปิด allowsEditing เพื่อใช้งานกับ allowsMultipleSelection
+      allowsMultipleSelection: true, // เปิดให้เลือกรูปหลายรูป
+      aspect: [4, 3],
+      quality: 1,
+    });
+  
+    if (!result.canceled) {
+      const selectedImages = result.assets.map(asset => asset.uri);
+      setImages(selectedImages);  // อัพเดท state เป็นอาร์เรย์ของ URI
+    }
+  };
 
   const uploadImagesToFirebase = async (imageUris) => {
-  const storage = getStorage();
-  const downloadURLs = [];
+    const storage = getStorage();
+    const downloadURLs = [];
 
-  for (const imageUri of imageUris) {
-    const response = await fetch(imageUri);
-    const blob = await response.blob();
-    const imageRef = storageRef(storage, `reports/${new Date().getTime()}.jpg`);
-    await uploadBytes(imageRef, blob);
-    const downloadURL = await getDownloadURL(imageRef);
-    downloadURLs.push(downloadURL);
-  }
-  return downloadURLs;  // คืนค่ารายการ URL ของภาพ
-};
-
-
-
+    for (const imageUri of imageUris) {
+      const response = await fetch(imageUri);
+      const blob = await response.blob();
+      const imageRef = storageRef(
+        storage,
+        `reports/${new Date().getTime()}.jpg`
+      );
+      await uploadBytes(imageRef, blob);
+      const downloadURL = await getDownloadURL(imageRef);
+      downloadURLs.push(downloadURL);
+    }
+    return downloadURLs; // คืนค่ารายการ URL ของภาพ
+  };
 
   const handleSubmit = async () => {
-  if (!problem || !description || !date) {
-    setModalVisible(true);
-    return;
-  }
+    if (!problem || !description || !date) {
+      setModalVisible(true);
+      return;
+    }
 
-  let imageUrls = [];
-  if (images.length > 0) {
-    // อัปโหลดภาพและรับ URL
-    imageUrls = await uploadImagesToFirebase(images);
-  }
+    let imageUrls = [];
+    if (images.length > 0) {
+      // อัปโหลดภาพและรับ URL
+      imageUrls = await uploadImagesToFirebase(images);
+    }
 
-  // ส่งรายงานไปยัง Firebase
-  uploadReport(problem, description, date, imageUrls); // ส่งอาร์เรย์ของ URL
+    // ส่งรายงานไปยัง Firebase
+    uploadReport(problem, description, date, imageUrls); // ส่งอาร์เรย์ของ URL
 
-  // แสดงข้อความสำเร็จและรีเซ็ตฟอร์ม
-  setShowSuccess(true);
-  setTimeout(() => {
-    setShowSuccess(false);
-  }, 3000); // ซ่อนข้อความหลังจาก 3 วินาที
-  setProblem("");
-  setDescription("");
-  setDate(new Date());
-  setImages([]); // รีเซ็ตภาพที่เลือก
-};
-
-
-
+    // แสดงข้อความสำเร็จและรีเซ็ตฟอร์ม
+    setShowSuccess(true);
+    setTimeout(() => {
+      setShowSuccess(false);
+    }, 3000); // ซ่อนข้อความหลังจาก 3 วินาที
+    setProblem("");
+    setDescription("");
+    setDate(new Date());
+    setImages([]); // รีเซ็ตภาพที่เลือก
+  };
 
   if (!fontLoaded) {
     return <ActivityIndicator size="large" color="#0000ff" />;
@@ -224,17 +222,15 @@ const ReportScreen = () => {
         <Text style={styles.imageButtonText}>เลือกภาพ</Text>
       </TouchableOpacity>
       {images.length > 0 && (
-  <View style={styles.imagePreviewContainer}>
-    {images.map((image, index) => (
-      <View key={index} style={styles.imageItem}>
-        <Image source={{ uri: image }} style={styles.imagePreview} />
-        <Text style={styles.imagePreviewText}>เลือกภาพนี้</Text>
-      </View>
-    ))}
-  </View>
-)}
-
-
+        <View style={styles.imagePreviewContainer}>
+          {images.map((image, index) => (
+            <View key={index} style={styles.imageItem}>
+              <Image source={{ uri: image }} style={styles.imagePreview} />
+              <Text style={styles.imagePreviewText}>เลือกภาพนี้</Text>
+            </View>
+          ))}
+        </View>
+      )}
 
       <View style={styles.buttonContainer}>
         <TouchableOpacity
@@ -271,13 +267,13 @@ const ReportScreen = () => {
         </View>
       </Modal>
 
-    {showSuccess && (
-      <View style={styles.successMessageContainer}>
-        <Animated.View style={[styles.successMessage, animatedStyle]}>
-          <Text style={styles.successText}>ส่งข้อมูลสำเร็จ!</Text>
-        </Animated.View>
-      </View>
-)}
+      {showSuccess && (
+        <View style={styles.successMessageContainer}>
+          <Animated.View style={[styles.successMessage, animatedStyle]}>
+            <Text style={styles.successText}>ส่งข้อมูลสำเร็จ!</Text>
+          </Animated.View>
+        </View>
+      )}
     </View>
   );
 };
@@ -444,7 +440,7 @@ const styles = StyleSheet.create({
   },
   successMessage: {
     backgroundColor: "#1e1e1e", // สีพื้นหลังของกล่องข้อความสำเร็จ
-    width: '50%', // กำหนดความกว้างของกล่อง
+    width: "50%", // กำหนดความกว้างของกล่อง
     maxWidth: 300, // กำหนดความกว้างสูงสุดของกล่อง
     borderRadius: 30, // มุมมนของกล่อง
     padding: 20,
@@ -463,17 +459,17 @@ const styles = StyleSheet.create({
     textAlign: "center",
   },
   imagePreviewContainer: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    justifyContent: 'space-between',
+    flexDirection: "row",
+    flexWrap: "wrap",
+    justifyContent: "space-between",
     marginVertical: 10,
   },
   imageItem: {
-    width: '48%', // จัดให้แสดง 2 รูปต่อแถว
+    width: "48%", // จัดให้แสดง 2 รูปต่อแถว
     marginBottom: 10,
   },
   imagePreview: {
-    width: '100%',
+    width: "100%",
     height: 100,
     borderRadius: 8,
   },

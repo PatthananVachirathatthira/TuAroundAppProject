@@ -1,8 +1,18 @@
 import React, { useEffect, useState, useRef } from "react";
-import { View, StyleSheet, Dimensions, TouchableOpacity, Image, Modal, Text, Pressable, ScrollView } from "react-native";
+import {
+  View,
+  StyleSheet,
+  Dimensions,
+  TouchableOpacity,
+  Text,
+  Modal,
+  ScrollView,
+  Image,
+} from "react-native";
 import MapView, { Marker } from "react-native-maps";
 import * as Location from "expo-location";
-import { MaterialIcons } from "@expo/vector-icons";
+import * as Font from "expo-font";
+import { MaterialIcons, AntDesign } from "@expo/vector-icons";
 import { database, ref, onValue } from "../firebaseConfig";
 
 const MotorcycleScreen = () => {
@@ -12,12 +22,23 @@ const MotorcycleScreen = () => {
     latitudeDelta: 0.01,
     longitudeDelta: 0.01,
   });
-
   const [bikeLocations, setBikeLocations] = useState([]);
   const [feeData, setFeeData] = useState(null);
   const [modalVisible, setModalVisible] = useState(false);
-  const [selectedBikeLocation, setSelectedBikeLocation] = useState(null); // State for selected bike location
+  const [fontLoaded, setFontLoaded] = useState(false);
   const mapRef = useRef(null);
+
+  const fetchFonts = () => {
+    return Font.loadAsync({
+      "Prompt-Regular": require("../assets/fonts/Prompt-Regular.ttf"),
+      "Prompt-Bold": require("../assets/fonts/Prompt-Bold.ttf"),
+      "Prompt-Medium": require("../assets/fonts/Prompt-Medium.ttf"),
+    });
+  };
+
+  useEffect(() => {
+    fetchFonts().then(() => setFontLoaded(true));
+  }, []);
 
   const getCurrentLocation = async () => {
     let { status } = await Location.requestForegroundPermissionsAsync();
@@ -41,7 +62,6 @@ const MotorcycleScreen = () => {
   };
 
   useEffect(() => {
-    
     const bikeLocationRef = ref(database, "BikeLocation");
     onValue(bikeLocationRef, (snapshot) => {
       const data = snapshot.val();
@@ -65,54 +85,63 @@ const MotorcycleScreen = () => {
     });
   }, []);
 
-  const handleMarkerPress = (location) => {
-    if (feeData && feeData[location.title]) {
-      setSelectedBikeLocation({ ...location, fees: feeData[location.title] });
-    } else {
-      setSelectedBikeLocation({ ...location, fees: {} });
-    }
+  const renderFeeInfo = () => {
+    if (!feeData) return <Text>Loading...</Text>;
+
+    return (
+      <ScrollView
+        contentContainerStyle={{ alignItems: "flex-start" }}
+        showsVerticalScrollIndicator={false}
+      >
+        {Object.entries(feeData).map(([origin, destinations], index) =>
+          Object.entries(destinations).map(([destination, fee]) => (
+            fee > 0 && (
+              <View key={`${origin}-${destination}-${index}`} style={index % 2 === 0 ? styles.tableRow : styles.tableRowAlternate}>
+                <Text style={[styles.tableCell, { flex: 1 }]}>{origin}</Text>
+                <Text style={[styles.tableCell, { flex: 1 }]}>{destination}</Text>
+                <Text style={[styles.tableCell, { flex: 1 }]}>{fee}</Text>
+              </View>
+            )
+          ))
+        )}
+      </ScrollView>
+    );
   };
 
   return (
     <View style={styles.container}>
-      {location ? (
-        <MapView
-          ref={mapRef}
-          style={styles.map}
-          initialRegion={location}
-          showsUserLocation={true}
-          showsMyLocationButton={false}
-          zoomEnabled={true}
-          scrollEnabled={true}
-        >
-          
-          
-          {bikeLocations.map((location, index) => (
-            <Marker
-              key={`bike-${index}`}
-              coordinate={{ latitude: location.latitude, longitude: location.longitude }}
-              title={location.title}
-              onPress={() => handleMarkerPress(location)} // Use handleMarkerPress to set selected location with fees
-            >
-              <Image
-                source={require('../assets/images/taxi-motorcycle.jpg')}
-                style={{ width: 20, height: 20 }}
-                resizeMode="contain"
-              />
-            </Marker>
-          ))}
-        </MapView>
-      ) : null}
+      <MapView
+        ref={mapRef}
+        style={styles.map}
+        initialRegion={location}
+        showsUserLocation={true}
+        showsMyLocationButton={false}
+        zoomEnabled={true}
+        scrollEnabled={true}
+      >
+        {bikeLocations.map((location, index) => (
+          <Marker
+            key={`bike-${index}`}
+            coordinate={{ latitude: location.latitude, longitude: location.longitude }}
+            title={location.title}
+          >
+            <Image
+              source={require('../assets/images/taxi-motorcycle.jpg')}
+              style={{ width: 20, height: 20 }}
+              resizeMode="contain"
+            />
+          </Marker>
+        ))}
+      </MapView>
 
       <TouchableOpacity style={styles.customButton} onPress={getCurrentLocation}>
         <MaterialIcons name="gps-fixed" size={24} color="black" />
       </TouchableOpacity>
 
-      <TouchableOpacity style={styles.openModalButton} onPress={() => setModalVisible(true)}>
-        <Text style={styles.buttonText}>info</Text>
+      <TouchableOpacity style={styles.detailsButton} onPress={() => setModalVisible(true)}>
+        <AntDesign name="infocirlceo" size={24} color="black" />
       </TouchableOpacity>
 
-      {/* Modal for general information */}
       <Modal
         animationType="slide"
         transparent={true}
@@ -120,67 +149,19 @@ const MotorcycleScreen = () => {
         onRequestClose={() => setModalVisible(false)}
       >
         <View style={styles.modalContainer}>
-          <ScrollView contentContainerStyle={styles.modalContent}>
-            <Text style={styles.modalTitle}>รายละเอียด</Text>
-            {feeData ? (
-              Object.keys(feeData).map((origin) => (
-                <View key={origin}>
-                  <Text style={styles.originText}>ต้นทาง: {origin}</Text>
-                  {Object.keys(feeData[origin]).map((destination) => (
-                    feeData[origin][destination] > 0 && ( // Only show if fee is greater than 0
-
-                    <View key={destination} style={styles.destinationContainer}>
-                      <Text style={styles.destinationText}>{destination}</Text>
-                      <Text style={styles.feeText}>
-                        ค่าบริการ: {feeData[origin][destination]} บาท
-                      </Text>
-                      </View>
-                    )
-                  ))}
-                </View>
-              ))
-            ) : (
-              <Text>Loading...</Text>
-            )}
-          </ScrollView>
-          <Pressable style={styles.closeButton} onPress={() => setModalVisible(false)}>
-            <Text style={styles.closeButtonText}>Close</Text>
-          </Pressable>
+          <View style={styles.modalContent}>
+            <View style={styles.tableHeader}>
+              <Text style={[styles.tableHeaderText, { flex: 1 }]}>ต้นทาง</Text>
+              <Text style={[styles.tableHeaderText, { flex: 1 }]}>ปลายทาง</Text>
+              <Text style={[styles.tableHeaderText, { flex: 1 }]}>ค่าบริการ (บาท)</Text>
+            </View>
+            {renderFeeInfo()}
+          </View>
+          <TouchableOpacity style={styles.closeButton} onPress={() => setModalVisible(false)}>
+            <Text style={styles.closeButtonText}>ปิด</Text>
+          </TouchableOpacity>
         </View>
       </Modal>
-
-      {/* Modal for selected bike location details */}
-      {selectedBikeLocation && (
-  <Modal
-    animationType="slide"
-    transparent={true}
-    visible={!!selectedBikeLocation}
-    onRequestClose={() => setSelectedBikeLocation(null)}
-  >
-    <View style={styles.modalContainer}>
-      <View style={styles.modalContent}>
-        <Text style={styles.modalTitle}>{selectedBikeLocation.title}</Text>
-        {selectedBikeLocation.fees ? (
-          Object.keys(selectedBikeLocation.fees).map((destination) => (
-            selectedBikeLocation.fees[destination] > 0 && ( // Only show if fee is greater than 0
-              <View key={destination} style={styles.destinationContainer}>
-                <Text style={styles.destinationText}>{destination}</Text>
-                <Text style={styles.feeText}>
-                  ค่าบริการ: {selectedBikeLocation.fees[destination]} บาท
-                </Text>
-              </View>
-            )
-          ))
-        ) : (
-          <Text>No fee data available.</Text>
-        )}
-        <Pressable style={styles.closeButton} onPress={() => setSelectedBikeLocation(null)}>
-          <Text style={styles.closeButtonText}>Close</Text>
-        </Pressable>
-      </View>
-    </View>
-  </Modal>
-)}
     </View>
   );
 };
@@ -195,81 +176,93 @@ const styles = StyleSheet.create({
   },
   customButton: {
     position: "absolute",
-    bottom: 35,
+    bottom: 70,
     right: 30,
-    backgroundColor: "#FFFFFF",
-    padding: 12,
-    borderRadius: 50,
-    elevation: 6,
+    backgroundColor: "white",
+    width: 50,
+    height: 50,
+    borderRadius: 25,
+    justifyContent: "center",
+    alignItems: "center",
+    elevation: 5,
   },
-  openModalButton: {
+  detailsButton: {
     position: "absolute",
-    bottom: 35,
-    left: 30,
-    backgroundColor: "#4CAF50",
-    padding: 12,
-    borderRadius: 50,
-    elevation: 6,
-  },
-  buttonText: {
-    color: "#FFFFFF",
-    fontWeight: "bold",
+    bottom: 140,
+    right: 30,
+    backgroundColor: "white",
+    width: 50,
+    height: 50,
+    borderRadius: 25,
+    justifyContent: "center",
+    alignItems: "center",
+    elevation: 5,
   },
   modalContainer: {
     flex: 1,
-    justifyContent: 'flex-end',
-    backgroundColor: "rgba(0,0,0,0.3)",
-  },
-  modalContent: {
-    backgroundColor: "#FFFFFF",
-    borderTopLeftRadius: 20,
-    borderTopRightRadius: 20,
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "rgba(0, 0, 0, 0.5)",
     padding: 20,
   },
-  modalTitle: {
-    fontSize: 22,
-    fontWeight: '600',
-    marginBottom: 15,
-    color: "#333",
+  modalContent: {
+    width: "100%",
+    maxHeight: "80%",
+    backgroundColor: "white",
+    borderRadius: 15,
+    overflow: "hidden",
   },
-  originText: {
-    fontSize: 18,
-    fontWeight: '500',
-    marginVertical: 8,
+  table: {
+    width: "100%",
+    borderRadius: 15,
   },
-  destinationContainer: {
-    paddingVertical: 5,
-    paddingHorizontal: 10,
+  tableHeader: {
+    flexDirection: "row",
+    backgroundColor: "#1e1e1e",
+    paddingVertical: 15,
+    position: "relative",
+    zIndex: 1,
   },
-  destinationText: {
-    fontSize: 16,
-    color: "#555",
-    marginVertical: 2,
+  tableHeaderText: {
+    fontSize: 15,
+    fontFamily: "Prompt-Medium",
+    color: "white",
+    textAlign: "center",
   },
-  feeText: {
+  tableRow: {
+    flexDirection: "row",
+    backgroundColor: "white",
+    borderBottomWidth: 1,
+    borderBottomColor: "#e0e0e0",
+    paddingVertical: 10,
+  },
+  tableRowAlternate: {
+    flexDirection: "row",
+    backgroundColor: "#f8f8f8",
+    borderBottomWidth: 1,
+    borderBottomColor: "#e0e0e0",
+    paddingVertical: 10,
+  },
+  tableCell: {
     fontSize: 14,
-    color: "#888",
+    fontFamily: "Prompt-Regular",
+    color: '#1e1e1e',
+    textAlign: "center",
   },
   closeButton: {
+    backgroundColor: '#1e1e1e',
+    width: 90,
     alignSelf: "center",
-    backgroundColor: "#2196F3",
-    paddingVertical: 10,
-    paddingHorizontal: 20,
+    paddingVertical: 12,
     borderRadius: 20,
-    marginTop: 15,
+    justifyContent: "center",
+    alignItems: "center",
+    marginTop: 20,
   },
   closeButtonText: {
     color: "white",
-    fontWeight: "bold",
-  },
-   modalText: {
+    fontFamily: "Prompt-Medium",
     fontSize: 16,
-    color: "#555",
-    marginVertical: 5,
-  },
-  closeButtonText: {
-    color: "white",
-    fontWeight: "bold",
   },
 });
 
