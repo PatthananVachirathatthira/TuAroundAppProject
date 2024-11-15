@@ -4,19 +4,18 @@ import MapView, { Marker } from "react-native-maps";
 import { database, ref, onValue } from '../firebaseConfig';
 
 const RouteScreen = ({ route }) => {
-  const [isModalVisible, setModalVisible] = useState(true); // เปิด Modal โดยเริ่มต้น
+  const [isModalVisible, setModalVisible] = useState(true);
   const [startLocation, setStartLocation] = useState(null);
   const [endLocation, setEndLocation] = useState(null);
-  const [routes, setRoutes] = useState([]); // เพิ่ม state สำหรับสาย
+  const [routes, setRoutes] = useState([]);
   const mapRef = useRef(null);
 
   const { start, end } = route.params;
 
   useEffect(() => {
     const evStopRef = ref(database, "EVstop");
-    const evRouteRef = ref(database, "EVroute"); // ดึงข้อมูลเส้นทาง
+    const evRouteRef = ref(database, "EVroute");
 
-    // ดึงข้อมูลสถานี
     onValue(evStopRef, (snapshot) => {
       const data = snapshot.val();
       if (data) {
@@ -32,7 +31,6 @@ const RouteScreen = ({ route }) => {
           coords: endCoords,
         });
 
-        // Animate ไปยังสถานีต้นทางที่เลือก
         mapRef.current.animateToRegion({
           latitude: startCoords[0],
           longitude: startCoords[1],
@@ -42,12 +40,10 @@ const RouteScreen = ({ route }) => {
       }
     });
 
-    // ดึงข้อมูลสายที่ต้องใช้
     onValue(evRouteRef, (snapshot) => {
       const routeData = snapshot.val();
       const availableRoutes = [];
 
-      // ตรวจสอบสายที่เหมาะสม
       for (const routeName in routeData) {
         const stations = routeData[routeName];
         const startValue = stations[start];
@@ -58,7 +54,7 @@ const RouteScreen = ({ route }) => {
         }
       }
 
-      setRoutes(availableRoutes); // เก็บสายที่ได้จากการตรวจสอบ
+      setRoutes(availableRoutes);
     });
   }, [start, end]);
 
@@ -97,22 +93,40 @@ const RouteScreen = ({ route }) => {
           />
         )}
       </MapView>
-      
+
       {isModalVisible && (
         <View style={styles.modalContainer}>
           <View style={styles.modalContent}>
             <Text style={styles.modalTitle}>รายละเอียดเส้นทาง</Text>
             <ScrollView style={styles.stationScrollView}>
               <View style={styles.stationList}>
-                <Text style={styles.routeInfo}>{`จาก: ${start}`}</Text>
-                <Text style={styles.routeInfo}>{`ถึง: ${end}`}</Text>
-                {/* แสดงข้อมูลสายที่ต้องขึ้น */}
+                {/* Start and End Station Representation */}
+                <View style={styles.stationRoute}>
+                  <View style={styles.stationRow}>
+                    <View style={styles.stationCircle}>
+                      <Text style={styles.stationLabel}>จาก</Text>
+                    </View>
+                    <Text style={styles.stationText}>{start}</Text>
+                  </View>
+
+                  {/* Connecting Line */}
+                  <View style={styles.verticalLine} />
+
+                  <View style={styles.stationRow}>
+                    <View style={styles.stationCircle}>
+                      <Text style={styles.stationLabel}>ถึง</Text>
+                    </View>
+                    <Text style={styles.stationText}>{end}</Text>
+                  </View>
+                </View>
+
+                {/* Show Route Names */}
                 {routes.length > 0 ? (
                   routes.map((routeName, index) => (
-                    <Text key={index} style={styles.stationText}>{routeName}</Text>
+                    <Text key={index} style={styles.routeText}>{routeName}</Text>
                   ))
                 ) : (
-                  <Text style={styles.stationText}>ไม่มีสายที่เหมาะสม</Text>
+                  <Text style={styles.routeText}>ไม่มีสายที่เหมาะสม</Text>
                 )}
               </View>
             </ScrollView>
@@ -161,19 +175,49 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     marginBottom: 10,
   },
-  routeInfo: {
-    marginBottom: 15,
-  },
   stationScrollView: {
     flex: 1,
     marginVertical: 10,
   },
   stationList: {
-    flexDirection: 'column',
-    alignItems: 'flex-start',
     paddingBottom: 20,
   },
+  stationRoute: {
+    flexDirection: 'column',
+    alignItems: 'flex-start', // Keep aligned to the left
+    marginVertical: 20,
+  },
+  stationRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  stationCircle: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: '#f65d3c',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginRight: 10,
+  },
+  stationLabel: {
+    color: '#fff',
+    fontSize: 14,
+    fontFamily: 'Prompt-Bold',
+  },
+  verticalLine: {
+    width: 4,
+    height: 25, // Adjust to perfectly connect circles
+    backgroundColor: '#f65d3c',
+    marginLeft: 19, // Align to the center of the circle
+    alignSelf: 'flex-start',
+  },
   stationText: {
+    fontSize: 18,
+    fontFamily: 'Prompt-Medium',
+    color: '#333',
+  },
+  routeText: {
     fontSize: 16,
     fontFamily: 'Prompt-Regular',
     color: '#555',
