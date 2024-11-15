@@ -12,6 +12,7 @@ import Icon from "react-native-vector-icons/FontAwesome";
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 import * as Font from 'expo-font';
 
+
 const fetchFonts = () => {
   return Font.loadAsync({
     'Prompt-Regular': require('../assets/fonts/Prompt-Regular.ttf'),
