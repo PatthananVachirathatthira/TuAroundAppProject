@@ -256,13 +256,17 @@ const styles = StyleSheet.create({
     justifyContent: 'flex-start',
     alignItems: 'center',
     backgroundColor: 'white',
-    paddingTop: 85,
   },
   searchSection: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    marginTop: 20,
+    position: 'absolute',
+    marginTop: 135,
+    // top:120, // กำหนดตำแหน่งของ search bar ด้านบน
+    left: 10,
+    right: 10,
+    zIndex: 10, // ทำให้ search bar อยู่เหนือแผนที่
   },
   searchBarContainer: {
     flexDirection: 'row',
@@ -270,7 +274,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#fff',
     borderRadius: 12,
     padding: 6,
-    width: '75%',
+    width: '80%',
     height: 52,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
@@ -307,8 +311,8 @@ const styles = StyleSheet.create({
   },
   dropdown: {
     position: 'absolute',
-    top: 170, // Adjust this as needed for positioning
-    right: '5%',
+    top: 200, // Adjust this as needed for positioning
+    right: '4%',
     backgroundColor: '#fff',
     borderRadius: 10,
     shadowColor: '#000',

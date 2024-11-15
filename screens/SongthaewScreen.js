@@ -1,17 +1,18 @@
 import React, { useEffect, useState } from "react";
-import { View, Text, StyleSheet, Image, FlatList } from "react-native";
-import { database, ref, onValue } from "../firebaseConfig"; // Import firebase configuration
+import { View, Text, StyleSheet, FlatList } from "react-native";
+import { database, ref, onValue } from "../firebaseConfig";
 
 const SongthaewScreen = () => {
   const [data, setData] = useState({});
+  const numColumns = 2; // จำนวนคอลัมน์
 
   useEffect(() => {
     const fetchData = () => {
-      const songthaewRef = ref(database, "songthaew"); // Reference to the "songthaew" node in Firebase
+      const songthaewRef = ref(database, "songthaew");
       onValue(songthaewRef, (snapshot) => {
-        const songthaewData = snapshot.val(); // Get the data from the snapshot
+        const songthaewData = snapshot.val();
         if (songthaewData) {
-          setData(songthaewData); // Set the data to state
+          setData(songthaewData);
         }
       });
     };
@@ -33,14 +34,12 @@ const SongthaewScreen = () => {
 
   return (
     <View style={styles.container}>
-      <Image
-        source={require('../assets/images/songthaw.jpg')} // Path to your bus stop image
-        style={styles.image}
-      />
       <FlatList
         data={songthaewRoutes}
         renderItem={renderItem}
-        keyExtractor={(item) => item.route}
+        keyExtractor={(item, index) => index.toString()}
+        numColumns={numColumns}
+        columnWrapperStyle={styles.rowWrapper} // จัดการแถว
         contentContainerStyle={styles.list}
       />
     </View>
@@ -50,39 +49,44 @@ const SongthaewScreen = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#FFFAF0", // สีพื้นหลังโทนส้มอ่อน
-    alignItems: "center",
-    padding: 20,
-  },
-  image: {
-    width: "100%",
-    height: 250, // ปรับขนาดให้สูงขึ้น
-    resizeMode: "cover", // ปรับเป็น cover เพื่อให้ดูดีขึ้น
-    borderRadius: 15, // เพิ่มมุมโค้งให้กับภาพ
-    overflow: "hidden", // ซ่อนส่วนที่เกินออกไป
-    marginBottom: 20,
+    backgroundColor: "white",
+    paddingHorizontal: 10,
+    paddingVertical: 110,
   },
   list: {
+    paddingTop: 20,
     paddingBottom: 20,
   },
+  rowWrapper: {
+    justifyContent: "space-between", 
+  },
   itemContainer: {
-    backgroundColor: "#FFA500", // สีส้ม
-    borderRadius: 10,
-    padding: 20,
+    backgroundColor: "#f65d3c",
+    borderRadius: 20,
+    padding: 15,
     marginVertical: 10,
-    width: "100%",
+    marginHorizontal: 10, // ระยะห่างระหว่างกล่องในแถว
+    flex: 1,
+    maxWidth: "45%", // ลดความกว้างของกล่องในแต่ละคอลัมน์
+    alignSelf: "center", // จัดกล่องให้อยู่กลางแถว
+    height: 140, // เพิ่มความสูงของกล่อง
     alignItems: "center",
-    elevation: 5, // เพิ่มเงา
+    justifyContent: "center",
+    elevation: 5,
   },
   routeText: {
     fontSize: 20,
     color: "#FFFFFF",
-    fontFamily: "Prompt-Bold", 
+    fontFamily: "Prompt-Bold",
+    textAlign: "center",
+    paddingBottom: 10,
+    paddingTop: 10,
   },
   priceText: {
     fontSize: 18,
     color: "#FFFFFF",
-    fontFamily: "Prompt-Regular", 
+    fontFamily: "Prompt-Regular",
+    textAlign: "center",
   },
 });
 
