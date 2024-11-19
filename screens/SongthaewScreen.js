@@ -22,8 +22,15 @@ const SongthaewScreen = () => {
 
   const renderItem = ({ item }) => (
     <View style={styles.itemContainer}>
-      <Text style={styles.routeText}>{item.route}</Text>
-      <Text style={styles.priceText}>{item.price} บาท</Text>
+      <View style={styles.textContainer}>
+        <Text style={styles.routeText}>{item.route}</Text>
+        <View style={styles.priceWithCircle}>
+          <View style={styles.circleBackground}>
+            <Text style={styles.priceText}>{item.price}</Text>
+          </View>
+          <Text style={styles.unitText}> บาท</Text>
+        </View>
+      </View>
     </View>
   );
 
@@ -51,42 +58,61 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: "white",
     paddingHorizontal: 10,
-    paddingVertical: 110,
+    paddingVertical: 100,
   },
   list: {
     paddingTop: 20,
     paddingBottom: 20,
   },
   rowWrapper: {
-    justifyContent: "space-between", 
+    justifyContent: "space-between",
   },
   itemContainer: {
-    backgroundColor: "#f65d3c",
+    backgroundColor: "#f5f5f5",
     borderRadius: 20,
     padding: 15,
     marginVertical: 10,
-    marginHorizontal: 10, // ระยะห่างระหว่างกล่องในแถว
+    marginHorizontal: 10,
     flex: 1,
-    maxWidth: "45%", // ลดความกว้างของกล่องในแต่ละคอลัมน์
-    alignSelf: "center", // จัดกล่องให้อยู่กลางแถว
-    height: 140, // เพิ่มความสูงของกล่อง
-    alignItems: "center",
-    justifyContent: "center",
+    maxWidth: "45%",
+    alignSelf: "center",
+    height: 120,
+    justifyContent: "space-between",
     elevation: 5,
+  },
+  textContainer: {
+    alignItems: "flex-start", // ชิดซ้าย
+    paddingVertical: 10,
+    justifyContent: "center", // จัดให้อยู่กลางในแนวตั้ง
   },
   routeText: {
     fontSize: 20,
-    color: "#FFFFFF",
-    fontFamily: "Prompt-Bold",
-    textAlign: "center",
-    paddingBottom: 10,
-    paddingTop: 10,
+    color: "#1e1e1e",
+    fontFamily: "Prompt-Medium",
+  },
+  priceWithCircle: {
+    flexDirection: "row", // จัดราคาและหน่วยในแถวเดียวกัน
+    alignItems: "center",
+    marginTop: 5,
+  },
+  circleBackground: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: "#f65d3c", // สีพื้นหลังวงกลม
+    justifyContent: "center",
+    alignItems: "center",
   },
   priceText: {
-    fontSize: 18,
-    color: "#FFFFFF",
+    color: "white", // สีของตัวเลขในวงกลม
+    fontSize: 18, // ขนาดตัวเลข
+    fontFamily: "Prompt-Bold",
+  },
+  unitText: {
+    fontSize: 18, // ขนาดข้อความหน่วย "บาท"
+    color: "#1e1e1e",
     fontFamily: "Prompt-Regular",
-    textAlign: "center",
+    marginLeft: 5, // เว้นระยะห่างจากวงกลม
   },
 });
 

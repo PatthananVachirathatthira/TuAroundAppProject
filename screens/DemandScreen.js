@@ -27,11 +27,15 @@ const DemandScreen = () => {
   const [busStops, setBusStops] = useState([]);
   const [modalVisible, setModalVisible] = useState(false);
   const [checkInStatus, setCheckInStatus] = useState(null);
-  const [checkInMessage, setCheckInMessage] = useState("");
+  const [checkInMessage, setCheckInMessage] = useState({
+    title: "",
+    count: "",
+  });
   const [showCheckInButton, setShowCheckInButton] = useState(false);
   const [userCheckedInStop, setUserCheckedInStop] = useState(null);
   const slideAnim = useRef(new Animated.Value(0)).current;
   const mapRef = useRef(null);
+  
 
   const getCurrentLocation = async () => {
     let { status } = await Location.requestForegroundPermissionsAsync();
@@ -124,12 +128,16 @@ const DemandScreen = () => {
 
       setCheckInStatus(true);
       setUserCheckedInStop(nearestStop.title);
-      setCheckInMessage(
-        `You are at ${nearestStop.title}. ${currentCount + 1} passengers now`
-      );
+      setCheckInMessage({
+        title: `You are at ${nearestStop.title}`,
+        count: `${currentCount + 1} passengers now`,
+      });
     } else {
       setCheckInStatus(false);
-      setCheckInMessage("You are not within 100 meters of any bus stop");
+      setCheckInMessage({
+        title: "Cannot check-in",
+        count: "You are not within 100 \nmeters of any bus stop",
+      });
     }
     setModalVisible(true);
   };
@@ -148,7 +156,9 @@ const DemandScreen = () => {
   useEffect(() => {
     const interval = setInterval(() => {
       if (userCheckedInStop) {
-        const checkedInStop = busStops.find((stop) => stop.title === userCheckedInStop);
+        const checkedInStop = busStops.find(
+          (stop) => stop.title === userCheckedInStop
+        );
         if (checkedInStop) {
           const distance = getDistance(
             location.latitude,
@@ -163,7 +173,9 @@ const DemandScreen = () => {
               [checkedInStop.title]: Math.max(currentCount - 1, 0),
             });
 
-            setCheckInMessage(`You have checked out from ${checkedInStop.title}`);
+            setCheckInMessage(
+              `You have checked out from ${checkedInStop.title}`
+            );
             setModalVisible(true);
             setUserCheckedInStop(null);
           }
@@ -186,14 +198,17 @@ const DemandScreen = () => {
         scrollEnabled={true}
       >
         {busStops.map((stop, index) => {
-          let markerColor = "green";
-          if (stop.count >= 5 && stop.count <= 10) markerColor = "yellow";
-          else if (stop.count > 10) markerColor = "red";
+          let markerColor = "#23a251";
+          if (stop.count >= 5 && stop.count <= 10) markerColor = "#d9e028";
+          else if (stop.count > 10) markerColor = "#c42a3d";
 
           return (
             <Marker
               key={`bus-${index}`}
-              coordinate={{ latitude: stop.latitude, longitude: stop.longitude }}
+              coordinate={{
+                latitude: stop.latitude,
+                longitude: stop.longitude,
+              }}
               title={stop.title}
               description={`Check-ins: ${stop.count}`}
             >
@@ -206,56 +221,33 @@ const DemandScreen = () => {
       </MapView>
 
       <TouchableOpacity style={styles.gpsButton} onPress={getCurrentLocation}>
-        <MaterialIcons name="gps-fixed" size={24} color="black" />
+        <MaterialIcons name="gps-fixed" size={24} color="#1e1e1e" />
       </TouchableOpacity>
 
-      <View style={styles.userButtonContainer}>
-        <TouchableOpacity style={styles.userButton} onPress={toggleSlide}>
-          {showCheckInButton ? (
-            <AntDesign name="close" size={24} color="black" />
-          ) : (
-            <Feather name="user" size={24} color="black" />
-          )}
-        </TouchableOpacity>
-      </View>
-
-      <Animated.View
-        style={[
-          styles.checkInButtonContainer,
-          {
-            transform: [{ translateX: slideAnim }],
-            zIndex: showCheckInButton ? 1 : 0,
-          },
-        ]}
-        pointerEvents={showCheckInButton ? "auto" : "none"}
-      >
-        <TouchableOpacity
-          style={styles.checkInButton}
-          onPress={checkInAtBusStop}
-        >
-          <FontAwesome5 name="walking" size={24} color="black" />
-          <Text>Check-In</Text>
-        </TouchableOpacity>
-      </Animated.View>
+      <TouchableOpacity style={styles.checkInButton} onPress={checkInAtBusStop}>
+        <FontAwesome5 name="walking" size={24} color="#1e1e1e" />
+        <Text style={styles.checkInText}>Check-In</Text>
+      </TouchableOpacity>
 
       <Modal
         animationType="slide"
         transparent={true}
         visible={modalVisible}
-        onRequestClose={() => {
-          setModalVisible(false);
-        }}
+        onRequestClose={() => setModalVisible(false)}
       >
         <View style={styles.modalBackground}>
           <View style={styles.modalContainer}>
             {checkInStatus ? (
-              <FontAwesome5 name="check-circle" size={50} color="green" />
+              <AntDesign name="checkcircle" size={50} color="#23a251" style={styles.icon}/>
             ) : (
-              <FontAwesome5 name="times-circle" size={50} color="red" />
+              <AntDesign name="closecircle" size={50} color="#e21b1b" style={styles.icon}/>
             )}
-            <Text style={styles.checkInMessage}>{checkInMessage}</Text>
+            <Text style={styles.mediumText}>{checkInMessage.title}</Text>
+            {checkInMessage.count && (
+              <Text style={styles.regularText}>{checkInMessage.count}</Text>
+            )}
             <TouchableOpacity
-              style={styles.modalButton}
+              style={styles.closeButton}
               onPress={() => setModalVisible(false)}
             >
               <Text style={styles.modalButtonText}>Close</Text>
@@ -287,50 +279,36 @@ const styles = StyleSheet.create({
   },
   gpsButton: {
     position: "absolute",
-    top: 10,
-    right: 10,
-    padding: 10,
+    bottom: 70,
+    right: 30,
     backgroundColor: "white",
-    borderRadius: 20,
-    shadowColor: "black",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.3,
-    shadowRadius: 3.84,
-    elevation: 5,
-  },
-  userButtonContainer: {
-    position: "absolute",
-    bottom: 10,
-    right: 10,
-  },
-  userButton: {
-    backgroundColor: "white",
-    padding: 10,
-    borderRadius: 20,
-    shadowColor: "black",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.3,
-    shadowRadius: 3.84,
-    elevation: 5,
-  },
-  checkInButtonContainer: {
-    position: "absolute",
-    bottom: 20,
-    right: 80,
-    backgroundColor: "white",
-    padding: 10,
-    borderRadius: 20,
-    flexDirection: "row",
+    width: 50,
+    height: 50,
+    borderRadius: 25,
+    justifyContent: "center",
     alignItems: "center",
-    shadowColor: "black",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.3,
-    shadowRadius: 3.84,
     elevation: 5,
   },
   checkInButton: {
+    position: "absolute",
+    bottom: 65, // ระยะจากด้านล่าง
+    left: "50%", // จัดกึ่งกลางในแนวนอน
+    transform: [{ translateX: -60 }], // ปรับให้ตรงกลางพอดี
+    backgroundColor: "white",
+    paddingVertical: 10,
+    borderRadius: 30,
+    width: 125, // กำหนดความกว้าง
+    height: 55,
     flexDirection: "row",
     alignItems: "center",
+    justifyContent: "center",
+    elevation: 3, // เงา
+  },
+  checkInText: {
+    fontFamily: "Prompt-Regular",
+    fontSize: 16,
+    marginLeft: 10,
+    color: "black",
   },
   modalBackground: {
     flex: 1,
@@ -342,29 +320,48 @@ const styles = StyleSheet.create({
     width: 300,
     padding: 20,
     backgroundColor: "white",
-    borderRadius: 10,
-    alignItems: "center",
-    shadowColor: "black",
+    flexDirection: "column",
+    borderRadius: 20,
+    alignItems: "center", // จัดให้อยู่ตรงกลางแนวตั้งและแนวนอน
+    justifyContent: "center",
+    shadowColor: "#1e1e1e",
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.3,
     shadowRadius: 3.84,
     elevation: 5,
   },
+  icon: {
+    marginBottom: 15, // ระยะห่างระหว่างไอคอนกับข้อความ (สำหรับ React Native เวอร์ชันเก่า)
+  },
   checkInMessage: {
-    marginTop: 10,
     fontSize: 16,
     textAlign: "center",
   },
-  modalButton: {
+  mediumText: {
+    fontFamily: "Prompt-Medium", // ฟอนต์ Medium
+    fontSize: 18,
+    textAlign: "center",
+    marginBottom: 5,
+  },
+  regularText: {
+    fontFamily: "Prompt-Regular", // ฟอนต์ Regular
+    fontSize: 16,
+    textAlign: "center",
+    color: "#1e1e1e",
+
+  },
+  closeButton: {
     marginTop: 20,
     paddingVertical: 10,
     paddingHorizontal: 20,
-    backgroundColor: "blue",
-    borderRadius: 5,
+    backgroundColor: "#1e1e1e",
+    borderRadius: 25,
   },
   modalButtonText: {
+    fontFamily: "Prompt-Medium", // ฟอนต์ Medium
+    fontSize: 16,
     color: "white",
-    fontWeight: "bold",
+    textAlign: "center",
   },
 });
 
