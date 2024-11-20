@@ -10,36 +10,36 @@ const images = [
   { 
     src: require('../assets/images/gradient-grainy-gradient-background_23-2149922200.jpg'), 
     description: { 
-      bold: 'Description 1', 
-      normal: 'Proident aliqua culpa aliqua cupidatat tempor excepteur nulla in.' 
+      bold: 'ตรวจสอบเส้นทางรถบัส', 
+      normal: 'เลือกสายรถที่ต้องการเพื่อดูเส้นทางบนแผนที่ พร้อมข้อมูลสถานที่ที่รถจะผ่าน ช่วยวางแผนการเดินทางได้สะดวกขึ้น' 
     } 
   },
   { 
     src: require('../assets/images/gradient-grainy-gradient-background_23-2149922209.jpg'), 
     description: { 
-      bold: 'Description 2', 
-      normal: 'Proident proident cupidatat eiusmod exercitation voluptate exercitation enim ullamco adipisicing et.' 
+      bold: 'ยืนยันตำแหน่งและเช็คจำนวนคน', 
+      normal: 'กดปุ่ม Check-In เพื่อยืนยันตำแหน่งของคุณ ระบบจะแสดงจำนวนผู้โดยสารใกล้เคียงในแต่ละสถานี' 
     } 
   },
   {
     src: require('../assets/images/gradient-grainy-gradient-background_23-2149922231.jpg'),
     description: {
-      bold: 'Description 3',
-      normal: 'Laborum laborum officia eiusmod non consequat deserunt nisi.'
+      bold: 'ตาวจสอบสถานที่ของรถสาธารณะ',
+      normal: 'กดไอคอนรถสาธารณะต่างๆ เพื่อแสดงสถานีของรถสาธารณะนั้นๆ'
     }
   },
   { 
     src: require('../assets/images/gradient-grainy-gradient-background_23-2149922238.jpg'), 
     description: { 
-      bold: 'Description 4', 
-      normal: 'Aliqua id nostrud est labore sit velit tempor elit commodo officia tempor exercitation.' 
+      bold: 'ดูข้อมูลรถมอไซค์และรถตู้', 
+      normal: 'ตรวจสอบรายละเอียดราคาค่าโดยสาร พร้อมสถานที่ต้นทางและปลายทางได้ง่ายๆ เพื่อช่วยวางแผนการเดินทางอย่างสะดวก' 
     } 
   },
   {
     src: require('../assets/images/gradient-grainy-gradient-background_23-2149922238.jpg'),
     description: {
-      bold: 'Description 5',
-      normal: 'This is the final description page. Tap to start.'
+      bold: 'แจ้งปัญหารถบัสที่คุณพบ',
+      normal: 'พบปัญหาเกี่ยวกับรถบัส? ไม่ว่าจะเป็นการล่าช้าหรือปัญหาเส้นทาง คุณสามารถรายงานปัญหาที่พบผ่านหน้านี้เพื่อการแก้ไขอย่างรวดเร็ว'
     }
   }
 ];
@@ -150,7 +150,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 40,
   },
   boldText: {
-    fontSize: 24,
+    fontSize: 22,
     textAlign: 'center',
     color: '#f65d3c',
     fontFamily: 'Prompt-Medium',
@@ -158,9 +158,9 @@ const styles = StyleSheet.create({
   normalText: {
     fontSize: 16,
     color: '#1e1e1e',
-    marginTop: 10,
+    marginTop: 15,
     textAlign: 'center',
-    lineHeight: 20,
+    lineHeight: 24,
     fontFamily: 'Prompt-Regular',
   },
   buttonContainer: {

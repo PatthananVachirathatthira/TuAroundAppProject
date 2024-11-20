@@ -73,6 +73,16 @@ const HomeScreen = ({ navigation }) => {
     })();
   }, []);
 
+  useEffect(() => {
+    const unsubscribe = navigation.addListener("blur", () => {
+      // Close the dropdown when the screen loses focus
+      setDropdownVisible(false);
+      setBusDropdownVisible(false); // Close the nested dropdown as well
+    });
+  
+    return unsubscribe; // Cleanup the listener when the component unmounts
+  }, [navigation]);
+
   const toggleDropdown = () => {
     if (dropdownVisible) {
       setDropdownVisible(false);

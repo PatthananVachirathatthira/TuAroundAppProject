@@ -35,7 +35,7 @@ const DemandScreen = () => {
   const [userCheckedInStop, setUserCheckedInStop] = useState(null);
   const slideAnim = useRef(new Animated.Value(0)).current;
   const mapRef = useRef(null);
-  
+
 
   const getCurrentLocation = async () => {
     let { status } = await Location.requestForegroundPermissionsAsync();
@@ -248,7 +248,11 @@ const DemandScreen = () => {
             )}
             <TouchableOpacity
               style={styles.closeButton}
-              onPress={() => setModalVisible(false)}
+              onPress={() => {
+                setModalVisible(false); // ปิด Modal
+                setCheckInStatus(null); // รีเซ็ตสถานะการ Check-in
+                setCheckInMessage({ title: "", count: "" }); // รีเซ็ตข้อความ
+              }}
             >
               <Text style={styles.modalButtonText}>Close</Text>
             </TouchableOpacity>

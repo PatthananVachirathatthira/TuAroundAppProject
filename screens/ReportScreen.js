@@ -412,7 +412,7 @@ const styles = StyleSheet.create({
     alignItems: "center", // จัดให้ข้อความและปุ่มอยู่กลาง
   },
   modalText: {
-    fontFamily: "Prompt-Medium", // ใช้ฟอนต์ Prompt-Medium
+    fontFamily: "Prompt-Regular", // ใช้ฟอนต์ Prompt-Medium
     fontSize: 18,
     color: "#1e1e1e", // สีข้อความ
     padding: 20,
