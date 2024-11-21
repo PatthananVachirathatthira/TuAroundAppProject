@@ -77,6 +77,7 @@ const MyMapComponent = ({ selectedBusRoute, showTraffic, userLocation }) => {
         initialRegion={initialRegion}
         showsTraffic={showTraffic}
         showsUserLocation={true}
+        showsMyLocationButton={false}
       >
         {busStops.length === 0 && (
           <Marker coordinate={initialRegion} title="No Bus Stops Available" />
