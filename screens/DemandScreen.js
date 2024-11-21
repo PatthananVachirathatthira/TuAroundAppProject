@@ -36,7 +36,6 @@ const DemandScreen = () => {
   const slideAnim = useRef(new Animated.Value(0)).current;
   const mapRef = useRef(null);
 
-
   const getCurrentLocation = async () => {
     let { status } = await Location.requestForegroundPermissionsAsync();
     if (status !== "granted") {
@@ -104,6 +103,16 @@ const DemandScreen = () => {
   };
 
   const checkInAtBusStop = () => {
+    if (checkInStatus) {
+      // หากผู้ใช้เช็คอินแล้วไม่อนุญาตให้เช็คอินซ้ำ
+      setCheckInMessage({
+        title: "Already Checked In",
+        count: "คุณได้เช็คอินสถานีนี้เเล้ว",
+      });
+      setModalVisible(true);
+      return; // หยุดการทำงาน
+    }
+
     let nearestStop = null;
     let minDistance = Infinity;
 
@@ -126,31 +135,20 @@ const DemandScreen = () => {
         [nearestStop.title]: currentCount + 1,
       });
 
-      setCheckInStatus(true);
-      setUserCheckedInStop(nearestStop.title);
+      setCheckInStatus(true); // อัปเดตสถานะการเช็คอิน
+      setUserCheckedInStop(nearestStop.title); // บันทึกสถานีที่ผู้ใช้เช็คอิน
       setCheckInMessage({
-        title: `You are at ${nearestStop.title}`,
-        count: `${currentCount + 1} passengers now`,
+        title: `คุณอยู่ที่ ${nearestStop.title}`,
+        count: `${currentCount + 1} ผู้โดยสารตอนนี้`,
       });
     } else {
       setCheckInStatus(false);
       setCheckInMessage({
-        title: "Cannot check-in",
-        count: "You are not within 100 \nmeters of any bus stop",
+        title: "ไม่สามารถเช็คอินได้",
+        count: "คุณไม่ได้อยู่ในระยะ 100 เมตรของสถานีรถประจำทาง",
       });
     }
     setModalVisible(true);
-  };
-
-  const toggleSlide = () => {
-    const toValue = showCheckInButton ? 0 : -60;
-    Animated.timing(slideAnim, {
-      toValue,
-      duration: 500,
-      useNativeDriver: true,
-    }).start(() => {
-      setShowCheckInButton(!showCheckInButton);
-    });
   };
 
   useEffect(() => {
@@ -173,11 +171,13 @@ const DemandScreen = () => {
               [checkedInStop.title]: Math.max(currentCount - 1, 0),
             });
 
-            setCheckInMessage(
-              `You have checked out from ${checkedInStop.title}`
-            );
+            setCheckInMessage({
+              title: `คุณได้เช็คเอาท์จาก ${checkedInStop.title}`,
+              count: "",
+            });
             setModalVisible(true);
-            setUserCheckedInStop(null);
+            setUserCheckedInStop(null); // รีเซ็ตสถานีที่เช็คอิน
+            setCheckInStatus(false);  // รีเซ็ตสถานะการเช็คอินเมื่อผู้ใช้ออกจากสถานี
           }
         }
       }
@@ -185,6 +185,17 @@ const DemandScreen = () => {
 
     return () => clearInterval(interval);
   }, [location, busStops, userCheckedInStop]);
+
+  const toggleSlide = () => {
+    const toValue = showCheckInButton ? 0 : -60;
+    Animated.timing(slideAnim, {
+      toValue,
+      duration: 500,
+      useNativeDriver: true,
+    }).start(() => {
+      setShowCheckInButton(!showCheckInButton);
+    });
+  };
 
   return (
     <View style={styles.container}>
@@ -240,21 +251,15 @@ const DemandScreen = () => {
             {checkInStatus ? (
               <AntDesign name="checkcircle" size={50} color="#23a251" style={styles.icon}/>
             ) : (
-              <AntDesign name="closecircle" size={50} color="#e21b1b" style={styles.icon}/>
+              <AntDesign name="closecircle" size={50} color="#e21a1a" style={styles.icon}/>
             )}
-            <Text style={styles.mediumText}>{checkInMessage.title}</Text>
-            {checkInMessage.count && (
-              <Text style={styles.regularText}>{checkInMessage.count}</Text>
-            )}
+            <Text style={styles.modalTitle}>{checkInMessage.title}</Text>
+            <Text style={styles.modalMessage}>{checkInMessage.count}</Text>
             <TouchableOpacity
               style={styles.closeButton}
-              onPress={() => {
-                setModalVisible(false); // ปิด Modal
-                setCheckInStatus(null); // รีเซ็ตสถานะการ Check-in
-                setCheckInMessage({ title: "", count: "" }); // รีเซ็ตข้อความ
-              }}
+              onPress={() => setModalVisible(false)}
             >
-              <Text style={styles.modalButtonText}>Close</Text>
+              <Feather name="x-circle" size={30} color="white" />
             </TouchableOpacity>
           </View>
         </View>
@@ -358,7 +363,7 @@ const styles = StyleSheet.create({
     marginTop: 20,
     paddingVertical: 10,
     paddingHorizontal: 20,
-    backgroundColor: "#1e1e1e",
+    backgroundColor: "#140101",
     borderRadius: 25,
   },
   modalButtonText: {

@@ -2,7 +2,6 @@ import { initializeApp } from "firebase/app";
 import { getDatabase, ref, set, onValue, push, update } from "firebase/database"; // Firebase Database methods
 import { getStorage } from "firebase/storage"; // Firebase Storage method
 
-// Your web app's Firebase configuration
 const firebaseConfig = {
   apiKey: "AIzaSyCZUrkuUG-ipwT4uRlwFizXFio5yOsH_JE",
   authDomain: "motorbiketaxi-92f3e.firebaseapp.com",
@@ -14,12 +13,9 @@ const firebaseConfig = {
   measurementId: "G-9RS61V82TK"
 };
 
-// Initialize Firebase
 const app = initializeApp(firebaseConfig);
 
-// Initialize Firebase Realtime Database and Storage
 const database = getDatabase(app);
 const storage = getStorage(app);
 
-// Export the database methods and storage
 export { database, ref, set, onValue, push, update, storage };
