@@ -1,11 +1,26 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import MapView, { Marker, Polyline } from 'react-native-maps';
-import { StyleSheet, View, Image } from 'react-native';
+import {
+  StyleSheet,
+  View,
+  Image,
+  TouchableOpacity,
+} from 'react-native';
+import * as Location from 'expo-location';
 import { database, ref, onValue } from '../firebaseConfig';
+import { MaterialIcons } from '@expo/vector-icons';
 
 const MyMapComponent = ({ selectedBusRoute, showTraffic, userLocation }) => {
   const [busStops, setBusStops] = useState([]);
   const [busRoutes, setBusRoutes] = useState({});
+  const [location, setLocation] = useState(userLocation || {
+    latitude: 14.070074,
+    longitude: 100.604836,
+    latitudeDelta: 0.01,
+    longitudeDelta: 0.01,
+  });
+  const mapRef = useRef(null);
+
   const [routeColors] = useState({
     '1A-สีแดง': '#FF0000',
     '1B-สีเหลือง': '#FFFF00',
@@ -15,73 +30,85 @@ const MyMapComponent = ({ selectedBusRoute, showTraffic, userLocation }) => {
   });
 
   useEffect(() => {
-    // Fetch bus stops
     const busStopsRef = ref(database, 'EVstop');
     onValue(busStopsRef, (snapshot) => {
       const data = snapshot.val();
       if (data) {
-        const stops = Object.keys(data).map(key => {
-          const coords = data[key].split(', ').map(coord => parseFloat(coord));
-          return coords.length === 2 && !isNaN(coords[0]) && !isNaN(coords[1]) 
-            ? { latitude: coords[0], longitude: coords[1], title: key } 
-            : null;
-        }).filter(stop => stop !== null);
+        const stops = Object.keys(data)
+          .map((key) => {
+            const coords = data[key].split(', ').map((coord) => parseFloat(coord));
+            return coords.length === 2 && !isNaN(coords[0]) && !isNaN(coords[1])
+              ? { latitude: coords[0], longitude: coords[1], title: key }
+              : null;
+          })
+          .filter((stop) => stop !== null);
         setBusStops(stops);
       }
     });
 
-    // Fetch bus routes from Firebase
     const routesRef = ref(database, 'EVturn');
     onValue(routesRef, (snapshot) => {
       const data = snapshot.val();
       if (data) {
         const fetchedRoutes = Object.keys(data).reduce((acc, routeKey) => {
           const coordinates = data[routeKey]
-            .filter(coord => coord !== null) // Check for non-null
-            .map(coord => {
+            .map((coord) => {
               const [latitude, longitude] = coord.split(', ').map(Number);
               return !isNaN(latitude) && !isNaN(longitude) ? { latitude, longitude } : null;
             })
-            .filter(coord => coord !== null);
-          acc[routeKey] = coordinates; // Store processed coordinates
+            .filter((coord) => coord !== null);
+          acc[routeKey] = coordinates;
           return acc;
         }, {});
-        setBusRoutes(fetchedRoutes); // Set busRoutes
+        setBusRoutes(fetchedRoutes);
       }
     });
   }, []);
-  
-  const initialRegion = {
-    latitude: userLocation ? userLocation.latitude : 14.070074,
-    longitude: userLocation ? userLocation.longitude : 100.604836,
-    latitudeDelta: 0.01,
-    longitudeDelta: 0.01,
+
+  const getCurrentLocation = async () => {
+    let { status } = await Location.requestForegroundPermissionsAsync();
+    if (status !== 'granted') {
+      console.log('Permission to access location was denied');
+      return;
+    }
+
+    let currentLocation = await Location.getCurrentPositionAsync({});
+    const currentRegion = {
+      latitude: currentLocation.coords.latitude,
+      longitude: currentLocation.coords.longitude,
+      latitudeDelta: 0.01,
+      longitudeDelta: 0.01,
+    };
+    setLocation(currentRegion);
+
+    if (mapRef.current) {
+      mapRef.current.animateToRegion(currentRegion, 1000);
+    }
   };
 
-  // Function to map route name to color
   const getRouteNameWithColor = (routeNumber) => {
-    return Object.keys(routeColors).find(routeName => routeName.startsWith(routeNumber));
+    return Object.keys(routeColors).find((routeName) =>
+      routeName.startsWith(routeNumber)
+    );
   };
 
   const mappedRouteName = getRouteNameWithColor(selectedBusRoute);
-  console.log('Mapped Route Name:', mappedRouteName);
-
   const selectedRouteCoordinates = busRoutes[mappedRouteName] || [];
-  console.log('Selected Route Coordinates:', selectedRouteCoordinates);
-
 
   return (
     <View style={styles.mapContainer}>
       <MapView
+        ref={mapRef}
         style={styles.map}
-        initialRegion={initialRegion}
+        initialRegion={location}
         showsTraffic={showTraffic}
         showsUserLocation={true}
+        showsMyLocationButton={false}
       >
         {busStops.length === 0 && (
-          <Marker coordinate={initialRegion} title="No Bus Stops Available" />
+          <Marker coordinate={location} title="No Bus Stops Available" />
         )}
-        
+
         {busStops.map((stop, index) => (
           <Marker
             key={index}
@@ -96,17 +123,19 @@ const MyMapComponent = ({ selectedBusRoute, showTraffic, userLocation }) => {
           </Marker>
         ))}
 
-        
-
-        {/* Render polyline for the selected bus route */}
         {selectedRouteCoordinates.length > 0 && (
           <Polyline
             coordinates={selectedRouteCoordinates}
-            strokeColor={routeColors[mappedRouteName]} // Use the correct color from routeColors
+            strokeColor={routeColors[mappedRouteName]}
             strokeWidth={3}
           />
         )}
       </MapView>
+
+      {/* GPS Button */}
+      <TouchableOpacity style={styles.gpsButton} onPress={getCurrentLocation}>
+        <MaterialIcons name="gps-fixed" size={24} color="#1e1e1e" />
+      </TouchableOpacity>
     </View>
   );
 };
@@ -118,6 +147,18 @@ const styles = StyleSheet.create({
   },
   map: {
     ...StyleSheet.absoluteFillObject,
+  },
+  gpsButton: {
+    position: 'absolute',
+    bottom: 70,
+    right: 30,
+    backgroundColor: 'white',
+    width: 50,
+    height: 50,
+    borderRadius: 25,
+    justifyContent: 'center',
+    alignItems: 'center',
+    elevation: 5,
   },
 });
 

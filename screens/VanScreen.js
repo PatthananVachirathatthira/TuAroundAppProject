@@ -119,54 +119,62 @@ const VanScreen = () => {
 
   const renderTicketInfo = () => {
     if (!ticketInfo) return null;
-
+  
     const filteredTicketInfo = Object.fromEntries(
       Object.entries(ticketInfo).filter(([location]) => location !== "ท่ารถตู้")
     );
-
+  
     return (
       <ScrollView
-        contentContainerStyle={{ alignItems: "flex-start" }}
         showsVerticalScrollIndicator={false}
+        showsHorizontalScrollIndicator={false}
       >
-        <View style={styles.table}>
-          <View style={styles.tableHeader}>
-            <Text style={[styles.tableHeaderText, { flex: 1 }]}>สถานที่</Text>
-            <Text style={[styles.tableHeaderText, { flex: 1 }]}>รอบแรก</Text>
-            <Text style={[styles.tableHeaderText, { flex: 1 }]}>รอบสุดท้าย</Text>
-            <Text style={[styles.tableHeaderText, { flex: 1 }]}>ราคา</Text>
-          </View>
-          {Object.entries(filteredTicketInfo).map(([location, routes], index) =>
-            Object.entries(routes).map(([route, details]) => {
+        <Text style={styles.title}>ข้อมูลการโดยสาร</Text>
+        {Object.entries(filteredTicketInfo).map(([location, routes], index) => (
+          <View key={location} style={styles.infoContainer}>
+            <TouchableOpacity
+              onPress={() => {
+                const coords = routes["ท่า" + location] || "";
+                const [latitude, longitude] = coords.split(", ").map(Number);
+                handleLocationPress(latitude, longitude);
+              }}
+            >
+              <Text style={styles.locationName}>{location}</Text>
+            </TouchableOpacity>
+            {Object.entries(routes).map(([route, details]) => {
               if (typeof details === "object") {
                 return (
-                  <View
-                    key={`${location}-${route}`}
-                    style={index % 2 === 0 ? styles.tableRow : styles.tableRowAlternate}
-                  >
-                    <TouchableOpacity
-                      onPress={() => {
-                        const coords = routes["ท่า" + location] || "";
-                        const [latitude, longitude] = coords.split(", ").map(Number);
-                        handleLocationPress(latitude, longitude);
-                      }}
-                      style={{ flex: 1 }}
-                    >
-                      <Text style={styles.locationName}>{location}</Text>
-                    </TouchableOpacity>
-                    <Text style={[styles.tableCell, { flex: 1 }]}>{details["รอบแรก"]}</Text>
-                    <Text style={[styles.tableCell, { flex: 1 }]}>{details["รอบสุดท้าย"]}</Text>
-                    <Text style={[styles.tableCell, { flex: 1 }]}>{details["ราคา"]} บาท</Text>
+                  <View key={route} style={styles.routeContainer}>
+                    <Text style={styles.routeName}>{route}</Text>
+  
+                    {/* Table Row for รอบแรก */}
+                    <View style={styles.tableRow}>
+                      <Text style={styles.tableLabel}>รอบแรก:</Text>
+                      <Text style={styles.tableValue}>{details["รอบแรก"]}</Text>
+                    </View>
+  
+                    {/* Table Row for รอบสุดท้าย */}
+                    <View style={styles.tableRow}>
+                      <Text style={styles.tableLabel}>รอบสุดท้าย:</Text>
+                      <Text style={styles.tableValue}>{details["รอบสุดท้าย"]}</Text>
+                    </View>
+  
+                    {/* Table Row for ราคา */}
+                    <View style={styles.tableRow}>
+                      <Text style={styles.tableLabel}>ราคา:</Text>
+                      <Text style={styles.tableValue}>{details["ราคา"]} บาท</Text>
+                    </View>
                   </View>
                 );
               }
               return null;
-            })
-          )}
-        </View>
+            })}
+          </View>
+        ))}
       </ScrollView>
     );
   };
+  
 
   return (
     <View style={styles.container}>
@@ -186,6 +194,7 @@ const VanScreen = () => {
             title={stop.name}
           />
         ))}
+
         {busStops.map((stop, index) => (
           <Marker
             key={`bus-${index}`}
@@ -200,11 +209,17 @@ const VanScreen = () => {
         ))}
       </MapView>
 
-      <TouchableOpacity style={styles.customButton} onPress={getCurrentLocation}>
+      <TouchableOpacity
+        style={styles.customButton}
+        onPress={getCurrentLocation}
+      >
         <MaterialIcons name="gps-fixed" size={24} color="black" />
       </TouchableOpacity>
 
-      <TouchableOpacity style={styles.detailsButton} onPress={() => setModalVisible(true)}>
+      <TouchableOpacity
+        style={styles.detailsButton}
+        onPress={() => setModalVisible(true)}
+      >
         <AntDesign name="infocirlceo" size={24} color="black" />
       </TouchableOpacity>
 
@@ -217,10 +232,13 @@ const VanScreen = () => {
         <View style={styles.modalContainer}>
           <View style={styles.modalContent}>
             {renderTicketInfo()}
+            <TouchableOpacity
+              style={styles.closeButton}
+              onPress={() => setModalVisible(false)}
+            >
+              <MaterialIcons name="close" size={24} color="white" />
+            </TouchableOpacity>
           </View>
-          <TouchableOpacity style={styles.closeButton} onPress={() => setModalVisible(false)}>
-            <Text style={styles.closeButtonText}>ปิด</Text>
-          </TouchableOpacity>
         </View>
       </Modal>
     </View>
@@ -228,6 +246,77 @@ const VanScreen = () => {
 };
 
 const styles = StyleSheet.create({
+  routeName: {
+    fontSize: 16,
+    fontFamily: 'Prompt-Regular',
+    marginBottom: 5,
+    textAlign: 'center',
+  },
+  routeContainer: {
+    marginVertical: 10,
+  },
+  tableRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    paddingVertical: 5,
+    borderBottomWidth: 0.5,
+    borderBottomColor: '#CCCCCC',
+  },
+  tableLabel: {
+    fontSize: 16,
+    fontFamily: 'Prompt-Regular',
+    flex: 1,
+    textAlign: 'left',
+  },
+  tableValue: {
+    fontSize: 16,
+    fontFamily: 'Prompt-Regular',
+    flex: 1,
+    textAlign: 'right',
+  },
+  modalContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "rgba(0, 0, 0, 0.5)",
+  },
+  modalContent: {
+    width: '80%',
+    padding: 20,
+    backgroundColor: "white",
+    borderRadius: 10,
+    alignItems: "center",
+  },
+  title: {
+    fontSize: 20,
+    marginTop: 10,
+    marginBottom: 10,
+    fontFamily: "Prompt-Bold",
+    textAlign: 'center',
+  },
+  infoContainer: {
+    width: '100%',
+    marginBottom: 10,
+    paddingVertical: 5,
+    paddingHorizontal: 5,
+  },
+  locationName: {
+    fontSize: 18,
+    fontFamily: "Prompt-Medium",
+    textAlign: 'center',
+    marginBottom: 5,
+  },
+  closeButton: {
+    position: "absolute",
+    top: 14,
+    right: 15,
+    backgroundColor: "black",
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    justifyContent: "center",
+    alignItems: "center",
+  },
   container: {
     flex: 1,
   },
@@ -258,76 +347,6 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
     elevation: 5,
-  },
-  modalContainer: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-    backgroundColor: "rgba(0, 0, 0, 0.5)",
-    padding: 25,
-  },
-  modalContent: {
-    width: "100%",
-    maxHeight: "80%",
-    backgroundColor: "white",
-    borderRadius: 15,
-    overflow: "hidden",
-  },
-  table: {
-    width: "100%",
-    borderRadius: 15,
-  },
-  tableHeader: {
-    flexDirection: "row",
-    backgroundColor: "#1e1e1e",
-    paddingVertical: 15,
-  },
-  tableHeaderText: {
-    fontSize: 16,
-    fontFamily: "Prompt-Medium",
-    color: "white",
-    textAlign: "center",
-  },
-  tableRow: {
-    flexDirection: "row",
-    backgroundColor: "white",
-    borderBottomWidth: 1,
-    borderBottomColor: "#e0e0e0",
-    paddingVertical: 10,
-  },
-  tableRowAlternate: {
-    flexDirection: "row",
-    backgroundColor: "#f8f8f8",
-    borderBottomWidth: 1,
-    borderBottomColor: "#e0e0e0",
-    paddingVertical: 10,
-  },
-  tableCell: {
-    fontSize: 14,
-    fontFamily: "Prompt-Regular",
-    color: "#1e1e1e",
-    textAlign: "center",
-  },
-  locationName: {
-    fontSize: 14,
-    fontFamily: "Prompt-Medium",
-    textAlign: "center",
-    color: "#1e1e1e",
-  },
-  closeButton: {
-    backgroundColor: "#1e1e1e",
-    width: 90,
-    alignSelf: "center",
-    paddingVertical: 12,
-    borderRadius: 20,
-    justifyContent: "center",
-    alignItems: "center",
-    marginTop: 20,
-  },
-  closeButtonText: {
-    color: "white",
-    fontFamily: "Prompt-Medium",
-    fontSize: 18,
   },
 });
 

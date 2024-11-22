@@ -9,7 +9,8 @@ import {
   Image,
   Pressable,
   Animated,
-  Easing,  Platform ,
+  Easing,
+  Platform,
 } from "react-native";
 import * as Font from "expo-font";
 import { Feather, Ionicons } from "@expo/vector-icons";
@@ -96,10 +97,12 @@ const ReportScreen = () => {
       aspect: [4, 3],
       quality: 1,
     });
-  
-    if (!result.canceled) {
-      const selectedImages = result.assets.map(asset => asset.uri);
-      setImages(selectedImages);  // อัพเดท state เป็นอาร์เรย์ของ URI
+
+    if (result && !result.canceled && result.assets) {
+      const selectedImages = result.assets.map((asset) => asset.uri);
+      setImages(selectedImages);
+    } else {
+      console.log("No images selected or operation canceled.");
     }
   };
 
@@ -239,7 +242,7 @@ const ReportScreen = () => {
             setProblem("");
             setDescription("");
             setDate(new Date());
-            setImage(null);
+            setImages([]);
           }}
         >
           <Text style={styles.cancelButtonText}>ยกเลิก</Text>
@@ -256,7 +259,7 @@ const ReportScreen = () => {
       >
         <View style={styles.modalContent}>
           <Text style={styles.modalText}>
-            กรุณาตรวจสอบข้อมูลที่ต้องกรอกให้ครบถ้วน
+            กรุณาตรวจสอบข้อมูลที่{"\n"}ต้องกรอกให้ครบถ้วน
           </Text>
           <TouchableOpacity
             style={styles.modalButton}
@@ -400,21 +403,22 @@ const styles = StyleSheet.create({
   },
   modal: {
     justifyContent: "center",
-    alignItems: "center",
+    alignItems: "center", 
   },
   modalContent: {
     backgroundColor: "white",
     padding: 20,
-    borderRadius: 50, // มุมมนของ modal
+    borderRadius: 25, // มุมมนของ modal
     alignItems: "center", // จัดให้ข้อความและปุ่มอยู่กลาง
   },
   modalText: {
-    fontFamily: "Prompt-Medium", // ใช้ฟอนต์ Prompt-Medium
-    fontSize: 16,
+    fontFamily: "Prompt-Regular", // ใช้ฟอนต์ Prompt-Medium
+    fontSize: 18,
     color: "#1e1e1e", // สีข้อความ
     padding: 20,
     marginBottom: 5, // ระยะห่างจากปุ่ม
     textAlign: "center", // จัดข้อความให้อยู่กลาง
+    lineHeight: 27,
   },
   modalButton: {
     backgroundColor: "#f65d3c", // สีพื้นหลังปุ่ม
@@ -427,7 +431,7 @@ const styles = StyleSheet.create({
   modalButtonText: {
     fontFamily: "Prompt-Medium", // ใช้ฟอนต์ Prompt-Medium
     color: "white",
-    fontSize: 15,
+    fontSize: 16,
   },
   successMessageContainer: {
     position: "absolute",
