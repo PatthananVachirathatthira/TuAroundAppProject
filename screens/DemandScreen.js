@@ -258,8 +258,8 @@ const DemandScreen = () => {
             <TouchableOpacity
               style={styles.closeButton}
               onPress={() => setModalVisible(false)}
-            >
-              <Feather name="x-circle" size={30} color="white" />
+            ><Text style={styles.modalButtonText}>ปิด</Text>
+              {/* <Feather name="x-circle" size={30} color="white" /> */}
             </TouchableOpacity>
           </View>
         </View>
@@ -344,17 +344,18 @@ const styles = StyleSheet.create({
   },
   checkInMessage: {
     fontSize: 16,
+    fontFamily: 'Prompt-Regular',
     textAlign: "center",
   },
-  mediumText: {
+  modalTitle: {
     fontFamily: "Prompt-Medium", // ฟอนต์ Medium
     fontSize: 18,
     textAlign: "center",
     marginBottom: 5,
   },
-  regularText: {
+  modalMessage: {
     fontFamily: "Prompt-Regular", // ฟอนต์ Regular
-    fontSize: 16,
+    fontSize: 17,
     textAlign: "center",
     color: "#1e1e1e",
 
